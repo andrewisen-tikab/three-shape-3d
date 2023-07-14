@@ -1,0 +1,18 @@
+{
+  "name": "three-shape-3d",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/three": "^0.154.0",
+    "camera-controls": "^2.7.0",
+    "three": "^0.154.0",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.0"
+  }
+}
