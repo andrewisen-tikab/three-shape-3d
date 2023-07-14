@@ -1,1 +1,1 @@
-export { default as Shape3D } from "./Shape3d";
+export { default as Shape3D } from './Shape3D';
