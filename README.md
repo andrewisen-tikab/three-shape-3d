@@ -37,9 +37,16 @@ Or, view the live demo here:
 
 [https://andrewisen-tikab.github.io/three-shape-3d/example/](https://andrewisen-tikab.github.io/three-shape-3d/example/)
 
-```bash
+## Docs
+
+Auto-generated docs can be found here:
+
+[https://andrewisen-tikab.github.io/three-shape-3d/docs/](https://andrewisen-tikab.github.io/three-shape-3d/docs/)
 
 ## Status
 
 This is a work in progress. It's not ready for production use.
+
+```
+
 ```
