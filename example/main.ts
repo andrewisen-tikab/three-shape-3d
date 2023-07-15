@@ -30,6 +30,9 @@ const example = (): void => {
     // Setup the GUI
     const gui = new GUI();
     const configFolder = gui.addFolder('Config');
+    const lineFolder = gui.addFolder('Line').open();
+    const areaFolder = gui.addFolder('Area').close();
+    const volumeFolder = gui.addFolder('Volumes').close();
 
     let checkFolder: GUI;
 
@@ -41,6 +44,7 @@ const example = (): void => {
         secondaryColor: 0xffffff,
         useSecondaryColor: false,
         closeLine: false,
+        volumeHeight: 5,
     };
 
     // Setup Stats.js
@@ -178,6 +182,20 @@ const example = (): void => {
     const initDebug = (): void => {
         configFolder.add(params, 'shape', Object.values(SUPPORTED_SHAPES)).onChange((shape) => {
             shape3d.setShape(shape);
+            lineFolder.close();
+            areaFolder.close();
+            volumeFolder.close();
+            switch (shape) {
+                case SUPPORTED_SHAPES.LINE:
+                    lineFolder.open();
+                    break;
+                case SUPPORTED_SHAPES.AREA:
+                    areaFolder.open();
+                case SUPPORTED_SHAPES.VOLUME:
+                    volumeFolder.open();
+                default:
+                    break;
+            }
         });
 
         configFolder.addColor(params, 'primaryColor').onChange((color) => {
@@ -193,8 +211,12 @@ const example = (): void => {
             value ? secondaryColor.enable() : secondaryColor.disable();
         });
 
-        configFolder.add(params, 'closeLine').onChange((value) => {
+        lineFolder.add(params, 'closeLine').onChange((value) => {
             shape3d.setCloseLine(value);
+        });
+
+        volumeFolder.add(params, 'volumeHeight', 1, 100).onChange((value) => {
+            shape3d.setVolumeHeight(value);
         });
     };
 

@@ -17,6 +17,11 @@ export default class Shape3D extends Shape3DCore {
     private areaMaterial: THREE.MeshBasicMaterial | null = null;
     private area: THREE.Mesh | null = null;
 
+    private volumeGeometry: THREE.ExtrudeGeometry | null = null;
+    private volumeMaterial: THREE.MeshBasicMaterial | null = null;
+    private volume: THREE.Mesh | null = null;
+    private volumeHeight: number;
+
     constructor(params?: Partial<Shape3DParams>) {
         super(params);
 
@@ -24,10 +29,12 @@ export default class Shape3D extends Shape3DCore {
             primaryColor = 0xffffff,
             secondaryColor = 0xffffff,
             closeLine = false,
+            volumeHeight = 5,
         } = params || {};
         this.primaryColor = new THREE.Color(primaryColor);
         if (secondaryColor !== null) this.secondaryColor = new THREE.Color(secondaryColor);
         this.closeLine = closeLine;
+        this.volumeHeight = volumeHeight;
     }
 
     public setShape(shape: SupportedShapes): void {
@@ -59,6 +66,8 @@ export default class Shape3D extends Shape3DCore {
         this.lineGeometry?.dispose();
         this.lineGeometry = null;
         this.lineMaterial?.dispose();
+        this.lineMaterial = null;
+
         this.line = null;
     }
 
@@ -66,10 +75,19 @@ export default class Shape3D extends Shape3DCore {
         this.areaGeometry?.dispose();
         this.areaGeometry = null;
         this.areaMaterial?.dispose();
+        this.areaMaterial = null;
+
         this.area = null;
     }
 
-    private disposeVolume(): void {}
+    private disposeVolume(): void {
+        this.volumeGeometry?.dispose();
+        this.volumeGeometry = null;
+        this.volumeMaterial?.dispose();
+        this.volumeMaterial = null;
+
+        this.volume = null;
+    }
 
     setFromPoints(points: THREE.Vector3[]): Shape3D {
         const vertices: Vertex[] = points.map((point) => point.toArray());
@@ -240,5 +258,64 @@ export default class Shape3D extends Shape3DCore {
 
     private updateVolume(): void {
         this.checkVolume();
+
+        this.volume === null ? this.createVolume() : this.updateExistingVolume();
+    }
+
+    private createVolume(): void {
+        this.checkVolume();
+
+        if (this.volumeMaterial === null) this.volumeMaterial = new THREE.MeshBasicMaterial();
+
+        this.updateVolumeGeometry();
+        this.updateVolumeMaterial();
+
+        this.volume = new THREE.Mesh(this.volumeGeometry!, this.volumeMaterial);
+        this.add(this.volume);
+    }
+
+    private updateExistingVolume(): void {
+        this.checkVolume();
+
+        this.updateVolumeGeometry();
+        this.updateVolumeMaterial();
+
+        this.volume!.geometry = this.volumeGeometry!;
+    }
+
+    /**
+     * Must be called by `updateVolume`.
+     */
+    private updateVolumeGeometry(): void {
+        this.checkVolume();
+
+        const shape = new THREE.Shape(
+            this.vertices.flatMap((vertex) => new THREE.Vector2(vertex[0], vertex[2])),
+        );
+
+        this.volumeGeometry = new THREE.ExtrudeGeometry(shape, {
+            bevelEnabled: false,
+            depth: this.volumeHeight,
+        });
+
+        this.volumeGeometry!.rotateX(-Math.PI / 2);
+        this.volumeGeometry!.rotateY(-Math.PI);
+        this.volumeGeometry!.rotateZ(-Math.PI);
+        this.volumeGeometry!.translate(0, this.volumeHeight, 0);
+    }
+
+    /**
+     * Must be called by `updateArea`.
+     */
+    private updateVolumeMaterial(): void {
+        this.checkVolume();
+
+        this.volumeMaterial!.color.copy(this.primaryColor);
+    }
+
+    public setVolumeHeight(volumeHeight: number) {
+        this.volumeHeight = volumeHeight;
+
+        this.updateVolume();
     }
 }
