@@ -32,7 +32,7 @@ const example = (): void => {
     const configFolder = gui.addFolder('Config');
     const lineFolder = gui.addFolder('Line').open();
     const areaFolder = gui.addFolder('Area').close();
-    const volumeFolder = gui.addFolder('Area').close();
+    const volumeFolder = gui.addFolder('Volumes').close();
 
     let checkFolder: GUI;
 
@@ -44,6 +44,7 @@ const example = (): void => {
         secondaryColor: 0xffffff,
         useSecondaryColor: false,
         closeLine: false,
+        volumeHeight: 5,
     };
 
     // Setup Stats.js
@@ -212,6 +213,10 @@ const example = (): void => {
 
         lineFolder.add(params, 'closeLine').onChange((value) => {
             shape3d.setCloseLine(value);
+        });
+
+        volumeFolder.add(params, 'volumeHeight', 1, 100).onChange((value) => {
+            shape3d.setVolumeHeight(value);
         });
     };
 

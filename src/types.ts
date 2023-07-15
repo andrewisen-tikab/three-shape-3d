@@ -16,4 +16,5 @@ export type Shape3DParams = {
     primaryColor: ColorRepresentation;
     secondaryColor: ColorRepresentation;
     closeLine: boolean;
+    volumeHeight: number;
 };
