@@ -27,7 +27,7 @@ class TransformShapeControls extends THREE.Object3D {
 
     public isTransformControls: boolean;
 
-    public domElement: HTMLDivElement;
+    public domElement: HTMLCanvasElement;
 
     private _gizmo: TransformShapeControlsGizmo;
 
@@ -118,7 +118,7 @@ class TransformShapeControls extends THREE.Object3D {
 
     constructor(
         camera: THREE.Camera,
-        domElement: HTMLDivElement,
+        domElement: HTMLCanvasElement,
         params: Partial<TransformShapeControlsGizmoParams> = {},
     ) {
         super();

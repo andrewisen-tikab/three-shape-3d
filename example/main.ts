@@ -6,12 +6,9 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import CameraControls from 'camera-controls';
 
 import { Shape3D, TransformShapeControls } from '../src';
-import { SUPPORTED_SHAPES } from '../src/types';
+import { SUPPORTED_SHAPES, SupportedShapes } from '../src/types';
 
 CameraControls.install({ THREE: THREE });
-
-const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
-const checkMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading: true });
 
 /**
  * Example of how to use the `ThreeSpatialHashGrid` class.
@@ -23,11 +20,9 @@ const example = (): void => {
 
     let scene: THREE.Scene;
     let group: THREE.Group;
-    let cubes: THREE.Group = new THREE.Group();
     let gridHelperSize: number;
 
     let renderer: THREE.WebGLRenderer;
-    let positionHelper: THREE.Mesh;
 
     // Setup the GUI
     const gui = new GUI();
@@ -36,9 +31,7 @@ const example = (): void => {
     const areaFolder = gui.addFolder('Area').close();
     const volumeFolder = gui.addFolder('Volumes').close();
 
-    const controlsFolder = gui.addFolder('Config');
-
-    let checkFolder: GUI;
+    const controlsFolder = gui.addFolder('Controls');
 
     const params = {
         boundsX: 16,
@@ -101,18 +94,6 @@ const example = (): void => {
         // Setup a positional helper
         const planeGeometry = new THREE.PlaneGeometry(1, 1);
         planeGeometry.translate(1 / 2, -1 / 2, 0);
-        const planeMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffff00,
-            depthTest: false,
-            depthWrite: false,
-        });
-
-        positionHelper = new THREE.Mesh(planeGeometry, planeMaterial);
-        positionHelper.renderOrder = 1;
-        positionHelper.rotateX(-Math.PI / 2);
-        positionHelper.matrixAutoUpdate = false;
-        positionHelper.updateMatrix();
-        scene.add(positionHelper);
 
         const onWindowResize = (): void => {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -126,7 +107,7 @@ const example = (): void => {
             renderer.render(scene, camera);
         };
 
-        const animate = (currentTime: number = 0): void => {
+        const animate = (_currentTime: number = 0): void => {
             // Camera controls
             const delta = clock.getDelta();
             cameraControls.update(delta);
@@ -194,46 +175,52 @@ const example = (): void => {
     };
 
     const initDebug = (): void => {
-        configFolder.add(params, 'shape', Object.values(SUPPORTED_SHAPES)).onChange((shape) => {
-            shape3d.setShape(shape);
-            lineFolder.close();
-            areaFolder.close();
-            volumeFolder.close();
-            switch (shape) {
-                case SUPPORTED_SHAPES.LINE:
-                    lineFolder.open();
-                    break;
-                case SUPPORTED_SHAPES.AREA:
-                    areaFolder.open();
-                case SUPPORTED_SHAPES.VOLUME:
-                    volumeFolder.open();
-                default:
-                    break;
-            }
-        });
+        configFolder
+            .add(params, 'shape', Object.values(SUPPORTED_SHAPES))
+            .onChange((shape: SupportedShapes) => {
+                shape3d.setShape(shape);
+                lineFolder.close();
+                areaFolder.close();
+                volumeFolder.close();
+                switch (shape) {
+                    case SUPPORTED_SHAPES.LINE:
+                        lineFolder.open();
+                        break;
+                    case SUPPORTED_SHAPES.AREA:
+                        areaFolder.open();
+                        break;
+                    case SUPPORTED_SHAPES.VOLUME:
+                        volumeFolder.open();
+                        break;
+                    default:
+                        break;
+                }
+            });
 
-        configFolder.addColor(params, 'primaryColor').onChange((color) => {
+        configFolder.addColor(params, 'primaryColor').onChange((color: number) => {
             shape3d.setPrimaryColor(color);
         });
 
-        const secondaryColor = configFolder.addColor(params, 'secondaryColor').onChange((color) => {
-            shape3d.setSecondaryColor(color);
-        });
+        const secondaryColor = configFolder
+            .addColor(params, 'secondaryColor')
+            .onChange((color: number) => {
+                shape3d.setSecondaryColor(color);
+            });
 
         if (!params.useSecondaryColor) secondaryColor.disable();
-        configFolder.add(params, 'useSecondaryColor').onChange((value) => {
+        configFolder.add(params, 'useSecondaryColor').onChange((value: number) => {
             value ? secondaryColor.enable() : secondaryColor.disable();
         });
 
-        lineFolder.add(params, 'closeLine').onChange((value) => {
+        lineFolder.add(params, 'closeLine').onChange((value: boolean) => {
             shape3d.setCloseLine(value);
         });
 
-        volumeFolder.add(params, 'volumeHeight', 1, 100).onChange((value) => {
+        volumeFolder.add(params, 'volumeHeight', 1, 100).onChange((value: number) => {
             shape3d.setVolumeHeight(value);
         });
 
-        controlsFolder.add(params, 'centerGizmo').onChange((value) => {
+        controlsFolder.add(params, 'centerGizmo').onChange((value: boolean) => {
             transformControls.setCenterGizmo(value);
         });
     };
