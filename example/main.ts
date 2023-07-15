@@ -5,7 +5,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 import CameraControls from 'camera-controls';
 
-import { Shape3D } from '../src';
+import { Shape3D, TransformShapeControls } from '../src';
 import { SUPPORTED_SHAPES } from '../src/types';
 
 CameraControls.install({ THREE: THREE });
@@ -19,6 +19,8 @@ const checkMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading
 const example = (): void => {
     // Setup scoped variables
     let cameraControls: CameraControls;
+    let transformControls: TransformShapeControls;
+
     let scene: THREE.Scene;
     let group: THREE.Group;
     let cubes: THREE.Group = new THREE.Group();
@@ -34,6 +36,8 @@ const example = (): void => {
     const areaFolder = gui.addFolder('Area').close();
     const volumeFolder = gui.addFolder('Volumes').close();
 
+    const controlsFolder = gui.addFolder('Config');
+
     let checkFolder: GUI;
 
     const params = {
@@ -45,6 +49,7 @@ const example = (): void => {
         useSecondaryColor: false,
         closeLine: false,
         volumeHeight: 5,
+        centerGizmo: true,
     };
 
     // Setup Stats.js
@@ -79,6 +84,11 @@ const example = (): void => {
         );
 
         cameraControls = new CameraControls(camera, renderer.domElement);
+        // Add custom transform shape controls
+        transformControls = new TransformShapeControls(camera, renderer.domElement);
+        transformControls.addEventListener('dragging-changed', (event) => {
+            cameraControls.enabled = !event.value;
+        });
 
         // Setup a basic lighting
         const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -177,6 +187,10 @@ const example = (): void => {
             new THREE.Color(0x0000ff),
         );
         group.add(axesHelper);
+
+        // Attach object
+        transformControls.attach(shape3d);
+        scene.add(transformControls);
     };
 
     const initDebug = (): void => {
@@ -217,6 +231,10 @@ const example = (): void => {
 
         volumeFolder.add(params, 'volumeHeight', 1, 100).onChange((value) => {
             shape3d.setVolumeHeight(value);
+        });
+
+        controlsFolder.add(params, 'centerGizmo').onChange((value) => {
+            transformControls.setCenterGizmo(value);
         });
     };
 
