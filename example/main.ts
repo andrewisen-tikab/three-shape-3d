@@ -30,6 +30,9 @@ const example = (): void => {
     // Setup the GUI
     const gui = new GUI();
     const configFolder = gui.addFolder('Config');
+    const lineFolder = gui.addFolder('Line').open();
+    const areaFolder = gui.addFolder('Area').close();
+    const volumeFolder = gui.addFolder('Area').close();
 
     let checkFolder: GUI;
 
@@ -178,6 +181,21 @@ const example = (): void => {
     const initDebug = (): void => {
         configFolder.add(params, 'shape', Object.values(SUPPORTED_SHAPES)).onChange((shape) => {
             shape3d.setShape(shape);
+            lineFolder.close();
+            areaFolder.close();
+            volumeFolder.close();
+            switch (shape) {
+                case SUPPORTED_SHAPES.LINE:
+                    lineFolder.open();
+                    break;
+                case SUPPORTED_SHAPES.AREA:
+                    areaFolder.open();
+                case SUPPORTED_SHAPES.VOLUME:
+                    areaFolder.open();
+
+                default:
+                    break;
+            }
         });
 
         configFolder.addColor(params, 'primaryColor').onChange((color) => {
@@ -193,7 +211,7 @@ const example = (): void => {
             value ? secondaryColor.enable() : secondaryColor.disable();
         });
 
-        configFolder.add(params, 'closeLine').onChange((value) => {
+        lineFolder.add(params, 'closeLine').onChange((value) => {
             shape3d.setCloseLine(value);
         });
     };
