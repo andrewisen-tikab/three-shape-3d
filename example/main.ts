@@ -191,8 +191,7 @@ const example = (): void => {
                 case SUPPORTED_SHAPES.AREA:
                     areaFolder.open();
                 case SUPPORTED_SHAPES.VOLUME:
-                    areaFolder.open();
-
+                    volumeFolder.open();
                 default:
                     break;
             }
