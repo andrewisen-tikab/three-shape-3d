@@ -242,7 +242,6 @@ export default class Shape3D extends Shape3DCore {
         }
 
         flatVertices.push(new THREE.Vector2(this.vertices[0][0], this.vertices[0][2]));
-
         this.areaGeometry!.setFromPoints(flatVertices);
         this.areaGeometry!.rotateX(Math.PI / 2);
     }
