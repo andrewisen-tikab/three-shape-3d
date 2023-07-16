@@ -31,7 +31,16 @@ export default class Shape3DCore extends THREE.Object3D {
         return this.vertices;
     }
 
+    public updateVertex(index: number, vertex: Vertex): void {
+        this.vertices[index] = vertex;
+        this.updateGeometry();
+    }
+
     public update(): void {
         throw new Error('Method not implemented.');
     }
+
+    public updateGeometry(): void {}
+
+    public updateMaterial(): void {}
 }
