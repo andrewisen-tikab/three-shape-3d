@@ -20,9 +20,12 @@ const _objectChangeEvent = { type: 'objectChange' };
 
 type TransformShapeControlsGizmoParams = {
     centerGizmo: boolean;
+    dragVertices: boolean;
 };
 
 class TransformShapeControls extends THREE.Object3D {
+    private vertexGroup!: THREE.Group;
+
     public object?: Shape3D;
 
     public isTransformControls: boolean;
@@ -32,6 +35,8 @@ class TransformShapeControls extends THREE.Object3D {
     private _gizmo: TransformShapeControlsGizmo;
 
     private _plane: TransformShapeControlsPlane;
+
+    private _vertexPlane: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
 
     public camera!: THREE.Camera;
 
@@ -116,6 +121,11 @@ class TransformShapeControls extends THREE.Object3D {
     private _onPointerUp!: (event: any) => void;
     params: Partial<TransformShapeControlsGizmoParams>;
 
+    private vertexCenter: THREE.Vector3;
+
+    private lastSelectedVertex: THREE.Mesh | null = null;
+    private vertexHoverMaterial: THREE.MeshBasicMaterial;
+
     constructor(
         camera: THREE.Camera,
         domElement: HTMLCanvasElement,
@@ -123,8 +133,18 @@ class TransformShapeControls extends THREE.Object3D {
     ) {
         super();
 
-        this.params = {
+        // this.vertexGroup = new THREE.Group();
+        // this.add(this.vertexGroup);
+
+        const defaultParams: TransformShapeControlsGizmoParams = {
             centerGizmo: true,
+            dragVertices: true,
+        };
+
+        this.vertexCenter = new THREE.Vector3();
+
+        this.params = {
+            ...defaultParams,
             ...params,
         };
 
@@ -149,6 +169,21 @@ class TransformShapeControls extends THREE.Object3D {
         const _plane = new TransformShapeControlsPlane();
         this._plane = _plane;
         this.add(_plane);
+
+        const vertexPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(100000, 100000, 2, 2),
+            new THREE.MeshBasicMaterial({
+                visible: false,
+                wireframe: true,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.1,
+                toneMapped: false,
+            }),
+        );
+        this._vertexPlane = vertexPlane;
+        vertexPlane.rotateX(-Math.PI / 2);
+        this.add(vertexPlane);
 
         const scope = this;
 
@@ -190,8 +225,14 @@ class TransformShapeControls extends THREE.Object3D {
         // Setting the defined property will automatically trigger change event
         // Defined properties are passed down to gizmo and plane
 
+        const vertexGroup = new THREE.Group();
+        this.lastSelectedVertex = null;
+        this.vertexHoverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        this.add(vertexGroup);
+
         defineProperty('camera', camera);
         defineProperty('object', undefined);
+        defineProperty('vertexGroup', vertexGroup);
         defineProperty('enabled', true);
         defineProperty('axis', null);
         defineProperty('mode', 'translate');
@@ -262,12 +303,26 @@ class TransformShapeControls extends THREE.Object3D {
         this.domElement.addEventListener('pointerup', this._onPointerUp);
     }
 
+    /**
+     * Set the param `centerGizmo`.
+     * @param centerGizmo
+     */
     setCenterGizmo(centerGizmo: boolean): void {
         this.params.centerGizmo = centerGizmo;
-        this.offset();
+        this.updateOffset();
     }
 
-    // updateMatrixWorld  updates key transformation variables
+    /**
+     * Set the param `dragVertices`.
+     * @param centerGizmo
+     */
+    setDragVertices(dragVertices: boolean): void {
+        this.params.dragVertices = dragVertices;
+    }
+
+    /**
+     * Updates key transformation variables
+     */
     updateMatrixWorld(): void {
         if (this.object !== undefined) {
             this.object.updateMatrixWorld();
@@ -290,6 +345,27 @@ class TransformShapeControls extends THREE.Object3D {
                 this._worldScale,
             );
 
+            // WIP: Test code
+            if (this.params.centerGizmo) {
+                switch (this.mode) {
+                    case 'translate':
+                        this._gizmo.position.copy(this.vertexCenter);
+                        break;
+
+                    default:
+                        this._gizmo.position.set(0, 0, 0);
+                        break;
+                }
+            } else {
+                this._gizmo.position.set(0, 0, 0);
+            }
+
+            if (this.params.dragVertices) {
+                this.vertexGroup.position.copy(this.worldPosition);
+                this.vertexGroup.quaternion.copy(this.worldQuaternion);
+                this.vertexGroup.scale.copy(this._worldScale);
+            }
+
             this._parentQuaternionInv.copy(this._parentQuaternion).invert();
             this._worldQuaternionInv.copy(this.worldQuaternion).invert();
         }
@@ -311,7 +387,11 @@ class TransformShapeControls extends THREE.Object3D {
         super.updateMatrixWorld(this);
     }
 
-    pointerHover(pointer: PointerEvent) {
+    /**
+     * Pointer hover event
+     * @param pointer
+     */
+    pointerHover(pointer: PointerEvent): void {
         if (this.object === undefined || this.dragging === true) return;
 
         _raycaster.setFromCamera(pointer as any, this.camera);
@@ -323,9 +403,32 @@ class TransformShapeControls extends THREE.Object3D {
         } else {
             this.axis = null;
         }
+
+        if (this.lastSelectedVertex) {
+            // @ts-ignore
+            this.lastSelectedVertex.material = this.lastSelectedVertex._material;
+        }
+        if (this.axis !== null) {
+            this.lastSelectedVertex = null;
+            return;
+        }
+        const vertex = intersectObjectWithRay(this.vertexGroup, _raycaster);
+        if (vertex) {
+            const mesh = vertex.object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>;
+            // @ts-ignore
+            mesh._material = vertex.object.material;
+            mesh.material = this.vertexHoverMaterial;
+            this.lastSelectedVertex = mesh;
+        } else {
+            this.lastSelectedVertex = null;
+        }
     }
 
-    pointerDown(pointer: PointerEvent) {
+    /**
+     * Pointer down event
+     * @param pointer
+     */
+    pointerDown(pointer: PointerEvent): void {
         if (this.object === undefined || this.dragging === true || pointer.button !== 0) return;
 
         if (this.axis !== null) {
@@ -354,8 +457,19 @@ class TransformShapeControls extends THREE.Object3D {
             _mouseDownEvent.mode = this.mode;
             this.dispatchEvent(_mouseDownEvent);
         }
+
+        // If dragging vertex, simply set dragging to true
+        if (this.lastSelectedVertex !== null) {
+            this.dragging = true;
+            _mouseDownEvent.mode = this.mode;
+            this.dispatchEvent(_mouseDownEvent);
+        }
     }
 
+    /**
+     * Pointer move event
+     * @param pointer
+     */
     pointerMove(pointer: PointerEvent) {
         const axis = this.axis;
         const mode = this.mode;
@@ -366,6 +480,18 @@ class TransformShapeControls extends THREE.Object3D {
             space = 'local';
         } else if (axis === 'E' || axis === 'XYZE' || axis === 'XYZ') {
             space = 'world';
+        }
+
+        //  Attempt to drag vertex
+        if (this.lastSelectedVertex) {
+            _raycaster.setFromCamera(pointer as any, this.camera);
+            const planeIntersect = intersectObjectWithRay(this._vertexPlane, _raycaster, true);
+            if (!planeIntersect) return;
+
+            // Simply copy the raycast point and adjust for the Shape3D's position.
+            this.lastSelectedVertex.position.copy(planeIntersect.point).sub(this.object!.position);
+
+            return;
         }
 
         if (
@@ -609,13 +735,32 @@ class TransformShapeControls extends THREE.Object3D {
     // Set current object
     attach(object: Shape3D) {
         this.object = object;
-        this.offset();
+        this.updateOffset();
+        this.updateHandles();
         this.visible = true;
 
         return this;
     }
 
-    offset() {
+    private updateHandles() {
+        if (this.params.dragVertices === false) return;
+        this.addHandles();
+    }
+
+    private addHandles() {
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+
+        this.object!.getVertices().forEach((vertex, index) => {
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.set(vertex[0], vertex[1], vertex[2]);
+            cube.name = 'vertex ' + index;
+            this.vertexGroup.add(cube);
+        });
+        this.vertexGroup.position.set(-this.position.x, -this.position.y, -this.position.z);
+    }
+
+    updateOffset() {
         if (this.object == null || this.params.centerGizmo === false) {
             this.position.set(0, 0, 0);
             return;
@@ -633,13 +778,13 @@ class TransformShapeControls extends THREE.Object3D {
             sumZ += vertex[2];
         }
 
-        const center = new THREE.Vector3(
+        this.vertexCenter.set(
             sumX / vertices.length,
             sumY / vertices.length,
             sumZ / vertices.length,
         );
 
-        this.position.copy(center);
+        // this.position.copy(center);
     }
 
     // Detach from object
@@ -1003,7 +1148,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                     [-Math.PI / 2, 0, 0],
                 ],
             ],
-        };
+        } as const;
 
         const pickerTranslate = {
             X: [
@@ -1113,7 +1258,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                     'helper',
                 ],
             ],
-        };
+        } as const;
 
         const gizmoRotate = {
             XYZE: [[new THREE.Mesh(CircleGeometry(0.5, 1), matGray), null, [0, Math.PI / 2, 0]]],
@@ -1127,7 +1272,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                     [0, Math.PI / 2, 0],
                 ],
             ],
-        };
+        } as const;
 
         const helperRotate = {
             AXIS: [
@@ -1139,7 +1284,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                     'helper',
                 ],
             ],
-        };
+        } as const;
 
         const pickerRotate = {
             XYZE: [[new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 8), matInvisible)]],
@@ -1165,7 +1310,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                 ],
             ],
             E: [[new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.1, 2, 24), matInvisible)]],
-        };
+        } as const;
 
         const gizmoScale = {
             X: [
@@ -1206,7 +1351,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
             XYZ: [
                 [new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), matWhiteTransparent.clone())],
             ],
-        };
+        } as const;
 
         const pickerScale = {
             X: [
@@ -1265,7 +1410,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                 ],
             ],
             XYZ: [[new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), matInvisible), [0, 0, 0]]],
-        };
+        } as const;
 
         const helperScale = {
             X: [
@@ -1295,10 +1440,12 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                     'helper',
                 ],
             ],
-        };
+        } as const;
 
-        // Creates an Object3D with gizmos described in custom hierarchy definition.
-
+        /**
+         * Creates an Object3D with gizmos described in custom hierarchy definition.
+         * @param gizmoMap
+         */
         function setupGizmo(gizmoMap: any) {
             const gizmo = new THREE.Object3D();
 
@@ -1367,8 +1514,9 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
         this.picker['scale'].visible = false;
     }
 
-    // updateMatrixWorld will update transformations and appearance of individual handles
-
+    /**
+     * Will update transformations and appearance of individual handles
+     */
     updateMatrixWorld(force: boolean) {
         const space = this.mode === 'scale' ? 'local' : this.space; // scale always oriented to local rotation
 
@@ -1766,9 +1914,5 @@ class TransformShapeControlsPlane extends THREE.Mesh {
     }
 }
 
-export {
-    TransformShapeControls,
-    TransformShapeControlsGizmo as TransformControlsGizmo,
-    TransformShapeControlsPlane as TransformControlsPlane,
-};
+export { TransformShapeControls, TransformShapeControlsGizmo, TransformShapeControlsPlane };
 export type { TransformShapeControlsGizmoParams };
