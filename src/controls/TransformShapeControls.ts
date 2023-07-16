@@ -124,6 +124,8 @@ class TransformShapeControls extends THREE.Object3D {
     private vertexCenter: THREE.Vector3;
 
     private lastSelectedVertex: THREE.Mesh | null = null;
+    private lastSelectedVertexQuaternion: THREE.Quaternion;
+
     private vertexHoverMaterial: THREE.MeshBasicMaterial;
 
     constructor(
@@ -227,6 +229,7 @@ class TransformShapeControls extends THREE.Object3D {
 
         const vertexGroup = new THREE.Group();
         this.lastSelectedVertex = null;
+        this.lastSelectedVertexQuaternion = new THREE.Quaternion();
         this.vertexHoverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         this.add(vertexGroup);
 
@@ -462,6 +465,10 @@ class TransformShapeControls extends THREE.Object3D {
         if (this.lastSelectedVertex !== null) {
             this.dragging = true;
             _mouseDownEvent.mode = this.mode;
+
+            // Move plane to object's height.
+            this._vertexPlane.position.setY(this.object!.position.y);
+
             this.dispatchEvent(_mouseDownEvent);
         }
     }
@@ -490,6 +497,11 @@ class TransformShapeControls extends THREE.Object3D {
 
             // Simply copy the raycast point and adjust for the Shape3D's position.
             this.lastSelectedVertex.position.copy(planeIntersect.point).sub(this.object!.position);
+            // Adjust for the rotation of thee TransformShapeControls
+            this.lastSelectedVertexQuaternion.copy(this.object!.quaternion);
+            this.lastSelectedVertex.position.applyQuaternion(
+                this.lastSelectedVertexQuaternion.invert(),
+            );
 
             // Update the vertex position in the Shape3D object
             const index = +this.lastSelectedVertex.name;
