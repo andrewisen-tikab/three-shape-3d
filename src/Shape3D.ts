@@ -92,13 +92,13 @@ export default class Shape3D extends Shape3DCore {
     setFromPoints(points: THREE.Vector3[]): Shape3D {
         const vertices: Vertex[] = points.map((point) => point.toArray());
         this.vertices = vertices;
-        this.update();
+        this.updateGeometry();
         return this;
     }
 
     setPrimaryColor(color: ColorRepresentation) {
         this.primaryColor = new THREE.Color(color);
-        this.update();
+        this.updateMaterial();
     }
 
     setSecondaryColor(color: ColorRepresentation) {
@@ -108,7 +108,7 @@ export default class Shape3D extends Shape3DCore {
             this.secondaryColor.set(color);
         }
 
-        this.update();
+        this.updateMaterial();
     }
 
     setCloseLine(closeLine: boolean) {
@@ -130,6 +130,46 @@ export default class Shape3D extends Shape3DCore {
                 break;
             case SUPPORTED_SHAPES.VOLUME:
                 this.updateVolume();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Update geometry for existing (!) shape.
+     */
+    public updateGeometry(): void {
+        if (this.vertices.length === 0) return;
+        switch (this.shape) {
+            case SUPPORTED_SHAPES.LINE:
+                this.line === null ? this.createLine() : this.updateLineGeometry();
+                break;
+            case SUPPORTED_SHAPES.AREA:
+                this.area === null ? this.createArea() : this.updateAreaGeometry();
+                break;
+            case SUPPORTED_SHAPES.VOLUME:
+                this.volume === null ? this.createVolume() : this.updateVolumeGeometry();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Update material for existing (!) shape.
+     */
+    public updateMaterial(): void {
+        if (this.vertices.length === 0) return;
+        switch (this.shape) {
+            case SUPPORTED_SHAPES.LINE:
+                this.line === null ? this.createLine() : this.updateLineMaterial();
+                break;
+            case SUPPORTED_SHAPES.AREA:
+                this.area === null ? this.createArea() : this.updateAreaMaterial();
+                break;
+            case SUPPORTED_SHAPES.VOLUME:
+                this.volume === null ? this.createVolume() : this.updateVolumeMaterial();
                 break;
             default:
                 break;
@@ -175,7 +215,7 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
-     * Must be called by `updateLine`.
+     * N.B: Must be called by an `update` method!
      */
     private updateLineGeometry(): void {
         this.checkLine();
@@ -195,7 +235,7 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
-     * Must be called by `updateLine`.
+     * N.B: Must be called by an `update` method!
      */
     private updateLineMaterial(): void {
         this.checkLine();
@@ -230,7 +270,7 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
-     * Must be called by `updateArea`.
+     * N.B: Must be called by an `update` method!
      */
     private updateAreaGeometry(): void {
         this.checkArea();
@@ -247,7 +287,7 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
-     * Must be called by `updateArea`.
+     * N.B: Must be called by an `update` method!
      */
     private updateAreaMaterial(): void {
         this.checkArea();
@@ -283,7 +323,7 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
-     * Must be called by `updateVolume`.
+     * N.B: Must be called by an `update` method!
      */
     private updateVolumeGeometry(): void {
         this.checkVolume();
@@ -304,7 +344,7 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
-     * Must be called by `updateArea`.
+     * N.B: Must be called by an `update` method!
      */
     private updateVolumeMaterial(): void {
         this.checkVolume();
