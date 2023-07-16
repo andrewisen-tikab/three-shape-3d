@@ -491,6 +491,13 @@ class TransformShapeControls extends THREE.Object3D {
             // Simply copy the raycast point and adjust for the Shape3D's position.
             this.lastSelectedVertex.position.copy(planeIntersect.point).sub(this.object!.position);
 
+            // Update the vertex position in the Shape3D object
+            const index = +this.lastSelectedVertex.name;
+            this.object!.updateVertex(index, [
+                this.lastSelectedVertex.position.x,
+                this.lastSelectedVertex.position.y,
+                this.lastSelectedVertex.position.z,
+            ]);
             return;
         }
 
@@ -754,7 +761,7 @@ class TransformShapeControls extends THREE.Object3D {
         this.object!.getVertices().forEach((vertex, index) => {
             const cube = new THREE.Mesh(geometry, material);
             cube.position.set(vertex[0], vertex[1], vertex[2]);
-            cube.name = 'vertex ' + index;
+            cube.name = `${index}`;
             this.vertexGroup.add(cube);
         });
         this.vertexGroup.position.set(-this.position.x, -this.position.y, -this.position.z);
