@@ -43,6 +43,7 @@ const example = (): void => {
         closeLine: false,
         volumeHeight: 5,
         centerGizmo: true,
+        gizmoMode: 'translate',
     };
 
     // Setup Stats.js
@@ -223,6 +224,12 @@ const example = (): void => {
         controlsFolder.add(params, 'centerGizmo').onChange((value: boolean) => {
             transformControls.setCenterGizmo(value);
         });
+
+        controlsFolder
+            .add(params, 'gizmoMode', ['translate', 'rotate', 'scale'])
+            .onChange((value: string) => {
+                transformControls.setMode(value);
+            });
     };
 
     // Functions are  created, let's call them!
