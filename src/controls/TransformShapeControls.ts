@@ -462,6 +462,10 @@ class TransformShapeControls extends THREE.Object3D {
         if (this.lastSelectedVertex !== null) {
             this.dragging = true;
             _mouseDownEvent.mode = this.mode;
+
+            // Move plane to object's height.
+            this._vertexPlane.position.setY(this.object!.position.y);
+
             this.dispatchEvent(_mouseDownEvent);
         }
     }
