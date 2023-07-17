@@ -35,6 +35,12 @@ const handleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 type TransformShapeControlsGizmoParams = {
     centerGizmo: boolean;
     dragVertices: boolean;
+    allowCreatingNewVertices: boolean;
+};
+
+type VertexMetadata = {
+    type: 'vertex' | 'middle-point';
+    index: number;
 };
 
 class TransformShapeControls extends THREE.Object3D {
@@ -60,11 +66,11 @@ class TransformShapeControls extends THREE.Object3D {
 
     public mode!: string;
 
-    public translationSnap!: number | null;
+    private translationSnap!: number | null;
 
-    public rotationSnap!: number | null;
+    private rotationSnap!: number | null;
 
-    public scaleSnap!: number | null;
+    private scaleSnap!: number | null;
 
     public space!: string;
 
@@ -155,6 +161,7 @@ class TransformShapeControls extends THREE.Object3D {
         const defaultParams: TransformShapeControlsGizmoParams = {
             centerGizmo: true,
             dragVertices: true,
+            allowCreatingNewVertices: true,
         };
 
         this.vertexCenter = new THREE.Vector3();
@@ -431,6 +438,11 @@ class TransformShapeControls extends THREE.Object3D {
         }
         const vertex = intersectObjectWithRay(this.vertexGroup, _raycaster);
         if (vertex) {
+            const metadata = vertex.object.userData;
+            if (metadata.type !== 'vertex') {
+                this.lastSelectedVertex = null;
+                return;
+            }
             const mesh = vertex.object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>;
             // @ts-ignore
             mesh._material = vertex.object.material;
@@ -511,19 +523,41 @@ class TransformShapeControls extends THREE.Object3D {
 
             // Simply copy the raycast point and adjust for the Shape3D's position.
             this.lastSelectedVertex.position.copy(planeIntersect.point).sub(this.object!.position);
+
+            // Snap to grid
+            if (this.translationSnap) {
+                this.lastSelectedVertex.position.x =
+                    Math.round(this.lastSelectedVertex.position.x / this.translationSnap) *
+                    this.translationSnap;
+                this.lastSelectedVertex.position.y =
+                    Math.round(this.lastSelectedVertex.position.y / this.translationSnap) *
+                    this.translationSnap;
+
+                this.lastSelectedVertex.position.z =
+                    Math.round(this.lastSelectedVertex.position.z / this.translationSnap) *
+                    this.translationSnap;
+            }
+
             // Adjust for the rotation of thee TransformShapeControls
             this.lastSelectedVertexQuaternion.copy(this.object!.quaternion);
             this.lastSelectedVertex.position.applyQuaternion(
                 this.lastSelectedVertexQuaternion.invert(),
             );
 
-            // Update the vertex position in the Shape3D object
-            const index = +this.lastSelectedVertex.name;
-            this.object!.updateVertex(index, [
-                this.lastSelectedVertex.position.x,
-                this.lastSelectedVertex.position.y,
-                this.lastSelectedVertex.position.z,
-            ]);
+            const metadata = this.lastSelectedVertex.userData as VertexMetadata;
+            const index = metadata.index;
+
+            if (metadata.type === 'vertex') {
+                // Update the vertex position in the Shape3D object
+                this.object!.updateVertex(index, [
+                    this.lastSelectedVertex.position.x,
+                    this.lastSelectedVertex.position.y,
+                    this.lastSelectedVertex.position.z,
+                ]);
+                this.updateOffset();
+                this.updateHandles();
+            }
+
             return;
         }
 
@@ -768,6 +802,9 @@ class TransformShapeControls extends THREE.Object3D {
     // Set current object
     attach(object: Shape3D) {
         this.object = object;
+
+        this.object.addEventListener('close-line-changed', this.onCloseLineChanged);
+
         this.updateOffset();
         this.updateHandles();
         this.visible = true;
@@ -781,12 +818,68 @@ class TransformShapeControls extends THREE.Object3D {
     }
 
     private addHandles() {
-        this.object!.getVertices().forEach((vertex, index) => {
+        this.vertexGroup.clear();
+        const vertices = this.object!.getVertices();
+
+        for (let index = 0; index < vertices.length; index++) {
+            const vertex = vertices[index];
             const cube = new THREE.Mesh(handleGeometry, handleMaterial);
+
             cube.position.set(vertex[0], vertex[1], vertex[2]);
-            cube.name = `${index}`;
+            const metadata: VertexMetadata = {
+                type: 'vertex',
+                index,
+            };
+            cube.userData = metadata;
             this.vertexGroup.add(cube);
-        });
+
+            if (this.params.allowCreatingNewVertices === false) continue;
+            if (index === 0) continue;
+
+            const prevousVertex = vertices[index - 1];
+
+            const middle = new THREE.Mesh(
+                handleGeometry,
+                new THREE.MeshBasicMaterial({ color: 0x0000ff }),
+            );
+            middle.position.set(
+                (vertex[0] + prevousVertex[0]) / 2,
+                (vertex[1] + prevousVertex[1]) / 2,
+                (vertex[2] + prevousVertex[2]) / 2,
+            );
+
+            const middleMetadata: VertexMetadata = {
+                type: 'middle-point',
+                index,
+            };
+            middle.userData = middleMetadata;
+
+            this.vertexGroup.add(middle);
+        }
+
+        if (this.object!.getCloseLine()) {
+            const index = vertices.length;
+            const vertex = vertices[0];
+            const prevousVertex = vertices[vertices.length - 1];
+
+            const middle = new THREE.Mesh(
+                handleGeometry,
+                new THREE.MeshBasicMaterial({ color: 0x0000ff }),
+            );
+
+            middle.position.set(
+                (vertex[0] + prevousVertex[0]) / 2,
+                (vertex[1] + prevousVertex[1]) / 2,
+                (vertex[2] + prevousVertex[2]) / 2,
+            );
+
+            const middleMetadata: VertexMetadata = {
+                type: 'middle-point',
+                index,
+            };
+            middle.userData = middleMetadata;
+            this.vertexGroup.add(middle);
+        }
         this.vertexGroup.position.set(-this.position.x, -this.position.y, -this.position.z);
     }
 
@@ -817,8 +910,16 @@ class TransformShapeControls extends THREE.Object3D {
         // this.position.copy(center);
     }
 
+    private onCloseLineChanged = (_e: any) => {
+        this.updateHandles();
+    };
+
     // Detach from object
     detach() {
+        if (this.object) {
+            this.object.removeEventListener('close-line-changed', this.onCloseLineChanged);
+        }
+
         this.object = undefined;
         this.visible = false;
         this.axis = null;
@@ -855,7 +956,7 @@ class TransformShapeControls extends THREE.Object3D {
         this.mode = mode;
     }
 
-    setTranslationSnap(translationSnap: number) {
+    setTranslationSnap(translationSnap: number | null) {
         this.translationSnap = translationSnap;
     }
 

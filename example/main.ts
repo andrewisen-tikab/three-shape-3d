@@ -44,6 +44,7 @@ const example = (): void => {
         volumeHeight: 5,
         centerGizmo: true,
         gizmoMode: 'translate',
+        translationSnap: 0,
     };
 
     // Setup Stats.js
@@ -230,6 +231,10 @@ const example = (): void => {
             .onChange((value: string) => {
                 transformControls.setMode(value);
             });
+
+        controlsFolder.add(params, 'translationSnap', 0, 10).onChange((value: number) => {
+            transformControls.setTranslationSnap(value === 0 ? null : value);
+        });
     };
 
     // Functions are  created, let's call them!
