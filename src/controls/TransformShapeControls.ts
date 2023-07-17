@@ -39,7 +39,7 @@ type TransformShapeControlsGizmoParams = {
 };
 
 type VertexMetadata = {
-    type: 'vertex' | 'middle-point';
+    type: 'vertex' | 'midpoint';
     index: number;
 };
 
@@ -438,11 +438,11 @@ class TransformShapeControls extends THREE.Object3D {
         }
         const vertex = intersectObjectWithRay(this.vertexGroup, _raycaster);
         if (vertex) {
-            const metadata = vertex.object.userData;
-            if (metadata.type !== 'vertex') {
-                this.lastSelectedVertex = null;
-                return;
-            }
+            // const metadata = vertex.object.userData;
+            // if (metadata.type !== 'vertex') {
+            //     this.lastSelectedVertex = null;
+            //     return;
+            // }
             const mesh = vertex.object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>;
             // @ts-ignore
             mesh._material = vertex.object.material;
@@ -489,12 +489,16 @@ class TransformShapeControls extends THREE.Object3D {
 
         // If dragging vertex, simply set dragging to true
         if (this.lastSelectedVertex !== null) {
-            this.dragging = true;
-            _mouseDownEvent.mode = this.mode;
+            const metadata = this.lastSelectedVertex.userData as VertexMetadata;
+            if (metadata.type === 'vertex') {
+                this.dragging = true;
+                _mouseDownEvent.mode = this.mode;
 
-            // Move plane to object's height.
-            this._vertexPlane.position.setY(this.object!.position.y);
-
+                // Move plane to object's height.
+                this._vertexPlane.position.setY(this.object!.position.y);
+            } else {
+                alert('Not a vertex!');
+            }
             this.dispatchEvent(_mouseDownEvent);
         }
     }
@@ -836,49 +840,50 @@ class TransformShapeControls extends THREE.Object3D {
             if (this.params.allowCreatingNewVertices === false) continue;
             if (index === 0) continue;
 
-            const prevousVertex = vertices[index - 1];
+            const previousVertex = vertices[index - 1];
 
-            const middle = new THREE.Mesh(
+            const midpoint = new THREE.Mesh(
                 handleGeometry,
                 new THREE.MeshBasicMaterial({ color: 0x0000ff }),
             );
-            middle.position.set(
-                (vertex[0] + prevousVertex[0]) / 2,
-                (vertex[1] + prevousVertex[1]) / 2,
-                (vertex[2] + prevousVertex[2]) / 2,
+
+            midpoint.position.set(
+                (vertex[0] + previousVertex[0]) / 2,
+                (vertex[1] + previousVertex[1]) / 2,
+                (vertex[2] + previousVertex[2]) / 2,
             );
 
             const middleMetadata: VertexMetadata = {
-                type: 'middle-point',
+                type: 'midpoint',
                 index,
             };
-            middle.userData = middleMetadata;
+            midpoint.userData = middleMetadata;
 
-            this.vertexGroup.add(middle);
+            this.vertexGroup.add(midpoint);
         }
 
         if (this.object!.getCloseLine()) {
             const index = vertices.length;
             const vertex = vertices[0];
-            const prevousVertex = vertices[vertices.length - 1];
+            const previousVertex = vertices[vertices.length - 1];
 
-            const middle = new THREE.Mesh(
+            const midpoint = new THREE.Mesh(
                 handleGeometry,
                 new THREE.MeshBasicMaterial({ color: 0x0000ff }),
             );
 
-            middle.position.set(
-                (vertex[0] + prevousVertex[0]) / 2,
-                (vertex[1] + prevousVertex[1]) / 2,
-                (vertex[2] + prevousVertex[2]) / 2,
+            midpoint.position.set(
+                (vertex[0] + previousVertex[0]) / 2,
+                (vertex[1] + previousVertex[1]) / 2,
+                (vertex[2] + previousVertex[2]) / 2,
             );
 
             const middleMetadata: VertexMetadata = {
-                type: 'middle-point',
+                type: 'midpoint',
                 index,
             };
-            middle.userData = middleMetadata;
-            this.vertexGroup.add(middle);
+            midpoint.userData = middleMetadata;
+            this.vertexGroup.add(midpoint);
         }
         this.vertexGroup.position.set(-this.position.x, -this.position.y, -this.position.z);
     }
