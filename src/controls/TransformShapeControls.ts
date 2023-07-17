@@ -459,7 +459,7 @@ class TransformShapeControls extends THREE.Object3D {
      * @param pointer
      */
     pointerDown(pointer: PointerEvent): void {
-        if (this.object === undefined || this.dragging === true || pointer.button !== 0) return;
+        if (this.object === undefined || this.dragging === true) return;
 
         if (this.axis !== null) {
             _raycaster.setFromCamera(pointer as any, this.camera);
@@ -492,14 +492,20 @@ class TransformShapeControls extends THREE.Object3D {
         if (this.lastSelectedVertex !== null) {
             const metadata = this.lastSelectedVertex.userData as VertexMetadata;
             if (metadata.type === 'vertex') {
-                this.dragging = true;
-                _mouseDownEvent.mode = this.mode;
+                // Detect if right click
+                if (pointer.button !== 0) {
+                    this.object.removeVertex(metadata.index);
+                    this.onVertexChanged();
+                } else {
+                    this.dragging = true;
+                    _mouseDownEvent.mode = this.mode;
 
-                // Move plane to object's height.
-                this._vertexPlane.position.setY(this.object!.position.y);
+                    // Move plane to object's height.
+                    this._vertexPlane.position.setY(this.object!.position.y);
+                }
             } else {
                 this.object.splitEdge(metadata.index);
-                this.updateHandles();
+                this.onVertexChanged();
             }
             this.dispatchEvent(_mouseDownEvent);
         }
@@ -560,8 +566,7 @@ class TransformShapeControls extends THREE.Object3D {
                     this.lastSelectedVertex.position.y,
                     this.lastSelectedVertex.position.z,
                 ]);
-                this.updateOffset();
-                this.updateHandles();
+                this.onVertexChanged();
             }
 
             return;
@@ -811,11 +816,16 @@ class TransformShapeControls extends THREE.Object3D {
 
         this.object.addEventListener('close-line-changed', this.onCloseLineChanged);
 
-        this.updateOffset();
-        this.updateHandles();
+        this.onVertexChanged();
+
         this.visible = true;
 
         return this;
+    }
+
+    private onVertexChanged() {
+        this.updateHandles();
+        this.updateOffset();
     }
 
     private updateHandles() {

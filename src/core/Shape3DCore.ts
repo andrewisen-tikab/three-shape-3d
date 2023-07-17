@@ -54,6 +54,16 @@ export default class Shape3DCore extends THREE.Object3D {
         this.updateGeometry();
     }
 
+    public removeVertex(index: number) {
+        if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
+        if (this.vertices.length === 2) {
+            console.warn('Cannot remove vertex. Shape must have at least 2 vertices');
+            return;
+        }
+        this.vertices.splice(index, 1);
+        this.updateGeometry();
+    }
+
     public update(): void {
         throw new Error('Method not implemented.');
     }
