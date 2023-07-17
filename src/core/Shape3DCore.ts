@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { type Vertex, type SupportedShapes, type Shape3DParams, SUPPORTED_SHAPES } from '../types';
+import { getMidpoint } from '../utils';
 
 export default class Shape3DCore extends THREE.Object3D {
     protected vertices: Vertex[] = [];
@@ -32,7 +33,24 @@ export default class Shape3DCore extends THREE.Object3D {
     }
 
     public updateVertex(index: number, vertex: Vertex): void {
+        if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
         this.vertices[index] = vertex;
+        this.updateGeometry();
+    }
+
+    /**
+     * Split the edge at the given index
+     * I.e. `index - (index - 1)`
+     *
+     * N.B: Midpoints start at index 1.
+     */
+    public splitEdge(index: number): void {
+        if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
+        const midpoint: Vertex = getMidpoint(this.vertices[index - 1], this.vertices[index]);
+
+        // Insert the midpoint at index and shift the rest of the vertices
+        this.vertices.splice(index, 0, midpoint);
+
         this.updateGeometry();
     }
 

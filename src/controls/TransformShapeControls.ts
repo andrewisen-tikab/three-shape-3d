@@ -8,6 +8,7 @@ THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 import Shape3D from '../Shape3D';
+import { getMidpoint } from '../utils';
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
@@ -497,7 +498,8 @@ class TransformShapeControls extends THREE.Object3D {
                 // Move plane to object's height.
                 this._vertexPlane.position.setY(this.object!.position.y);
             } else {
-                alert('Not a vertex!');
+                this.object.splitEdge(metadata.index);
+                this.updateHandles();
             }
             this.dispatchEvent(_mouseDownEvent);
         }
@@ -847,11 +849,7 @@ class TransformShapeControls extends THREE.Object3D {
                 new THREE.MeshBasicMaterial({ color: 0x0000ff }),
             );
 
-            midpoint.position.set(
-                (vertex[0] + previousVertex[0]) / 2,
-                (vertex[1] + previousVertex[1]) / 2,
-                (vertex[2] + previousVertex[2]) / 2,
-            );
+            midpoint.position.set(...getMidpoint(vertex, previousVertex));
 
             const middleMetadata: VertexMetadata = {
                 type: 'midpoint',
@@ -871,12 +869,7 @@ class TransformShapeControls extends THREE.Object3D {
                 handleGeometry,
                 new THREE.MeshBasicMaterial({ color: 0x0000ff }),
             );
-
-            midpoint.position.set(
-                (vertex[0] + previousVertex[0]) / 2,
-                (vertex[1] + previousVertex[1]) / 2,
-                (vertex[2] + previousVertex[2]) / 2,
-            );
+            midpoint.position.set(...getMidpoint(vertex, previousVertex));
 
             const middleMetadata: VertexMetadata = {
                 type: 'midpoint',
