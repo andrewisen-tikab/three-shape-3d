@@ -12,6 +12,8 @@ You can create a shape from a set of points and build either a:
 -   area
 -   volume
 
+![Example](https://github.com/andrewisen-tikab/three-shape-3d/blob/feature/resources/example.gif 'Example')
+
 ## Installation
 
 ```bash
