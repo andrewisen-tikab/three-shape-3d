@@ -4,6 +4,12 @@ import type { ColorRepresentation, Shape3DParams, SupportedShapes, Vertex } from
 
 import * as THREE from 'three';
 
+const rotateShapeGeometry = (geometry: THREE.BufferGeometry): void => {
+    geometry.rotateX(-Math.PI / 2);
+    geometry.rotateY(-Math.PI);
+    geometry.rotateZ(-Math.PI);
+};
+
 export default class Shape3D extends Shape3DCore {
     private primaryColor: THREE.Color;
     private secondaryColor: THREE.Color | null = null;
@@ -146,6 +152,7 @@ export default class Shape3D extends Shape3DCore {
      */
     public updateGeometry(): void {
         if (this.vertices.length === 0) return;
+
         switch (this.shape) {
             case SUPPORTED_SHAPES.LINE:
                 this.line === null ? this.createLine() : this.updateLineGeometry();
@@ -258,7 +265,8 @@ export default class Shape3D extends Shape3DCore {
         this.checkArea();
 
         if (this.areaGeometry === null) this.areaGeometry = new THREE.ShapeGeometry();
-        if (this.areaMaterial === null) this.areaMaterial = new THREE.MeshBasicMaterial();
+        if (this.areaMaterial === null)
+            this.areaMaterial = new THREE.MeshBasicMaterial({ side: THREE.BackSide });
 
         this.updateAreaGeometry();
         this.updateAreaMaterial();
@@ -280,15 +288,18 @@ export default class Shape3D extends Shape3DCore {
     private updateAreaGeometry(): void {
         this.checkArea();
 
-        const flatVertices: THREE.Vector2[] = [];
-        for (let i = 0; i < this.vertices.length; i++) {
-            const element = this.vertices[i];
-            flatVertices.push(new THREE.Vector2(element[0], element[2]));
-        }
+        const shape = new THREE.Shape().setFromPoints(
+            this.vertices.map((v) => new THREE.Vector2(v[0], v[2])),
+        );
 
-        flatVertices.push(new THREE.Vector2(this.vertices[0][0], this.vertices[0][2]));
-        this.areaGeometry!.setFromPoints(flatVertices);
-        this.areaGeometry!.rotateX(Math.PI / 2);
+        const geometry = new THREE.ShapeGeometry(shape);
+
+        this.areaGeometry = geometry;
+        rotateShapeGeometry(geometry);
+
+        if (this.area) {
+            this.area.geometry = geometry;
+        }
     }
 
     /**
@@ -309,7 +320,8 @@ export default class Shape3D extends Shape3DCore {
     private createVolume(): void {
         this.checkVolume();
 
-        if (this.volumeMaterial === null) this.volumeMaterial = new THREE.MeshBasicMaterial();
+        if (this.volumeMaterial === null)
+            this.volumeMaterial = new THREE.MeshBasicMaterial({ side: THREE.BackSide });
 
         this.updateVolumeGeometry();
         this.updateVolumeMaterial();
@@ -337,15 +349,19 @@ export default class Shape3D extends Shape3DCore {
             this.vertices.flatMap((vertex) => new THREE.Vector2(vertex[0], vertex[2])),
         );
 
-        this.volumeGeometry = new THREE.ExtrudeGeometry(shape, {
+        const geometry = new THREE.ExtrudeGeometry(shape, {
             bevelEnabled: false,
             depth: this.volumeHeight,
         });
 
-        this.volumeGeometry!.rotateX(-Math.PI / 2);
-        this.volumeGeometry!.rotateY(-Math.PI);
-        this.volumeGeometry!.rotateZ(-Math.PI);
-        this.volumeGeometry!.translate(0, this.volumeHeight, 0);
+        this.volumeGeometry = geometry;
+
+        rotateShapeGeometry(geometry);
+        geometry.translate(0, this.volumeHeight, 0);
+
+        if (this.volume) {
+            this.volume.geometry = geometry;
+        }
     }
 
     /**
