@@ -60,11 +60,11 @@ class TransformShapeControls extends THREE.Object3D {
 
     public mode!: string;
 
-    public translationSnap!: number | null;
+    private translationSnap!: number | null;
 
-    public rotationSnap!: number | null;
+    private rotationSnap!: number | null;
 
-    public scaleSnap!: number | null;
+    private scaleSnap!: number | null;
 
     public space!: string;
 
@@ -511,6 +511,21 @@ class TransformShapeControls extends THREE.Object3D {
 
             // Simply copy the raycast point and adjust for the Shape3D's position.
             this.lastSelectedVertex.position.copy(planeIntersect.point).sub(this.object!.position);
+
+            // Snap to grid
+            if (this.translationSnap) {
+                this.lastSelectedVertex.position.x =
+                    Math.round(this.lastSelectedVertex.position.x / this.translationSnap) *
+                    this.translationSnap;
+                this.lastSelectedVertex.position.y =
+                    Math.round(this.lastSelectedVertex.position.y / this.translationSnap) *
+                    this.translationSnap;
+
+                this.lastSelectedVertex.position.z =
+                    Math.round(this.lastSelectedVertex.position.z / this.translationSnap) *
+                    this.translationSnap;
+            }
+
             // Adjust for the rotation of thee TransformShapeControls
             this.lastSelectedVertexQuaternion.copy(this.object!.quaternion);
             this.lastSelectedVertex.position.applyQuaternion(
@@ -855,7 +870,7 @@ class TransformShapeControls extends THREE.Object3D {
         this.mode = mode;
     }
 
-    setTranslationSnap(translationSnap: number) {
+    setTranslationSnap(translationSnap: number | null) {
         this.translationSnap = translationSnap;
     }
 
