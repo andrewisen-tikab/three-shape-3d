@@ -32,6 +32,7 @@ export default class Shape3DCore extends THREE.Object3D {
     }
 
     public updateVertex(index: number, vertex: Vertex): void {
+        if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
         this.vertices[index] = vertex;
         this.updateGeometry();
     }
