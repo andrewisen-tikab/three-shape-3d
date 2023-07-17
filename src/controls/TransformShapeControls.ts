@@ -1,8 +1,17 @@
 import * as THREE from 'three';
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
+
+// @ts-ignore
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+// @ts-ignore
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 import Shape3D from '../Shape3D';
 
 const _raycaster = new THREE.Raycaster();
+// @ts-ignore
+_raycaster.firstHitOnly = true;
 
 const _tempVector = new THREE.Vector3();
 const _tempVector2 = new THREE.Vector3();
@@ -17,6 +26,11 @@ const _changeEvent = { type: 'change' };
 const _mouseDownEvent: { type: 'mouseDown'; mode?: string } = { type: 'mouseDown' };
 const _mouseUpEvent: { type: 'mouseUp'; mode: string | null } = { type: 'mouseUp', mode: null };
 const _objectChangeEvent = { type: 'objectChange' };
+
+const handleGeometry = new THREE.BoxGeometry(1, 1, 1);
+// @ts-ignore
+handleGeometry.computeBoundsTree();
+const handleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
 type TransformShapeControlsGizmoParams = {
     centerGizmo: boolean;
@@ -767,11 +781,8 @@ class TransformShapeControls extends THREE.Object3D {
     }
 
     private addHandles() {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
         this.object!.getVertices().forEach((vertex, index) => {
-            const cube = new THREE.Mesh(geometry, material);
+            const cube = new THREE.Mesh(handleGeometry, handleMaterial);
             cube.position.set(vertex[0], vertex[1], vertex[2]);
             cube.name = `${index}`;
             this.vertexGroup.add(cube);
@@ -1078,21 +1089,32 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
 
         const arrowGeometry = new THREE.CylinderGeometry(0, 0.04, 0.1, 12);
         arrowGeometry.translate(0, 0.05, 0);
+        // @ts-ignore
+        arrowGeometry.computeBoundsTree();
 
         const scaleHandleGeometry = new THREE.BoxGeometry(0.08, 0.08, 0.08);
         scaleHandleGeometry.translate(0, 0.04, 0);
+        // @ts-ignore
+        scaleHandleGeometry.computeBoundsTree();
 
         const lineGeometry = new THREE.BufferGeometry();
         lineGeometry.setAttribute(
             'position',
             new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0], 3),
         );
+        // @ts-ignore
+        lineGeometry.computeBoundsTree();
 
         const lineGeometry2 = new THREE.CylinderGeometry(0.0075, 0.0075, 0.5, 3);
         lineGeometry2.translate(0, 0.25, 0);
 
+        // @ts-ignore
+        lineGeometry2.computeBoundsTree();
+
         function CircleGeometry(radius: number, arc: number) {
             const geometry = new THREE.TorusGeometry(radius, 0.0075, 3, 64, arc * Math.PI * 2);
+            // @ts-ignore
+            geometry.computeBoundsTree();
             geometry.rotateY(Math.PI / 2);
             geometry.rotateX(Math.PI / 2);
             return geometry;
@@ -1460,6 +1482,31 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                 ],
             ],
         } as const;
+
+        (
+            [
+                // Translate
+                ...Object.values(gizmoTranslate),
+                ...Object.values(pickerTranslate),
+                ...Object.values(helperTranslate),
+                // Rotate
+                ...Object.values(gizmoRotate),
+                ...Object.values(pickerRotate),
+                ...Object.values(helperRotate),
+                //  scale
+                ...Object.values(gizmoTranslate),
+                ...Object.values(pickerTranslate),
+                ...Object.values(helperTranslate),
+            ] as any
+        ).forEach((parent: any[]) => {
+            parent.forEach((array: any[]) => {
+                array.forEach((object: THREE.Mesh) => {
+                    if (!object?.geometry) return;
+                    // @ts-ignore
+                    object.geometry.computeBoundsTree();
+                });
+            });
+        });
 
         /**
          * Creates an Object3D with gizmos described in custom hierarchy definition.
