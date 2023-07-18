@@ -12,7 +12,7 @@ You can create a shape from a set of points and build either a:
 -   area
 -   volume
 
-![Example](https://github.com/andrewisen-tikab/three-shape-3d/blob/feature/resources/example.gif 'Example')
+<img src="https://github.com/andrewisen-tikab/three-shape-3d/blob/feature/resources/example.gif" width="100%" />
 
 ## Installation
 
