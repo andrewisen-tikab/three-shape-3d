@@ -44,6 +44,8 @@ type VertexMetadata = {
     index: number;
 };
 
+type Mode = 'translate' | 'rotate' | 'scale';
+
 class TransformShapeControls extends THREE.Object3D {
     private vertexGroup!: THREE.Group;
 
@@ -65,7 +67,7 @@ class TransformShapeControls extends THREE.Object3D {
 
     public axis!: string | null;
 
-    public mode!: string;
+    public mode!: Mode;
 
     private translationSnap!: number | null;
 
@@ -960,7 +962,10 @@ class TransformShapeControls extends THREE.Object3D {
         return this.mode;
     }
 
-    setMode(mode: string) {
+    setMode(mode: Mode) {
+        if (mode !== 'translate' && mode !== 'rotate' && mode !== 'scale')
+            throw new Error('Invalid mode');
+
         this.mode = mode;
     }
 
