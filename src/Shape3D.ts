@@ -281,33 +281,54 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
-     * Update geometry for existing (!) shape.
-     */
-    public updateGeometry(): void {
-        if (this.vertices.length === 0) return;
-
-        switch (this.shape) {
-            case SUPPORTED_SHAPES.LINE:
-                this.line === null ? this.createLine() : this.updateLineGeometry();
-                break;
-            case SUPPORTED_SHAPES.AREA:
-                this.area === null ? this.createArea() : this.updateAreaGeometry();
-                break;
-            case SUPPORTED_SHAPES.VOLUME:
-                this.volume === null ? this.createVolume() : this.updateVolumeGeometry();
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     *
      * Update material for existing (!) shape.
      *
      * @param force Force an update on all shapes.
      */
-    public updateMaterial(force: boolean = false): void {
+    public updateGeometry(force = true): void {
+        if (this.vertices.length === 0) return;
+        if (force) {
+            // If force is true, update all shapes.
+            switch (this.shape) {
+                case SUPPORTED_SHAPES.LINE:
+                    this.line === null ? this.createLine() : this.updateLineGeometry();
+                    break;
+                case SUPPORTED_SHAPES.AREA:
+                    this.line === null ? this.createLine() : this.updateLineGeometry();
+                    this.area === null ? this.createArea() : this.updateAreaGeometry();
+                    break;
+                case SUPPORTED_SHAPES.VOLUME:
+                    this.line === null ? this.createLine() : this.updateLineGeometry();
+                    this.area === null ? this.createArea() : this.updateAreaGeometry();
+                    this.volume === null ? this.createVolume() : this.updateVolumeGeometry();
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            // Otherwise, update only the current shape.
+            switch (this.shape) {
+                case SUPPORTED_SHAPES.LINE:
+                    this.line === null ? this.createLine() : this.updateLineGeometry();
+                    break;
+                case SUPPORTED_SHAPES.AREA:
+                    this.area === null ? this.createArea() : this.updateAreaGeometry();
+                    break;
+                case SUPPORTED_SHAPES.VOLUME:
+                    this.volume === null ? this.createVolume() : this.updateVolumeGeometry();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Update material for existing (!) shape.
+     *
+     * @param force Force an update on all shapes.
+     */
+    public updateMaterial(force: boolean = true): void {
         if (this.vertices.length === 0) return;
         if (force) {
             // If force is true, update all shapes.
