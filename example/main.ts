@@ -37,9 +37,9 @@ const example = (): void => {
         boundsX: 16,
         boundsZ: 16,
         shape: SUPPORTED_SHAPES.LINE,
-        primaryColor: 0xffffff,
-        secondaryColor: 0xffffff,
-        useSecondaryColor: false,
+        lineColor: 0xffffff,
+        areaColor: 0xffffff,
+        volumeColor: 0xffffff,
         closeLine: false,
         volumeHeight: 5,
         centerGizmo: true,
@@ -146,7 +146,11 @@ const example = (): void => {
         points.push(new THREE.Vector3(5, 0, 5));
         points.push(new THREE.Vector3(0, 0, 5));
 
-        shape3d = new Shape3D().setFromPoints(points);
+        shape3d = new Shape3D({
+            lineColor: params.lineColor,
+            areaColor: params.areaColor,
+            volumeColor: params.volumeColor,
+        }).setFromPoints(points);
 
         group.add(shape3d);
 
@@ -200,19 +204,16 @@ const example = (): void => {
                 }
             });
 
-        configFolder.addColor(params, 'primaryColor').onChange((color: number) => {
-            shape3d.setPrimaryColor(color);
+        lineFolder.addColor(params, 'lineColor').onChange((color: number) => {
+            shape3d.setLineColor(color);
         });
 
-        const secondaryColor = configFolder
-            .addColor(params, 'secondaryColor')
-            .onChange((color: number) => {
-                shape3d.setSecondaryColor(color);
-            });
+        areaFolder.addColor(params, 'areaColor').onChange((color: number) => {
+            shape3d.setAreaColor(color);
+        });
 
-        if (!params.useSecondaryColor) secondaryColor.disable();
-        configFolder.add(params, 'useSecondaryColor').onChange((value: number) => {
-            value ? secondaryColor.enable() : secondaryColor.disable();
+        volumeFolder.addColor(params, 'volumeColor').onChange((color: number) => {
+            shape3d.setVolumeColor(color);
         });
 
         lineFolder.add(params, 'closeLine').onChange((value: boolean) => {

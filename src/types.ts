@@ -13,8 +13,9 @@ export type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_S
 export type Shape3DParams = {
     vertices: Vertex[];
     shape: SupportedShapes;
-    primaryColor: ColorRepresentation;
-    secondaryColor: ColorRepresentation;
+    lineColor: ColorRepresentation;
+    areaColor: ColorRepresentation;
+    volumeColor: ColorRepresentation;
     closeLine: boolean;
     volumeHeight: number;
 };
