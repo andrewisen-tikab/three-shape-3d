@@ -40,6 +40,8 @@ const example = (): void => {
         lineColor: 0xffffff,
         areaColor: 0xffffff,
         volumeColor: 0xffffff,
+        alwaysShowLine: true,
+        alwaysShowArea: true,
         closeLine: false,
         volumeHeight: 5,
         centerGizmo: true,
@@ -150,6 +152,10 @@ const example = (): void => {
             lineColor: params.lineColor,
             areaColor: params.areaColor,
             volumeColor: params.volumeColor,
+            appearance: {
+                alwaysShowLine: params.alwaysShowLine,
+                alwaysShowArea: params.alwaysShowArea,
+            },
         }).setFromPoints(points);
 
         group.add(shape3d);
@@ -205,15 +211,23 @@ const example = (): void => {
             });
 
         lineFolder.addColor(params, 'lineColor').onChange((color: number) => {
-            shape3d.setLineColor(color);
+            shape3d.setLineColor(color, true);
+        });
+
+        lineFolder.add(params, 'alwaysShowLine').onChange((value: boolean) => {
+            shape3d.setAppearance({ alwaysShowLine: value });
         });
 
         areaFolder.addColor(params, 'areaColor').onChange((color: number) => {
-            shape3d.setAreaColor(color);
+            shape3d.setAreaColor(color, true);
+        });
+
+        areaFolder.add(params, 'alwaysShowArea').onChange((value: boolean) => {
+            shape3d.setAppearance({ alwaysShowArea: value });
         });
 
         volumeFolder.addColor(params, 'volumeColor').onChange((color: number) => {
-            shape3d.setVolumeColor(color);
+            shape3d.setVolumeColor(color, true);
         });
 
         lineFolder.add(params, 'closeLine').onChange((value: boolean) => {
