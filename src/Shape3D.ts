@@ -11,8 +11,10 @@ const rotateShapeGeometry = (geometry: THREE.BufferGeometry): void => {
 };
 
 export default class Shape3D extends Shape3DCore {
-    private primaryColor: THREE.Color;
-    private secondaryColor: THREE.Color | null = null;
+    private lineColor: THREE.Color;
+    private areaColor: THREE.Color | null = null;
+    private volumeColor: THREE.Color | null = null;
+
     private closeLine: boolean;
 
     private lineGeometry: THREE.BufferGeometry<THREE.NormalBufferAttributes> | null = null;
@@ -32,13 +34,16 @@ export default class Shape3D extends Shape3DCore {
         super(params);
 
         const {
-            primaryColor = 0xffffff,
-            secondaryColor = 0xffffff,
+            lineColor = 0xffffff,
+            areaColor,
+            volumeColor,
             closeLine = false,
             volumeHeight = 5,
         } = params || {};
-        this.primaryColor = new THREE.Color(primaryColor);
-        if (secondaryColor !== null) this.secondaryColor = new THREE.Color(secondaryColor);
+        this.lineColor = new THREE.Color(lineColor);
+        if (areaColor) this.areaColor = new THREE.Color(areaColor);
+        if (volumeColor) this.volumeColor = new THREE.Color(volumeColor);
+
         this.closeLine = closeLine;
         this.volumeHeight = volumeHeight;
     }
@@ -103,16 +108,31 @@ export default class Shape3D extends Shape3DCore {
         return this;
     }
 
-    setPrimaryColor(color: ColorRepresentation) {
-        this.primaryColor = new THREE.Color(color);
+    setLineColor(color: ColorRepresentation) {
+        if (this.lineColor === null) {
+            this.lineColor = new THREE.Color(color);
+        } else {
+            this.lineColor.set(color);
+        }
+
         this.updateMaterial();
     }
 
-    setSecondaryColor(color: ColorRepresentation) {
-        if (this.secondaryColor === null) {
-            this.secondaryColor = new THREE.Color(color);
+    setAreaColor(color: ColorRepresentation) {
+        if (this.areaColor === null) {
+            this.areaColor = new THREE.Color(color);
         } else {
-            this.secondaryColor.set(color);
+            this.areaColor.set(color);
+        }
+
+        this.updateMaterial();
+    }
+
+    setVolumeColor(color: ColorRepresentation) {
+        if (this.volumeColor === null) {
+            this.volumeColor = new THREE.Color(color);
+        } else {
+            this.volumeColor.set(color);
         }
 
         this.updateMaterial();
@@ -253,7 +273,7 @@ export default class Shape3D extends Shape3DCore {
     private updateLineMaterial(): void {
         this.checkLine();
 
-        this.lineMaterial!.color.copy(this.primaryColor);
+        this.lineMaterial!.color.copy(this.lineColor);
     }
 
     private updateArea(): void {
@@ -309,7 +329,7 @@ export default class Shape3D extends Shape3DCore {
     private updateAreaMaterial(): void {
         this.checkArea();
 
-        this.areaMaterial!.color.copy(this.primaryColor);
+        this.areaMaterial!.color.copy(this.areaColor ?? this.lineColor);
     }
 
     private updateVolume(): void {
@@ -371,7 +391,7 @@ export default class Shape3D extends Shape3DCore {
     private updateVolumeMaterial(): void {
         this.checkVolume();
 
-        this.volumeMaterial!.color.copy(this.primaryColor);
+        this.volumeMaterial!.color.copy(this.volumeColor ?? this.areaColor ?? this.lineColor);
     }
 
     public setVolumeHeight(volumeHeight: number) {
