@@ -15,9 +15,20 @@ export default class Shape3DCore extends THREE.Object3D {
         this.setVertices(vertices);
         this.update();
     }
-
-    public setShape(shape: SupportedShapes): void {
+    /**
+     * Attempt to set the shape of the object
+     * @param shape
+     * @returns The shape that was set.
+     */
+    public setShape(shape: SupportedShapes): SupportedShapes {
+        if (shape === SUPPORTED_SHAPES.AREA || shape === SUPPORTED_SHAPES.VOLUME) {
+            if (this.vertices.length < 3) {
+                console.warn('Shape must have at least 3 vertices');
+                return this.shape;
+            }
+        }
         this.shape = shape;
+        return shape;
     }
 
     public getShape(): SupportedShapes {
@@ -56,10 +67,25 @@ export default class Shape3DCore extends THREE.Object3D {
 
     public removeVertex(index: number) {
         if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
-        if (this.vertices.length === 2) {
-            console.warn('Cannot remove vertex. Shape must have at least 2 vertices');
-            return;
+
+        switch (this.shape) {
+            case SUPPORTED_SHAPES.LINE:
+                if (this.vertices.length === 2) {
+                    console.warn('Cannot remove vertex. Shape must have at least 2 vertices');
+                    return;
+                }
+                break;
+            case SUPPORTED_SHAPES.AREA:
+            case SUPPORTED_SHAPES.VOLUME:
+                if (this.vertices.length === 3) {
+                    console.warn('Cannot remove vertex. Shape must have at least 3 vertices');
+                    return;
+                }
+                break;
+            default:
+                break;
         }
+
         this.vertices.splice(index, 1);
         this.updateGeometry();
     }

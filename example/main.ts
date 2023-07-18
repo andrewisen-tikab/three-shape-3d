@@ -180,11 +180,12 @@ const example = (): void => {
         configFolder
             .add(params, 'shape', Object.values(SUPPORTED_SHAPES))
             .onChange((shape: SupportedShapes) => {
-                shape3d.setShape(shape);
+                const currentShape = shape3d.setShape(shape);
+                params.shape = currentShape as any;
                 lineFolder.close();
                 areaFolder.close();
                 volumeFolder.close();
-                switch (shape) {
+                switch (currentShape) {
                     case SUPPORTED_SHAPES.LINE:
                         lineFolder.open();
                         break;
@@ -229,7 +230,7 @@ const example = (): void => {
         controlsFolder
             .add(params, 'gizmoMode', ['translate', 'rotate', 'scale'])
             .onChange((value: string) => {
-                transformControls.setMode(value);
+                transformControls.setMode(value as any);
             });
 
         controlsFolder.add(params, 'translationSnap', 0, 10).onChange((value: number) => {

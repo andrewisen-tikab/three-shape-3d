@@ -43,7 +43,7 @@ export default class Shape3D extends Shape3DCore {
         this.volumeHeight = volumeHeight;
     }
 
-    public setShape(shape: SupportedShapes): void {
+    public setShape(shape: SupportedShapes): SupportedShapes {
         super.setShape(shape);
 
         this.clear();
@@ -62,6 +62,7 @@ export default class Shape3D extends Shape3DCore {
         }
 
         this.update();
+        return this.shape;
     }
 
     public dispose(): void {
