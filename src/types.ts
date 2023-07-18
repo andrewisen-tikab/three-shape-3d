@@ -10,6 +10,11 @@ export type ColorRepresentation = HEX;
 export const SUPPORTED_SHAPES = { LINE: 'line', AREA: 'area', VOLUME: 'volume' } as const;
 export type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
 
+export type Appearance = {
+    alwaysShowLine: boolean;
+    alwaysShowArea: boolean;
+};
+
 export type Shape3DParams = {
     vertices: Vertex[];
     shape: SupportedShapes;
@@ -18,4 +23,5 @@ export type Shape3DParams = {
     volumeColor: ColorRepresentation;
     closeLine: boolean;
     volumeHeight: number;
+    appearance: Appearance;
 };
