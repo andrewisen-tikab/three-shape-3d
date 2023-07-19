@@ -145,7 +145,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         return label;
     }
 
-    onBlur(e: FocusEven, index: number) {
+    onBlur(e: FocusEvent, index: number) {
         // Get value of input
         const inputElement = e.target as HTMLInputElement;
         const value = inputElement.value;
