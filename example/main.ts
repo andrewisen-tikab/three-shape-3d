@@ -2,6 +2,7 @@ import './style.css';
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+import { CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js';
 
 import CameraControls from 'camera-controls';
 
@@ -23,6 +24,7 @@ const example = (): void => {
     let gridHelperSize: number;
 
     let renderer: THREE.WebGLRenderer;
+    let cssRenderer: CSS2DRenderer;
 
     // Setup the GUI
     const gui = new GUI();
@@ -71,6 +73,13 @@ const example = (): void => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        cssRenderer = new CSS2DRenderer();
+        cssRenderer.setSize(window.innerWidth, window.innerHeight);
+        cssRenderer.domElement.style.position = 'absolute';
+        cssRenderer.domElement.style.top = '0px';
+        cssRenderer.domElement.className = 'shape-3d-css-renderer';
+        document.body.appendChild(cssRenderer.domElement);
+
         // We'll use the `camera-controls` library to handle our camera.
         const clock = new THREE.Clock();
         const camera = new THREE.PerspectiveCamera(
@@ -109,6 +118,7 @@ const example = (): void => {
 
         const render = (): void => {
             renderer.render(scene, camera);
+            cssRenderer.render(scene, camera);
         };
 
         const animate = (_currentTime: number = 0): void => {
