@@ -62,7 +62,7 @@ export default class Shape3DCore extends THREE.Object3D {
         // Insert the midpoint at index and shift the rest of the vertices
         this.vertices.splice(index, 0, midpoint);
 
-        this.updateGeometry();
+        this.update();
     }
 
     public removeVertex(index: number) {

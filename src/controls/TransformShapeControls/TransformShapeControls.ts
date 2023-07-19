@@ -7,8 +7,10 @@ THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-import Shape3D from '../Shape3D';
-import { getMidpoint } from '../utils';
+import Shape3D from '../../Shape3D';
+import { getMidpoint } from '../../utils';
+import { generateLabel } from './labels';
+import { Vertex } from '../../types';
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
@@ -37,6 +39,7 @@ type TransformShapeControlsGizmoParams = {
     centerGizmo: boolean;
     dragVertices: boolean;
     allowCreatingNewVertices: boolean;
+    showLengthLabels: boolean;
 };
 
 type VertexMetadata = {
@@ -48,6 +51,8 @@ type Mode = 'translate' | 'rotate' | 'scale';
 
 class TransformShapeControls extends THREE.Object3D {
     private vertexGroup!: THREE.Group;
+
+    private labelsGroup!: THREE.Group;
 
     public object?: Shape3D;
 
@@ -165,6 +170,7 @@ class TransformShapeControls extends THREE.Object3D {
             centerGizmo: true,
             dragVertices: true,
             allowCreatingNewVertices: true,
+            showLengthLabels: true,
         };
 
         this.vertexCenter = new THREE.Vector3();
@@ -257,9 +263,14 @@ class TransformShapeControls extends THREE.Object3D {
         this.vertexHoverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         this.add(vertexGroup);
 
+        const labelsGroup = new THREE.Group();
+        this.add(labelsGroup);
+
         defineProperty('camera', camera);
         defineProperty('object', undefined);
         defineProperty('vertexGroup', vertexGroup);
+        defineProperty('labelsGroup', labelsGroup);
+
         defineProperty('enabled', true);
         defineProperty('axis', null);
         defineProperty('mode', 'translate');
@@ -387,10 +398,18 @@ class TransformShapeControls extends THREE.Object3D {
                 this._gizmo.position.set(0, 0, 0);
             }
 
+            // Update vertex group
             if (this.params.dragVertices) {
                 this.vertexGroup.position.copy(this.worldPosition);
                 this.vertexGroup.quaternion.copy(this.worldQuaternion);
                 this.vertexGroup.scale.copy(this._worldScale);
+            }
+
+            // Update vertex group
+            if (this.params.dragVertices) {
+                this.labelsGroup.position.copy(this.worldPosition);
+                this.labelsGroup.quaternion.copy(this.worldQuaternion);
+                this.labelsGroup.scale.copy(this._worldScale);
             }
 
             this._parentQuaternionInv.copy(this._parentQuaternion).invert();
@@ -827,7 +846,10 @@ class TransformShapeControls extends THREE.Object3D {
 
     private onVertexChanged() {
         this.updateHandles();
+
         this.updateOffset();
+
+        this.updateLabels();
     }
 
     private updateHandles() {
@@ -920,8 +942,38 @@ class TransformShapeControls extends THREE.Object3D {
         // this.position.copy(center);
     }
 
+    private updateLabels() {
+        if (this.params.showLengthLabels === false) return;
+        this.addLabels();
+    }
+
+    private addLabels() {
+        this.labelsGroup.clear();
+        const vertices = this.object!.getVertices();
+
+        // Get distance from camera to center of object
+        const offsetDistance = this.vertexCenter.distanceTo(this.camera.position) / 100 + 1.1;
+
+        const center: Vertex = [this.vertexCenter.x, this.vertexCenter.y, this.vertexCenter.z];
+        for (let index = 0; index < vertices.length; index++) {
+            const vertex = vertices[index];
+            if (index === 0) continue;
+            const previousVertex = vertices[index - 1];
+            generateLabel(this.labelsGroup, vertex, previousVertex, center, offsetDistance);
+        }
+
+        if (this.object!.getCloseLine()) {
+            const vertex = vertices[0];
+            const previousVertex = vertices[vertices.length - 1];
+
+            generateLabel(this.labelsGroup, vertex, previousVertex, center, offsetDistance);
+        }
+
+        this.labelsGroup.position.set(-this.position.x, -this.position.y, -this.position.z);
+    }
+
     private onCloseLineChanged = (_e: any) => {
-        this.updateHandles();
+        this.onVertexChanged();
     };
 
     // Detach from object

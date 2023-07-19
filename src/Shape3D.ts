@@ -192,6 +192,8 @@ export default class Shape3D extends Shape3DCore {
     setCloseLine(closeLine: boolean) {
         this.closeLine = closeLine;
         this.update();
+
+        this.dispatchEvent({ type: 'close-line-changed' });
     }
 
     getCloseLine(): boolean {
