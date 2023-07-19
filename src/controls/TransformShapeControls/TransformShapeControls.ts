@@ -8,9 +8,8 @@ THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 import Shape3D from '../../Shape3D';
-import { getMidpoint } from '../../utils';
-import { generateLabel } from './labels';
-import { Vertex } from '../../types';
+import { getMidpoint, setLineLength } from '../../utils';
+import LabelsManager from './LabelsManager';
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
@@ -50,9 +49,11 @@ type VertexMetadata = {
 type Mode = 'translate' | 'rotate' | 'scale';
 
 class TransformShapeControls extends THREE.Object3D {
-    private vertexGroup!: THREE.Group;
+    public vertexGroup!: THREE.Group;
 
-    private labelsGroup!: THREE.Group;
+    public labelsGroup!: THREE.Group;
+
+    private labelsManager: LabelsManager;
 
     public object?: Shape3D;
 
@@ -149,7 +150,7 @@ class TransformShapeControls extends THREE.Object3D {
     private _onPointerUp!: (event: any) => void;
     params: Partial<TransformShapeControlsGizmoParams>;
 
-    private vertexCenter: THREE.Vector3;
+    public vertexCenter: THREE.Vector3;
 
     private lastSelectedVertex: THREE.Mesh | null = null;
     private lastSelectedVertexQuaternion: THREE.Quaternion;
@@ -263,6 +264,7 @@ class TransformShapeControls extends THREE.Object3D {
         this.vertexHoverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         this.add(vertexGroup);
 
+        this.labelsManager = new LabelsManager(this);
         const labelsGroup = new THREE.Group();
         this.add(labelsGroup);
 
@@ -428,6 +430,8 @@ class TransformShapeControls extends THREE.Object3D {
         } else {
             this.eye.copy(this.cameraPosition).sub(this.worldPosition).normalize();
         }
+
+        this.labelsManager.update();
 
         // @ts-ignore
         super.updateMatrixWorld(this);
@@ -949,26 +953,7 @@ class TransformShapeControls extends THREE.Object3D {
 
     private addLabels() {
         this.labelsGroup.clear();
-        const vertices = this.object!.getVertices();
-
-        // Get distance from camera to center of object
-        const offsetDistance = this.vertexCenter.distanceTo(this.camera.position) / 100 + 1.1;
-
-        const center: Vertex = [this.vertexCenter.x, this.vertexCenter.y, this.vertexCenter.z];
-        for (let index = 0; index < vertices.length; index++) {
-            const vertex = vertices[index];
-            if (index === 0) continue;
-            const previousVertex = vertices[index - 1];
-            generateLabel(this.labelsGroup, vertex, previousVertex, center, offsetDistance);
-        }
-
-        if (this.object!.getCloseLine()) {
-            const vertex = vertices[0];
-            const previousVertex = vertices[vertices.length - 1];
-
-            generateLabel(this.labelsGroup, vertex, previousVertex, center, offsetDistance);
-        }
-
+        this.labelsManager.addLabels();
         this.labelsGroup.position.set(-this.position.x, -this.position.y, -this.position.z);
     }
 
@@ -1039,6 +1024,26 @@ class TransformShapeControls extends THREE.Object3D {
 
     setSpace(space: string) {
         this.space = space;
+    }
+
+    setLineLength(index: number, lineLength: number) {
+        if (this.object == null) {
+            console.warn('No object attached');
+            return;
+        }
+        if (index < 0 || index > this.object!.getVertices().length) {
+            console.warn('Invalid index');
+            return;
+        }
+        if (lineLength < 0) {
+            console.warn('Invalid line length');
+            return;
+        }
+        const adjustedIndex = index === this.object!.getVertices().length ? 0 : index;
+        const vertices = this.object!.getVertices();
+        const newVertex = setLineLength(index, lineLength, vertices);
+        this.object.updateVertex(adjustedIndex, newVertex);
+        this.onVertexChanged();
     }
 }
 

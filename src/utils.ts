@@ -76,3 +76,17 @@ export const getLength2D = (firstVertex: Vertex, secondVertex: Vertex): number =
             Math.pow(firstVertex[2] - secondVertex[2], 2),
     );
 };
+
+export const setLineLength = (index: number, lineLength: number, vertices: Vertex[]): Vertex => {
+    const closedLine = vertices.length === index;
+
+    const firstVertex = closedLine ? vertices[vertices.length - 1] : vertices[index - 1];
+    const secondVertex = closedLine ? vertices[0] : vertices[index];
+
+    _firstVertex.fromArray(firstVertex);
+    _secondVertex.fromArray(secondVertex);
+
+    _line.subVectors(_secondVertex, _firstVertex).normalize();
+    _firstVertex.add(_line.multiplyScalar(lineLength));
+    return _firstVertex.toArray();
+};

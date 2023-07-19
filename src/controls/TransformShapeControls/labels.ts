@@ -2,10 +2,18 @@ import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { Vertex } from '../../types';
 import { getLength2D, getMidpointOffsetFromLine } from '../../utils';
 
-function addPrefix(this: HTMLInputElement, _ev: Event) {
+export function addPrefix(this: HTMLInputElement, _ev: Event) {
     this.setAttribute('size', `${this.value!.length}`);
 }
 
+/**
+ * @deprecated Use {@link LabelsManager} instead.
+ * @param parent
+ * @param firstVertex
+ * @param secondVertex
+ * @param center
+ * @param offsetDistance
+ */
 export const generateLabel = (
     parent: THREE.Object3D,
     firstVertex: Vertex,
