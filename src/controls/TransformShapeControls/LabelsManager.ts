@@ -31,6 +31,12 @@ export default class LabelsManager extends THREE.EventDispatcher {
      */
     public addLabels() {
         if (!this.transformShapeControls.object) return;
+
+        for (let i = 0; i < this.labels.length; i++) {
+            const label = this.labels[i];
+            label?.parent?.remove(label);
+        }
+
         this.labels = [];
         const vertices = this.transformShapeControls.object.getVertices();
 
