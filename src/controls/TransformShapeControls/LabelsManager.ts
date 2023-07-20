@@ -151,8 +151,18 @@ export default class LabelsManager extends THREE.EventDispatcher {
         const value = inputElement.value;
 
         const number = parseFloat(value);
-        if (isNaN(number)) return;
-        if (number <= 0) return;
+
+        if (isNaN(number)) {
+            // @ts-ignore
+            inputElement.value = null;
+            return;
+        }
+        if (number <= 0) {
+            // @ts-ignore
+            inputElement.value = null;
+            return;
+        }
+
         this.transformShapeControls.setLineLength(index, number);
     }
 }
