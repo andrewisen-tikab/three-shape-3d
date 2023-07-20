@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import type { TransformShapeControls } from './TransformShapeControls';
 import { Vertex } from '../../types';
-import { getLength2D, getMidpointOffsetFromLine } from '../../utils';
+import { getLength2D, getLineRotationAsDeg, getMidpointOffsetFromLine } from '../../utils';
 import { addPrefix } from './labels';
-import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 
 /**
  * Manages the labels for the {@link TransformShapeControls}.
@@ -11,7 +11,7 @@ import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 export default class LabelsManager extends THREE.EventDispatcher {
     private transformShapeControls: TransformShapeControls;
 
-    private labels: CSS2DObject[] = [];
+    private labels: CSS3DObject[] = [];
 
     constructor(transformShapeControls: TransformShapeControls) {
         super();
@@ -31,6 +31,12 @@ export default class LabelsManager extends THREE.EventDispatcher {
      */
     public addLabels() {
         if (!this.transformShapeControls.object) return;
+
+        for (let i = 0; i < this.labels.length; i++) {
+            const label = this.labels[i];
+            label?.parent?.remove(label);
+        }
+
         this.labels = [];
         const vertices = this.transformShapeControls.object.getVertices();
 
@@ -92,16 +98,18 @@ export default class LabelsManager extends THREE.EventDispatcher {
             this.transformShapeControls.vertexCenter.y,
             this.transformShapeControls.vertexCenter.z,
         ];
+
         for (let i = 0; i < this.labels.length; i++) {
             const label = this.labels[i];
             const firstVertex = vertices[i];
             const secondVertex = i === vertices.length - 1 ? vertices[0] : vertices[i + 1];
             this.updatePosition(label, firstVertex, secondVertex, center, offsetDistance);
+            this.updateRotation(label, firstVertex, secondVertex);
         }
     }
 
     private updatePosition(
-        label: CSS2DObject,
+        label: CSS3DObject,
         firstVertex: Vertex,
         secondVertex: Vertex,
         center: Vertex,
@@ -111,6 +119,11 @@ export default class LabelsManager extends THREE.EventDispatcher {
         label.position.set(offset[0], offset[1], offset[2]);
     }
 
+    private updateRotation(label: CSS3DObject, firstVertex: Vertex, secondVertex: Vertex) {
+        const rotation = getLineRotationAsDeg(firstVertex, secondVertex);
+        label.rotation.set(-Math.PI / 2, 0, -THREE.MathUtils.degToRad(rotation));
+    }
+
     private generateLabel(
         parent: THREE.Object3D,
         index: number,
@@ -118,7 +131,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         secondVertex: Vertex,
         center: Vertex,
         offsetDistance: number,
-    ): CSS2DObject {
+    ): CSS3DObject {
         const length = getLength2D(firstVertex, secondVertex);
 
         const divElement = document.createElement('div');
@@ -126,6 +139,11 @@ export default class LabelsManager extends THREE.EventDispatcher {
 
         const inputElement = document.createElement('input');
         inputElement.type = 'text';
+        inputElement.inputMode = 'numeric';
+        inputElement.readOnly = true;
+        inputElement.ondblclick = function (this: HTMLInputElement, _ev: MouseEvent) {
+            this.readOnly = '' as unknown as boolean;
+        } as any;
 
         inputElement.id = 'myInput';
         inputElement.className = 'shape-3d-label';
@@ -138,7 +156,9 @@ export default class LabelsManager extends THREE.EventDispatcher {
         });
 
         divElement.appendChild(inputElement);
-        const label = new CSS2DObject(divElement);
+        const label = new CSS3DObject(divElement);
+        label.rotateX(-Math.PI / 2);
+        label.scale.setScalar(1 / 10);
         this.updatePosition(label, firstVertex, secondVertex, center, offsetDistance);
         parent.add(label);
 
@@ -151,8 +171,18 @@ export default class LabelsManager extends THREE.EventDispatcher {
         const value = inputElement.value;
 
         const number = parseFloat(value);
-        if (isNaN(number)) return;
-        if (number <= 0) return;
+
+        if (isNaN(number)) {
+            // @ts-ignore
+            inputElement.value = null;
+            return;
+        }
+        if (number <= 0) {
+            // @ts-ignore
+            inputElement.value = null;
+            return;
+        }
+
         this.transformShapeControls.setLineLength(index, number);
     }
 }

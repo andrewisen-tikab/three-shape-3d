@@ -90,3 +90,19 @@ export const setLineLength = (index: number, lineLength: number, vertices: Verte
     _firstVertex.add(_line.multiplyScalar(lineLength));
     return _firstVertex.toArray();
 };
+
+export const getLineRotationAsDeg = (firstVertex: Vertex, secondVertex: Vertex) => {
+    _firstVertex.fromArray(firstVertex);
+    _secondVertex.fromArray(secondVertex);
+
+    _line.subVectors(_secondVertex, _firstVertex).normalize();
+
+    // Get the line's rotation.
+    // const angleToXAxis = Math.atan2(_line.y, _line.x);
+    const angleToXAxis = Math.atan2(_line.z, _line.x);
+
+    // Convert the angle from radians to degrees
+    const angleDegrees = THREE.MathUtils.radToDeg(angleToXAxis);
+
+    return angleDegrees;
+};

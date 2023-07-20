@@ -18,4 +18,18 @@ body {
     transform: translate(-50%, -50%);
     pointer-events: auto !important;
     z-index: 2;
+    color: white;
+    background: none;
+    border: none;
+    transform-style: preserve-3d;
+}
+
+.shape-3d-label::placeholder {
+    color: white;
+    opacity: 1;
+}
+
+.shape-3d-label:focus,
+input:focus {
+    outline: none;
 }
