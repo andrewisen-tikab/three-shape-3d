@@ -49,6 +49,7 @@ const example = (): void => {
         centerGizmo: true,
         gizmoMode: 'translate',
         translationSnap: 0,
+        showLengthLabels: true,
     };
 
     // Setup Stats.js
@@ -91,7 +92,9 @@ const example = (): void => {
 
         cameraControls = new CameraControls(camera, renderer.domElement);
         // Add custom transform shape controls
-        transformControls = new TransformShapeControls(camera, renderer.domElement);
+        transformControls = new TransformShapeControls(camera, renderer.domElement, {
+            showLengthLabels: params.showLengthLabels,
+        });
         transformControls.addEventListener('dragging-changed', (event) => {
             cameraControls.enabled = !event.value;
         });
@@ -260,6 +263,10 @@ const example = (): void => {
 
         controlsFolder.add(params, 'translationSnap', 0, 10).onChange((value: number) => {
             transformControls.setTranslationSnap(value === 0 ? null : value);
+        });
+
+        controlsFolder.add(params, 'showLengthLabels').onChange((value: boolean) => {
+            transformControls.setShowLengthLabels(value);
         });
     };
 

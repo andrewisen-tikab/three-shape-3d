@@ -947,12 +947,14 @@ class TransformShapeControls extends THREE.Object3D {
     }
 
     private updateLabels() {
-        if (this.params.showLengthLabels === false) return;
+        if (this.params.showLengthLabels === false) {
+            this.labelsManager.dispose();
+            return;
+        }
         this.addLabels();
     }
 
     private addLabels() {
-        this.labelsGroup.clear();
         this.labelsManager.addLabels();
         this.labelsGroup.position.set(-this.position.x, -this.position.y, -this.position.z);
     }
@@ -1044,6 +1046,11 @@ class TransformShapeControls extends THREE.Object3D {
         const newVertex = setLineLength(index, lineLength, vertices);
         this.object.updateVertex(adjustedIndex, newVertex);
         this.onVertexChanged();
+    }
+
+    setShowLengthLabels(showLengthLabels: boolean) {
+        this.params.showLengthLabels = showLengthLabels;
+        this.updateLabels();
     }
 }
 

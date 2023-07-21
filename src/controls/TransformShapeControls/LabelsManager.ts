@@ -32,10 +32,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
     public addLabels() {
         if (!this.transformShapeControls.object) return;
 
-        for (let i = 0; i < this.labels.length; i++) {
-            const label = this.labels[i];
-            label?.parent?.remove(label);
-        }
+        this.dispose();
 
         this.labels = [];
         const vertices = this.transformShapeControls.object.getVertices();
@@ -184,5 +181,16 @@ export default class LabelsManager extends THREE.EventDispatcher {
         }
 
         this.transformShapeControls.setLineLength(index, number);
+    }
+
+    public dispose() {
+        if (this.transformShapeControls.labelsGroup) {
+            this.transformShapeControls.labelsGroup.clear();
+        }
+
+        for (let i = 0; i < this.labels.length; i++) {
+            const label = this.labels[i];
+            label?.parent?.remove(label);
+        }
     }
 }
