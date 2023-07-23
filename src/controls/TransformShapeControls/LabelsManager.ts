@@ -1,7 +1,12 @@
 import * as THREE from 'three';
 import type { TransformShapeControls } from './TransformShapeControls';
 import { Vertex } from '../../types';
-import { getLength2D, getLineRotationAsDeg, getMidpointOffsetFromLine } from '../../utils';
+import {
+    getCurvePositions,
+    getLength2D,
+    getLineRotationAsDeg,
+    getMidpointOffsetFromLine,
+} from '../../utils';
 import { addPrefix } from './labels';
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 
@@ -12,11 +17,13 @@ export default class LabelsManager extends THREE.EventDispatcher {
     private transformShapeControls: TransformShapeControls;
 
     private labels: CSS3DObject[] = [];
+    private angles: THREE.Mesh[] = [];
 
     constructor(transformShapeControls: TransformShapeControls) {
         super();
         this.transformShapeControls = transformShapeControls;
         this.labels = [];
+        this.angles = [];
     }
 
     /**
@@ -35,6 +42,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         this.dispose();
 
         this.labels = [];
+        this.angles = [];
         const vertices = this.transformShapeControls.object.getVertices();
 
         // Get distance from camera to center of object
@@ -58,6 +66,18 @@ export default class LabelsManager extends THREE.EventDispatcher {
                 offsetDistance,
             );
             this.labels.push(label);
+
+            if (index !== vertices.length - 1) {
+                const nextVertex = vertices[index + 1];
+                const angle = this.generateAngle(
+                    this.transformShapeControls.labelsGroup,
+                    index,
+                    nextVertex,
+                    vertex,
+                    previousVertex,
+                );
+                this.angles.push(angle);
+            }
         }
 
         if (this.transformShapeControls.object!.getCloseLine()) {
@@ -100,12 +120,12 @@ export default class LabelsManager extends THREE.EventDispatcher {
             const label = this.labels[i];
             const firstVertex = vertices[i];
             const secondVertex = i === vertices.length - 1 ? vertices[0] : vertices[i + 1];
-            this.updatePosition(label, firstVertex, secondVertex, center, offsetDistance);
+            this.updateLabelPosition(label, firstVertex, secondVertex, center, offsetDistance);
             this.updateRotation(label, firstVertex, secondVertex);
         }
     }
 
-    private updatePosition(
+    private updateLabelPosition(
         label: CSS3DObject,
         firstVertex: Vertex,
         secondVertex: Vertex,
@@ -156,10 +176,22 @@ export default class LabelsManager extends THREE.EventDispatcher {
         const label = new CSS3DObject(divElement);
         label.rotateX(-Math.PI / 2);
         label.scale.setScalar(1 / 10);
-        this.updatePosition(label, firstVertex, secondVertex, center, offsetDistance);
+        this.updateLabelPosition(label, firstVertex, secondVertex, center, offsetDistance);
         parent.add(label);
 
         return label;
+    }
+
+    private generateAngle(
+        parent: THREE.Object3D,
+        _index: number,
+        nextVertex: Vertex,
+        currentVertex: Vertex,
+        previousVertex: Vertex,
+    ) {
+        const arch = getCurvePositions(parent, nextVertex, currentVertex, previousVertex);
+
+        return arch;
     }
 
     onBlur(e: FocusEvent, index: number) {
@@ -191,6 +223,10 @@ export default class LabelsManager extends THREE.EventDispatcher {
         for (let i = 0; i < this.labels.length; i++) {
             const label = this.labels[i];
             label?.parent?.remove(label);
+        }
+        for (let i = 0; i < this.angles.length; i++) {
+            const angle = this.labels[i];
+            angle?.parent?.remove(angle);
         }
     }
 }

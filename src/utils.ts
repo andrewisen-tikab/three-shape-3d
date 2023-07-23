@@ -1,5 +1,11 @@
 import * as THREE from 'three';
 import type { Vertex } from './types';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+
+const lineMaterial = new LineMaterial({ color: 0xff0000, linewidth: 4 });
+lineMaterial.resolution.set(window.innerWidth, window.innerHeight);
 
 export const getMidpoint = (firstVertex: Vertex, secondVertex: Vertex): Vertex => [
     (firstVertex[0] + secondVertex[0]) / 2,
@@ -7,7 +13,10 @@ export const getMidpoint = (firstVertex: Vertex, secondVertex: Vertex): Vertex =
     (firstVertex[2] + secondVertex[2]) / 2,
 ];
 
-const _midpoint = new THREE.Vector3();
+const _midpoint3A = new THREE.Vector3();
+
+const _midpoint3B = new THREE.Vector3();
+
 const _center = new THREE.Vector3();
 
 /**
@@ -22,17 +31,28 @@ export const getMidpointOffsetFromCenter = (
     center: Vertex,
     offsetDistance = 1,
 ): Vertex => {
-    _midpoint.fromArray(midpoint);
+    _midpoint3A.fromArray(midpoint);
     _center.fromArray(center);
-    const displacement = _midpoint.clone().sub(_center).normalize().multiplyScalar(offsetDistance);
-    return _midpoint.clone().add(displacement).toArray();
+    const displacement = _midpoint3A
+        .clone()
+        .sub(_center)
+        .normalize()
+        .multiplyScalar(offsetDistance);
+    return _midpoint3A.clone().add(displacement).toArray();
 };
 
 const _firstVertex = new THREE.Vector3();
 const _secondVertex = new THREE.Vector3();
-const _line = new THREE.Vector3();
+const _line3A = new THREE.Vector3();
+const _line3B = new THREE.Vector3();
+const _line2A = new THREE.Vector2();
+const _line2B = new THREE.Vector2();
+
 const _perpendicular = new THREE.Vector3();
 const _up = new THREE.Vector3(0, 1, 0);
+// @ts-ignore
+const _x3 = new THREE.Vector3(1, 0, 0);
+const _x2 = new THREE.Vector2(1, 0);
 
 export const getMidpointOffsetFromLine = (
     firstVertex: Vertex,
@@ -44,24 +64,24 @@ export const getMidpointOffsetFromLine = (
     _secondVertex.fromArray(secondVertex);
     _center.fromArray(center);
 
-    _line.subVectors(_secondVertex, _firstVertex);
-    _midpoint.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
+    _line3A.subVectors(_secondVertex, _firstVertex);
+    _midpoint3A.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
 
-    _perpendicular.crossVectors(_up, _line).normalize();
+    _perpendicular.crossVectors(_up, _line3A).normalize();
 
     const distance1 = _center.distanceTo(
-        _midpoint.clone().add(_perpendicular.multiplyScalar(offsetDistance)),
+        _midpoint3A.clone().add(_perpendicular.multiplyScalar(offsetDistance)),
     );
 
     const distance2 = _center.distanceTo(
-        _midpoint.clone().add(_perpendicular.multiplyScalar(-offsetDistance)),
+        _midpoint3A.clone().add(_perpendicular.multiplyScalar(-offsetDistance)),
     );
 
-    _midpoint.add(
+    _midpoint3A.add(
         _perpendicular.multiplyScalar(distance1 > distance2 ? -offsetDistance : offsetDistance),
     );
 
-    return _midpoint.toArray();
+    return _midpoint3A.toArray();
 };
 
 /**
@@ -86,8 +106,8 @@ export const setLineLength = (index: number, lineLength: number, vertices: Verte
     _firstVertex.fromArray(firstVertex);
     _secondVertex.fromArray(secondVertex);
 
-    _line.subVectors(_secondVertex, _firstVertex).normalize();
-    _firstVertex.add(_line.multiplyScalar(lineLength));
+    _line3A.subVectors(_secondVertex, _firstVertex).normalize();
+    _firstVertex.add(_line3A.multiplyScalar(lineLength));
     return _firstVertex.toArray();
 };
 
@@ -95,14 +115,141 @@ export const getLineRotationAsDeg = (firstVertex: Vertex, secondVertex: Vertex) 
     _firstVertex.fromArray(firstVertex);
     _secondVertex.fromArray(secondVertex);
 
-    _line.subVectors(_secondVertex, _firstVertex).normalize();
+    _line3A.subVectors(_secondVertex, _firstVertex).normalize();
 
     // Get the line's rotation.
     // const angleToXAxis = Math.atan2(_line.y, _line.x);
-    const angleToXAxis = Math.atan2(_line.z, _line.x);
+    const angleToXAxis = Math.atan2(_line3A.z, _line3A.x);
 
     // Convert the angle from radians to degrees
     const angleDegrees = THREE.MathUtils.radToDeg(angleToXAxis);
 
     return angleDegrees;
+};
+
+/**
+ * Get a curve representing the angle between two lines.
+ * @param nextVertex
+ * @param currentVertex
+ * @param previousVertex
+ * @returns
+ */
+export const getCurvePositions = (
+    parent: THREE.Object3D,
+    nextVertex: Vertex,
+    currentVertex: Vertex,
+    previousVertex: Vertex,
+) => {
+    // Setup the lines as a 2D vectors
+    _line2A
+        .set(currentVertex[0] - previousVertex[0], currentVertex[2] - previousVertex[2])
+        .normalize();
+    _line2B.set(nextVertex[0] - currentVertex[0], nextVertex[2] - currentVertex[2]).normalize();
+
+    // Calculate angles relative to the x axis
+    // const angleA = _line2A.angleTo(_x2);
+    const angleB = _line2B.angleTo(_x2);
+
+    // Calculate the angle between the two lines
+    const angle = Math.PI - _line2A.angleTo(_line2B);
+
+    // Determine if the angle is acute or obtuse.
+    // If obtuse, then we should flip all the calculations.
+    const shouldFlip = shouldFlipAngle(nextVertex, currentVertex, previousVertex);
+
+    // The internal rotation of the `EllipseCurve`.
+    const archRotation = shouldFlip ? Math.PI : angleB;
+    // The external rotation of the arch.
+    const ellipseCurveRotation = shouldFlip ? Math.PI + angleB : 0;
+
+    // The angle of the `EllipseCurve`.
+    const end = shouldFlip ? -angle : angle;
+
+    // With that, we can create the `EllipseCurve`.
+    const curve = new THREE.EllipseCurve(
+        0,
+        0, // centerX, centerY
+        0.5,
+        0.5, // xRadius, yRadius
+        0,
+        end, // startAngle, endAngle
+        shouldFlip, // clockwise
+        ellipseCurveRotation,
+    );
+
+    // And finally, convert to a set of 3D vertices.
+    const positions: number[] = [];
+    const points = curve.getPoints(50);
+    for (let index = 0; index < points.length; index += 2) {
+        const point = points[index];
+        // LineGeometry doesn't seem to  like a 2D array of points.
+        positions.push(point.x, point.y, 0);
+    }
+
+    const lineGeometry = new LineGeometry().setPositions(positions);
+
+    const arch = new Line2(lineGeometry, lineMaterial);
+    arch.computeLineDistances();
+
+    // Rotate the arch so it faces +Y
+    arch.rotation.x = Math.PI / 2;
+    // Dunno??
+    arch.rotation.z = archRotation;
+
+    arch.position.set(currentVertex[0], currentVertex[1], currentVertex[2]);
+
+    parent.add(arch);
+
+    return arch;
+};
+
+/**
+ * Determine if the angle between two lines is obtuse or acute.
+ * If obtuse, then we should flip all the calculations.
+ * @param nextVertex
+ * @param currentVertex
+ * @param previousVertex
+ * @returns True if the angle is obtuse, false if acute.
+ */
+export const shouldFlipAngle = (
+    nextVertex: Vertex,
+    currentVertex: Vertex,
+    previousVertex: Vertex,
+) => {
+    _firstVertex.fromArray(previousVertex);
+    _secondVertex.fromArray(currentVertex);
+
+    _line3A.subVectors(_secondVertex, _firstVertex);
+    _midpoint3A.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
+
+    _line2A.set(_line3A.x, _line3A.z);
+    _line3A.multiplyScalar(0.5);
+
+    _firstVertex.fromArray(currentVertex);
+    _secondVertex.fromArray(nextVertex);
+
+    _line3B.subVectors(_secondVertex, _firstVertex).multiplyScalar(0.5);
+    _midpoint3B.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
+
+    // Get the center point of _midpoint3A and _midpoint3B
+    const center3 = _midpoint3A.add(_midpoint3B).multiplyScalar(0.5);
+
+    // const center3 = _line3A.add(_line3B).multiplyScalar(0.5);
+    // const center2 = new THREE.Vector2(center3.x, center3.z);
+
+    _firstVertex.fromArray(previousVertex);
+
+    _line2B.set(center3.x - _firstVertex.x, center3.z - _firstVertex.z);
+
+    const crossProduct = _line2A.cross(_line2B);
+
+    // if (crossProduct > 0) {
+    //     console.log('The point P is on the right side of the line.');
+    // } else if (crossProduct < 0) {
+    //     console.log('The point P is on the left side of the line.');
+    // } else {
+    //     console.log('The point P is on the line.');
+    // }
+
+    return crossProduct < 0;
 };
