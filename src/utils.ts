@@ -3,7 +3,7 @@ import type { Vertex } from './types';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
-import { addPrefix, generateLabel } from './controls/TransformShapeControls/labels';
+import { addPrefix } from './controls/TransformShapeControls/labels';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 const lineMaterial = new LineMaterial({ color: 0xff0000, linewidth: 4 });
