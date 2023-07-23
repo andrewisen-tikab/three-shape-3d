@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { TransformShapeControls } from './TransformShapeControls';
 import { Vertex } from '../../types';
 import {
-    getCurvePositions,
+    generateAngle,
     getLength2D,
     getLineRotationAsDeg,
     getMidpointOffsetFromLine,
@@ -189,7 +189,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         currentVertex: Vertex,
         previousVertex: Vertex,
     ) {
-        const arch = getCurvePositions(parent, nextVertex, currentVertex, previousVertex);
+        const arch = generateAngle(parent, nextVertex, currentVertex, previousVertex);
 
         return arch;
     }
