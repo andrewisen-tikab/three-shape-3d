@@ -151,7 +151,7 @@ export const generateAngle = (
     _line2B.set(nextVertex[0] - currentVertex[0], nextVertex[2] - currentVertex[2]).normalize();
 
     // Calculate angles relative to the x axis
-    const angleA = _line2A.angleTo(_x2);
+    // const angleA = _line2A.angleTo(_x2);
     const angleB = _line2B.angleTo(_x2);
 
     // Calculate the angle between the two lines
@@ -218,7 +218,6 @@ export const generateAngle = (
 
     const angleLabelPosition = getAngleLabelPosition(nextVertex, currentVertex, previousVertex);
 
-    const delta = shouldFlip ? 1 : -1;
     label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
 
     label.rotateX(-Math.PI / 2);
@@ -237,6 +236,7 @@ export const generateAngle = (
  * @param currentVertex
  * @param previousVertex
  * @returns True if the angle is obtuse, false if acute.
+ * @deprecated Not working atm.
  */
 export const shouldFlipAngle = (
     nextVertex: Vertex,
