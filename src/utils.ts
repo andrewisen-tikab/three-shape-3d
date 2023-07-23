@@ -3,6 +3,8 @@ import type { Vertex } from './types';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { addPrefix, generateLabel } from './controls/TransformShapeControls/labels';
+import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 
 const lineMaterial = new LineMaterial({ color: 0xff0000, linewidth: 4 });
 lineMaterial.resolution.set(window.innerWidth, window.innerHeight);
@@ -18,6 +20,8 @@ const _midpoint3A = new THREE.Vector3();
 const _midpoint3B = new THREE.Vector3();
 
 const _center = new THREE.Vector3();
+
+const _direction3 = new THREE.Vector3();
 
 /**
  * Offset a midpoint from a center.
@@ -134,7 +138,7 @@ export const getLineRotationAsDeg = (firstVertex: Vertex, secondVertex: Vertex) 
  * @param previousVertex
  * @returns
  */
-export const getCurvePositions = (
+export const generateAngle = (
     parent: THREE.Object3D,
     nextVertex: Vertex,
     currentVertex: Vertex,
@@ -147,7 +151,7 @@ export const getCurvePositions = (
     _line2B.set(nextVertex[0] - currentVertex[0], nextVertex[2] - currentVertex[2]).normalize();
 
     // Calculate angles relative to the x axis
-    // const angleA = _line2A.angleTo(_x2);
+    const angleA = _line2A.angleTo(_x2);
     const angleB = _line2B.angleTo(_x2);
 
     // Calculate the angle between the two lines
@@ -198,7 +202,30 @@ export const getCurvePositions = (
 
     arch.position.set(currentVertex[0], currentVertex[1], currentVertex[2]);
 
+    const divElement = document.createElement('div');
+    divElement.className = 'shape-3d-label-container';
+
+    const inputElement = document.createElement('input');
+    inputElement.type = 'text';
+
+    inputElement.className = 'shape-3d-label';
+    inputElement.placeholder = `${THREE.MathUtils.radToDeg(Math.abs(angle)).toFixed(2)}`;
+    inputElement.setAttribute('size', `${inputElement.getAttribute('placeholder')!.length}`);
+    inputElement.oninput = addPrefix.bind(inputElement);
+
+    divElement.appendChild(inputElement);
+    const label = new CSS3DObject(divElement);
+
+    const angleLabelPosition = getAngleLabelPosition(nextVertex, currentVertex, previousVertex);
+
+    const delta = shouldFlip ? 1 : -1;
+    label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
+
+    label.rotateX(-Math.PI / 2);
+    label.scale.setScalar(1 / 50);
+
     parent.add(arch);
+    parent.add(label);
 
     return arch;
 };
@@ -252,4 +279,30 @@ export const shouldFlipAngle = (
     // }
 
     return crossProduct < 0;
+};
+
+export const getAngleLabelPosition = (
+    nextVertex: Vertex,
+    currentVertex: Vertex,
+    previousVertex: Vertex,
+): Vertex => {
+    _firstVertex.fromArray(previousVertex);
+    _secondVertex.fromArray(currentVertex);
+
+    _midpoint3A.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
+
+    _firstVertex.fromArray(currentVertex);
+    _secondVertex.fromArray(nextVertex);
+
+    _midpoint3B.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
+
+    const center3 = _midpoint3A.add(_midpoint3B).multiplyScalar(0.5);
+
+    _firstVertex.fromArray(currentVertex);
+
+    _direction3.subVectors(center3, _firstVertex).normalize().multiplyScalar(1.5);
+
+    const position = _firstVertex.add(_direction3);
+
+    return position.toArray();
 };
