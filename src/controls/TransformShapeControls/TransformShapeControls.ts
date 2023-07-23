@@ -34,6 +34,8 @@ const handleGeometry = new THREE.BoxGeometry(1, 1, 1);
 handleGeometry.computeBoundsTree();
 const handleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
+const scale = 1 / 4;
+
 type TransformShapeControlsGizmoParams = {
     centerGizmo: boolean;
     dragVertices: boolean;
@@ -868,7 +870,7 @@ class TransformShapeControls extends THREE.Object3D {
         for (let index = 0; index < vertices.length; index++) {
             const vertex = vertices[index];
             const cube = new THREE.Mesh(handleGeometry, handleMaterial);
-
+            cube.scale.setScalar(scale);
             cube.position.set(vertex[0], vertex[1], vertex[2]);
             const metadata: VertexMetadata = {
                 type: 'vertex',
@@ -886,6 +888,7 @@ class TransformShapeControls extends THREE.Object3D {
                 handleGeometry,
                 new THREE.MeshBasicMaterial({ color: 0x0000ff }),
             );
+            midpoint.scale.setScalar(scale);
 
             midpoint.position.set(...getMidpoint(vertex, previousVertex));
 
