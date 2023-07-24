@@ -5,7 +5,7 @@ import {
     generateAngle,
     getLength2D,
     getLineRotationAsDeg,
-    getMidpointOffsetFromLine,
+    setOffsetPositionFromLine,
 } from '../../utils';
 import { addPrefix } from './labels';
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
