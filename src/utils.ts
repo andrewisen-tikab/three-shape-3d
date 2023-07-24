@@ -150,6 +150,10 @@ export const generateAngle = (
         .normalize();
     _line2B.set(nextVertex[0] - currentVertex[0], nextVertex[2] - currentVertex[2]).normalize();
 
+    // Determine if the line is "positive slope".
+    // If the slope is negative, then we need to flip the calculations.
+    const lineBHasPositiveSlope = nextVertex[2] - currentVertex[2] < 0;
+
     // Calculate angles relative to the x axis
     // const angleA = _line2A.angleTo(_x2);
     const angleB = _line2B.angleTo(_x2);
@@ -162,9 +166,18 @@ export const generateAngle = (
     const shouldFlip = shouldFlipAngle(nextVertex, currentVertex, previousVertex);
 
     // The internal rotation of the `EllipseCurve`.
-    const archRotation = shouldFlip ? Math.PI : angleB;
+    const archRotationA1 = lineBHasPositiveSlope ? Math.PI - angleB : -(Math.PI - angleB); // Should not flip.
+    const archRotationB1 = lineBHasPositiveSlope ? Math.PI : -Math.PI; // Should flip.
+
+    const archRotationA2 = Math.PI + archRotationA1; // Should not flip.
+    const archRotationB2 = archRotationB1; // Should flip.
+    const archRotation = shouldFlip ? archRotationB2 : archRotationA2; // Should flip.
+
     // The external rotation of the arch.
-    const ellipseCurveRotation = shouldFlip ? Math.PI + angleB : 0;
+    const ellipseCurveRotationA1 = 0; // Should not flip.
+    const ellipseCurveRotationB1 = lineBHasPositiveSlope ? -(Math.PI + angleB) : Math.PI + angleB; // Should flip.
+
+    const ellipseCurveRotation = shouldFlip ? ellipseCurveRotationB1 : ellipseCurveRotationA1;
 
     // The angle of the `EllipseCurve`.
     const end = shouldFlip ? -angle : angle;
@@ -199,7 +212,6 @@ export const generateAngle = (
     arch.rotation.x = Math.PI / 2;
     // Dunno??
     arch.rotation.z = archRotation;
-
     arch.position.set(currentVertex[0], currentVertex[1], currentVertex[2]);
 
     const divElement = document.createElement('div');
@@ -236,47 +248,42 @@ export const generateAngle = (
  * @param currentVertex
  * @param previousVertex
  * @returns True if the angle is obtuse, false if acute.
- * @deprecated Not working atm.
  */
 export const shouldFlipAngle = (
     nextVertex: Vertex,
     currentVertex: Vertex,
     previousVertex: Vertex,
 ) => {
+    // Set first line as Vector2 (we'll use this later).
     _firstVertex.fromArray(previousVertex);
     _secondVertex.fromArray(currentVertex);
-
     _line3A.subVectors(_secondVertex, _firstVertex);
+    _line2A.set(_line3A.x, _line3A.z);
+
+    // Set first line's midpoint
     _midpoint3A.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
 
-    _line2A.set(_line3A.x, _line3A.z);
-    _line3A.multiplyScalar(0.5);
-
+    // Set second line as Vector2.
     _firstVertex.fromArray(currentVertex);
     _secondVertex.fromArray(nextVertex);
 
-    _line3B.subVectors(_secondVertex, _firstVertex).multiplyScalar(0.5);
+    // Set first line's midpoint
     _midpoint3B.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
 
-    // Get the center point of _midpoint3A and _midpoint3B
+    // Get the center point, Point P, of _midpoint3A and _midpoint3B
     const center3 = _midpoint3A.add(_midpoint3B).multiplyScalar(0.5);
 
-    // const center3 = _line3A.add(_line3B).multiplyScalar(0.5);
-    // const center2 = new THREE.Vector2(center3.x, center3.z);
-
+    // Now, we create a line from the first vertex to the center point.
+    // Again, we define it as Vector 2
     _firstVertex.fromArray(previousVertex);
 
-    _line2B.set(center3.x - _firstVertex.x, center3.z - _firstVertex.z);
+    _line3B.subVectors(center3, _firstVertex);
+    _line2B.set(_line3B.x, _line3B.z);
 
+    // If the cross product is positive, point P is on the right side of the line.
+    // If the cross product is negative, point P is on the left side of the line.
+    // If the cross product is zero, point P is on the line.
     const crossProduct = _line2A.cross(_line2B);
-
-    // if (crossProduct > 0) {
-    //     console.log('The point P is on the right side of the line.');
-    // } else if (crossProduct < 0) {
-    //     console.log('The point P is on the left side of the line.');
-    // } else {
-    //     console.log('The point P is on the line.');
-    // }
 
     return crossProduct < 0;
 };
