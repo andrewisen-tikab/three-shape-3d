@@ -19,11 +19,17 @@ export default class LabelsManager extends THREE.EventDispatcher {
     private labels: CSS3DObject[] = [];
     private angles: THREE.Mesh[] = [];
 
+    public showLengthLabels: boolean;
+
+    public showAngleLabels: boolean;
+
     constructor(transformShapeControls: TransformShapeControls) {
         super();
         this.transformShapeControls = transformShapeControls;
         this.labels = [];
         this.angles = [];
+        this.showAngleLabels = true;
+        this.showLengthLabels = true;
     }
 
     /**
@@ -53,46 +59,53 @@ export default class LabelsManager extends THREE.EventDispatcher {
             this.transformShapeControls.vertexCenter.y,
             this.transformShapeControls.vertexCenter.z,
         ];
+
         for (let index = 0; index < vertices.length; index++) {
             const vertex = vertices[index];
             if (index === 0) continue;
             const previousVertex = vertices[index - 1];
-            const label = this.generateLabel(
-                this.transformShapeControls.labelsGroup,
-                index,
-                vertex,
-                previousVertex,
-                center,
-                offsetDistance,
-            );
-            this.labels.push(label);
-
-            if (index !== vertices.length - 1) {
-                const nextVertex = vertices[index + 1];
-                const angle = this.generateAngle(
+            if (this.showLengthLabels) {
+                const label = this.generateLabel(
                     this.transformShapeControls.labelsGroup,
                     index,
-                    nextVertex,
                     vertex,
                     previousVertex,
+                    center,
+                    offsetDistance,
                 );
-                this.angles.push(angle);
+                this.labels.push(label);
+            }
+
+            if (index !== vertices.length - 1) {
+                if (this.showAngleLabels) {
+                    const nextVertex = vertices[index + 1];
+                    const angle = this.generateAngle(
+                        this.transformShapeControls.labelsGroup,
+                        index,
+                        nextVertex,
+                        vertex,
+                        previousVertex,
+                    );
+                    this.angles.push(angle);
+                }
             }
         }
 
         if (this.transformShapeControls.object!.getCloseLine()) {
-            const vertex = vertices[0];
-            const previousVertex = vertices[vertices.length - 1];
+            if (this.showLengthLabels) {
+                const vertex = vertices[0];
+                const previousVertex = vertices[vertices.length - 1];
 
-            const label = this.generateLabel(
-                this.transformShapeControls.labelsGroup,
-                vertices.length,
-                vertex,
-                previousVertex,
-                center,
-                offsetDistance,
-            );
-            this.labels.push(label);
+                const label = this.generateLabel(
+                    this.transformShapeControls.labelsGroup,
+                    vertices.length,
+                    vertex,
+                    previousVertex,
+                    center,
+                    offsetDistance,
+                );
+                this.labels.push(label);
+            }
         }
     }
 
