@@ -108,7 +108,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
                 this.transformShapeControls.camera.position,
             ) /
                 100 +
-            1.1;
+            0.8;
 
         const center: Vertex = [
             this.transformShapeControls.vertexCenter.x,
@@ -175,7 +175,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         divElement.appendChild(inputElement);
         const label = new CSS3DObject(divElement);
         label.rotateX(-Math.PI / 2);
-        label.scale.setScalar(1 / 10);
+        label.scale.setScalar(1 / 50);
         this.updateLabelPosition(label, firstVertex, secondVertex, center, offsetDistance);
         parent.add(label);
 
