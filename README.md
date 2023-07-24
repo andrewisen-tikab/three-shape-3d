@@ -46,6 +46,12 @@ TODO
 
 <img src="https://github.com/andrewisen-tikab/three-shape-3d/blob/feature/resources/labels.gif?raw=true" width="100%" />
 
+### Angles
+
+TODO
+
+<img src="https://github.com/andrewisen-tikab/three-shape-3d/blob/feature/resources/angles.gif?raw=true" width="100%" />
+
 ## Example
 
 See the [example](./example) folder for an example.
