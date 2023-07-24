@@ -46,7 +46,7 @@ const example = (): void => {
         alwaysShowArea: true,
         closeLine: false,
         volumeHeight: 5,
-        centerGizmo: true,
+        centerGizmo: false,
         gizmoMode: 'translate',
         translationSnap: 0,
         showLengthLabels: true,
@@ -94,6 +94,7 @@ const example = (): void => {
         cameraControls = new CameraControls(camera, renderer.domElement);
         // Add custom transform shape controls
         transformControls = new TransformShapeControls(camera, renderer.domElement, {
+            centerGizmo: params.centerGizmo,
             showLengthLabels: params.showLengthLabels,
             showAngleLabels: params.showAngleLabels,
         });
