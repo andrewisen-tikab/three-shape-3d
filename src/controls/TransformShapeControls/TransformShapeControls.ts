@@ -41,6 +41,7 @@ type TransformShapeControlsGizmoParams = {
     dragVertices: boolean;
     allowCreatingNewVertices: boolean;
     showLengthLabels: boolean;
+    showAngleLabels: boolean;
 };
 
 type VertexMetadata = {
@@ -174,6 +175,7 @@ class TransformShapeControls extends THREE.Object3D {
             dragVertices: true,
             allowCreatingNewVertices: true,
             showLengthLabels: true,
+            showAngleLabels: true,
         };
 
         this.vertexCenter = new THREE.Vector3();
@@ -950,10 +952,13 @@ class TransformShapeControls extends THREE.Object3D {
     }
 
     private updateLabels() {
-        if (this.params.showLengthLabels === false) {
+        if (this.params.showLengthLabels === false && this.params.showAngleLabels === false) {
             this.labelsManager.dispose();
             return;
         }
+        this.labelsManager.showLengthLabels = this.params.showLengthLabels!;
+        this.labelsManager.showAngleLabels = this.params.showAngleLabels!;
+
         this.addLabels();
     }
 
@@ -1053,6 +1058,11 @@ class TransformShapeControls extends THREE.Object3D {
 
     setShowLengthLabels(showLengthLabels: boolean) {
         this.params.showLengthLabels = showLengthLabels;
+        this.updateLabels();
+    }
+
+    setShowAngleLabels(showAngleLabels: boolean) {
+        this.params.showAngleLabels = showAngleLabels;
         this.updateLabels();
     }
 }

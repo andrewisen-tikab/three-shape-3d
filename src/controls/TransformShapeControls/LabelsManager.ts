@@ -5,7 +5,7 @@ import {
     generateAngle,
     getLength2D,
     getLineRotationAsDeg,
-    getMidpointOffsetFromLine,
+    setOffsetPositionFromLine,
 } from '../../utils';
 import { addPrefix } from './labels';
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
@@ -19,11 +19,17 @@ export default class LabelsManager extends THREE.EventDispatcher {
     private labels: CSS3DObject[] = [];
     private angles: THREE.Mesh[] = [];
 
+    public showLengthLabels: boolean;
+
+    public showAngleLabels: boolean;
+
     constructor(transformShapeControls: TransformShapeControls) {
         super();
         this.transformShapeControls = transformShapeControls;
         this.labels = [];
         this.angles = [];
+        this.showAngleLabels = true;
+        this.showLengthLabels = true;
     }
 
     /**
@@ -53,46 +59,53 @@ export default class LabelsManager extends THREE.EventDispatcher {
             this.transformShapeControls.vertexCenter.y,
             this.transformShapeControls.vertexCenter.z,
         ];
+
         for (let index = 0; index < vertices.length; index++) {
             const vertex = vertices[index];
             if (index === 0) continue;
             const previousVertex = vertices[index - 1];
-            const label = this.generateLabel(
-                this.transformShapeControls.labelsGroup,
-                index,
-                vertex,
-                previousVertex,
-                center,
-                offsetDistance,
-            );
-            this.labels.push(label);
-
-            if (index !== vertices.length - 1) {
-                const nextVertex = vertices[index + 1];
-                const angle = this.generateAngle(
+            if (this.showLengthLabels) {
+                const label = this.generateLabel(
                     this.transformShapeControls.labelsGroup,
                     index,
-                    nextVertex,
                     vertex,
                     previousVertex,
+                    center,
+                    offsetDistance,
                 );
-                this.angles.push(angle);
+                this.labels.push(label);
+            }
+
+            if (index !== vertices.length - 1) {
+                if (this.showAngleLabels) {
+                    const nextVertex = vertices[index + 1];
+                    const angle = this.generateAngle(
+                        this.transformShapeControls.labelsGroup,
+                        index,
+                        nextVertex,
+                        vertex,
+                        previousVertex,
+                    );
+                    this.angles.push(angle);
+                }
             }
         }
 
         if (this.transformShapeControls.object!.getCloseLine()) {
-            const vertex = vertices[0];
-            const previousVertex = vertices[vertices.length - 1];
+            if (this.showLengthLabels) {
+                const vertex = vertices[0];
+                const previousVertex = vertices[vertices.length - 1];
 
-            const label = this.generateLabel(
-                this.transformShapeControls.labelsGroup,
-                vertices.length,
-                vertex,
-                previousVertex,
-                center,
-                offsetDistance,
-            );
-            this.labels.push(label);
+                const label = this.generateLabel(
+                    this.transformShapeControls.labelsGroup,
+                    vertices.length,
+                    vertex,
+                    previousVertex,
+                    center,
+                    offsetDistance,
+                );
+                this.labels.push(label);
+            }
         }
     }
 
@@ -108,7 +121,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
                 this.transformShapeControls.camera.position,
             ) /
                 100 +
-            1.1;
+            0.8;
 
         const center: Vertex = [
             this.transformShapeControls.vertexCenter.x,
@@ -132,12 +145,14 @@ export default class LabelsManager extends THREE.EventDispatcher {
         center: Vertex,
         offsetDistance: number,
     ) {
-        const offset = getMidpointOffsetFromLine(firstVertex, secondVertex, center, offsetDistance);
-        label.position.set(offset[0], offset[1], offset[2]);
+        setOffsetPositionFromLine(label, firstVertex, secondVertex, center, offsetDistance);
     }
 
     private updateRotation(label: CSS3DObject, firstVertex: Vertex, secondVertex: Vertex) {
-        const rotation = getLineRotationAsDeg(firstVertex, secondVertex);
+        let rotation = getLineRotationAsDeg(firstVertex, secondVertex);
+
+        if (rotation === 180) rotation = 0;
+
         label.rotation.set(-Math.PI / 2, 0, -THREE.MathUtils.degToRad(rotation));
     }
 
@@ -175,7 +190,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         divElement.appendChild(inputElement);
         const label = new CSS3DObject(divElement);
         label.rotateX(-Math.PI / 2);
-        label.scale.setScalar(1 / 10);
+        label.scale.setScalar(1 / 50);
         this.updateLabelPosition(label, firstVertex, secondVertex, center, offsetDistance);
         parent.add(label);
 

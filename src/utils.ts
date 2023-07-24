@@ -58,7 +58,8 @@ const _up = new THREE.Vector3(0, 1, 0);
 const _x3 = new THREE.Vector3(1, 0, 0);
 const _x2 = new THREE.Vector2(1, 0);
 
-export const getMidpointOffsetFromLine = (
+export const setOffsetPositionFromLine = (
+    object: THREE.Object3D,
     firstVertex: Vertex,
     secondVertex: Vertex,
     center: Vertex,
@@ -81,11 +82,13 @@ export const getMidpointOffsetFromLine = (
         _midpoint3A.clone().add(_perpendicular.multiplyScalar(-offsetDistance)),
     );
 
-    _midpoint3A.add(
-        _perpendicular.multiplyScalar(distance1 > distance2 ? -offsetDistance : offsetDistance),
-    );
+    const shouldFlip = distance1 > distance2;
 
-    return _midpoint3A.toArray();
+    _midpoint3A.add(_perpendicular.multiplyScalar(shouldFlip ? -offsetDistance : offsetDistance));
+
+    const offset = _midpoint3A.toArray();
+
+    object.position.set(offset[0], offset[1], offset[2]);
 };
 
 /**
@@ -220,15 +223,21 @@ export const generateAngle = (
     const inputElement = document.createElement('input');
     inputElement.type = 'text';
 
+    const humanReadableAngles = THREE.MathUtils.radToDeg(Math.abs(angle)).toFixed(2);
     inputElement.className = 'shape-3d-label';
-    inputElement.placeholder = `${THREE.MathUtils.radToDeg(Math.abs(angle)).toFixed(2)}`;
+    inputElement.placeholder = humanReadableAngles;
     inputElement.setAttribute('size', `${inputElement.getAttribute('placeholder')!.length}`);
     inputElement.oninput = addPrefix.bind(inputElement);
 
     divElement.appendChild(inputElement);
     const label = new CSS3DObject(divElement);
 
-    const angleLabelPosition = getAngleLabelPosition(nextVertex, currentVertex, previousVertex);
+    const angleLabelPosition = getAngleLabelPosition(
+        nextVertex,
+        currentVertex,
+        previousVertex,
+        humanReadableAngles,
+    );
 
     label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
 
@@ -288,10 +297,21 @@ export const shouldFlipAngle = (
     return crossProduct < 0;
 };
 
+const angleOffset = 1.1;
+
+/**
+ *
+ * @param nextVertex
+ * @param currentVertex
+ * @param previousVertex
+ * @param humanReadableAngles
+ * @deprecated WIP: This is not working as expected.
+ */
 export const getAngleLabelPosition = (
     nextVertex: Vertex,
     currentVertex: Vertex,
     previousVertex: Vertex,
+    humanReadableAngles: string,
 ): Vertex => {
     _firstVertex.fromArray(previousVertex);
     _secondVertex.fromArray(currentVertex);
@@ -307,9 +327,18 @@ export const getAngleLabelPosition = (
 
     _firstVertex.fromArray(currentVertex);
 
-    _direction3.subVectors(center3, _firstVertex).normalize().multiplyScalar(1.5);
+    _direction3.subVectors(center3, _firstVertex).normalize().multiplyScalar(angleOffset);
 
-    const position = _firstVertex.add(_direction3);
+    const position = _firstVertex.add(_direction3).clone();
+
+    // Check if vectors are the same
+    if (position.equals(_firstVertex) && humanReadableAngles === '180.00') {
+        _firstVertex.fromArray(previousVertex);
+        _secondVertex.fromArray(currentVertex);
+        _direction3.subVectors(_secondVertex, _firstVertex);
+
+        position.add(_direction3.cross(_up).normalize().multiplyScalar(angleOffset));
+    }
 
     return position.toArray();
 };

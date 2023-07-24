@@ -46,10 +46,11 @@ const example = (): void => {
         alwaysShowArea: true,
         closeLine: false,
         volumeHeight: 5,
-        centerGizmo: true,
+        centerGizmo: false,
         gizmoMode: 'translate',
         translationSnap: 0,
         showLengthLabels: true,
+        showAngleLabels: true,
     };
 
     // Setup Stats.js
@@ -93,7 +94,9 @@ const example = (): void => {
         cameraControls = new CameraControls(camera, renderer.domElement);
         // Add custom transform shape controls
         transformControls = new TransformShapeControls(camera, renderer.domElement, {
+            centerGizmo: params.centerGizmo,
             showLengthLabels: params.showLengthLabels,
+            showAngleLabels: params.showAngleLabels,
         });
         transformControls.addEventListener('dragging-changed', (event) => {
             cameraControls.enabled = !event.value;
@@ -267,6 +270,10 @@ const example = (): void => {
 
         controlsFolder.add(params, 'showLengthLabels').onChange((value: boolean) => {
             transformControls.setShowLengthLabels(value);
+        });
+
+        controlsFolder.add(params, 'showAngleLabels').onChange((value: boolean) => {
+            transformControls.setShowAngleLabels(value);
         });
     };
 

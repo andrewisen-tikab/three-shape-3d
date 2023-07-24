@@ -1,6 +1,6 @@
 import { CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { Vertex } from '../../types';
-import { getLength2D, getMidpointOffsetFromLine } from '../../utils';
+import { getLength2D, setOffsetPositionFromLine } from '../../utils';
 
 export function addPrefix(this: HTMLInputElement, _ev: Event) {
     this.setAttribute('size', `${this.value!.length}`);
@@ -21,7 +21,6 @@ export const generateLabel = (
     center: Vertex,
     offsetDistance: number,
 ) => {
-    const offset = getMidpointOffsetFromLine(firstVertex, secondVertex, center, offsetDistance);
     const length = getLength2D(firstVertex, secondVertex);
 
     const divElement = document.createElement('div');
@@ -38,7 +37,7 @@ export const generateLabel = (
 
     divElement.appendChild(inputElement);
     const label = new CSS2DObject(divElement);
-    label.position.set(offset[0], offset[1], offset[2]);
+    setOffsetPositionFromLine(label, firstVertex, secondVertex, center, offsetDistance);
 
     parent.add(label);
 };
