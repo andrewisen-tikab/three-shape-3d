@@ -145,8 +145,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         center: Vertex,
         offsetDistance: number,
     ) {
-        const offset = getMidpointOffsetFromLine(firstVertex, secondVertex, center, offsetDistance);
-        label.position.set(offset[0], offset[1], offset[2]);
+        setOffsetPositionFromLine(label, firstVertex, secondVertex, center, offsetDistance);
     }
 
     private updateRotation(label: CSS3DObject, firstVertex: Vertex, secondVertex: Vertex) {
