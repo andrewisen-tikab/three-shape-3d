@@ -149,7 +149,10 @@ export default class LabelsManager extends THREE.EventDispatcher {
     }
 
     private updateRotation(label: CSS3DObject, firstVertex: Vertex, secondVertex: Vertex) {
-        const rotation = getLineRotationAsDeg(firstVertex, secondVertex);
+        let rotation = getLineRotationAsDeg(firstVertex, secondVertex);
+
+        if (rotation === 180) rotation = 0;
+
         label.rotation.set(-Math.PI / 2, 0, -THREE.MathUtils.degToRad(rotation));
     }
 
