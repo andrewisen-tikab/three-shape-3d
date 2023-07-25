@@ -24,6 +24,8 @@ const _center = new THREE.Vector3();
 // @ts-ignore
 const _direction3 = new THREE.Vector3();
 
+const _interpolatedVector = new THREE.Vector3();
+
 /**
  * Offset a midpoint from a center.
  * @param midpoint
@@ -233,7 +235,12 @@ export const generateAngle = (
     divElement.appendChild(inputElement);
     const label = new CSS3DObject(divElement);
 
-    const angleLabelPosition = getAngleLabelPosition(nextVertex, currentVertex, previousVertex);
+    const angleLabelPosition = getAngleLabelPosition(
+        nextVertex,
+        currentVertex,
+        previousVertex,
+        humanReadableAngles,
+    );
 
     label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
 
@@ -294,7 +301,7 @@ export const shouldFlipAngle = (
 };
 
 /**
- *
+ * Get the position of the co-called `angleLabel`.
  * @param nextVertex
  * @param currentVertex
  * @param previousVertex
@@ -304,28 +311,33 @@ export const getAngleLabelPosition = (
     nextVertex: Vertex,
     currentVertex: Vertex,
     previousVertex: Vertex,
+    humanReadableAngles: string,
 ): Vertex => {
+    // Set first line.
     _firstVertex.fromArray(previousVertex);
     _secondVertex.fromArray(currentVertex);
+    _line3A.subVectors(_secondVertex, _firstVertex).normalize();
 
-    const line3A = _line3A.subVectors(_secondVertex, _firstVertex).normalize().clone();
-
+    // Set second line.
     _firstVertex.fromArray(currentVertex);
     _secondVertex.fromArray(nextVertex);
+    _line3B.subVectors(_secondVertex, _firstVertex).normalize().multiplyScalar(-1);
 
-    const line3B = _line3B
-        .subVectors(_secondVertex, _firstVertex)
-        .normalize()
-        .multiplyScalar(-1)
-        .clone();
+    // Generate an interpolatedVector between the two lines.
+    _interpolatedVector.copy(_line3A.lerp(_line3B, 0.5));
+    // Normalize and add an offset.
+    _interpolatedVector.normalize().multiplyScalar(-1);
 
-    line3A.dot(line3A);
-    const interpolatedVector = line3A.clone().lerp(line3B, 0.5);
-
-    interpolatedVector.normalize().multiplyScalar(-1);
-
+    // Add the interpolatedVector to the currentVertex.
     _firstVertex.fromArray(currentVertex);
-    interpolatedVector.add(_firstVertex);
+    _interpolatedVector.add(_firstVertex);
 
-    return interpolatedVector.toArray();
+    if (humanReadableAngles === '180.00') {
+        _firstVertex.fromArray(previousVertex);
+        _secondVertex.fromArray(currentVertex);
+        _direction3.subVectors(_secondVertex, _firstVertex);
+        _interpolatedVector.add(_direction3.cross(_up).normalize().multiplyScalar(1));
+    }
+
+    return _interpolatedVector.toArray();
 };
