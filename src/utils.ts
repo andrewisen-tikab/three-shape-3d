@@ -232,12 +232,7 @@ export const generateAngle = (
     divElement.appendChild(inputElement);
     const label = new CSS3DObject(divElement);
 
-    const angleLabelPosition = getAngleLabelPosition(
-        nextVertex,
-        currentVertex,
-        previousVertex,
-        humanReadableAngles,
-    );
+    const angleLabelPosition = getAngleLabelPosition(nextVertex, currentVertex, previousVertex);
 
     label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
 
@@ -305,40 +300,33 @@ const angleOffset = 1.1;
  * @param currentVertex
  * @param previousVertex
  * @param humanReadableAngles
- * @deprecated WIP: This is not working as expected.
  */
 export const getAngleLabelPosition = (
     nextVertex: Vertex,
     currentVertex: Vertex,
     previousVertex: Vertex,
-    humanReadableAngles: string,
 ): Vertex => {
     _firstVertex.fromArray(previousVertex);
     _secondVertex.fromArray(currentVertex);
 
-    _midpoint3A.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
+    const line3A = _line3A.subVectors(_secondVertex, _firstVertex).normalize().clone();
 
     _firstVertex.fromArray(currentVertex);
     _secondVertex.fromArray(nextVertex);
 
-    _midpoint3B.addVectors(_firstVertex, _secondVertex).multiplyScalar(0.5);
+    const line3B = _line3B
+        .subVectors(_secondVertex, _firstVertex)
+        .normalize()
+        .multiplyScalar(-1)
+        .clone();
 
-    const center3 = _midpoint3A.add(_midpoint3B).multiplyScalar(0.5);
+    line3A.dot(line3A);
+    const interpolatedVector = line3A.clone().lerp(line3B, 0.5);
+
+    interpolatedVector.normalize().multiplyScalar(-1);
 
     _firstVertex.fromArray(currentVertex);
+    interpolatedVector.add(_firstVertex);
 
-    _direction3.subVectors(center3, _firstVertex).normalize().multiplyScalar(angleOffset);
-
-    const position = _firstVertex.add(_direction3).clone();
-
-    // Check if vectors are the same
-    if (position.equals(_firstVertex) && humanReadableAngles === '180.00') {
-        _firstVertex.fromArray(previousVertex);
-        _secondVertex.fromArray(currentVertex);
-        _direction3.subVectors(_secondVertex, _firstVertex);
-
-        position.add(_direction3.cross(_up).normalize().multiplyScalar(angleOffset));
-    }
-
-    return position.toArray();
+    return interpolatedVector.toArray();
 };
