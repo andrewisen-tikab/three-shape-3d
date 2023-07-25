@@ -79,13 +79,16 @@ export default class LabelsManager extends THREE.EventDispatcher {
             if (index !== vertices.length - 1) {
                 if (this.showAngleLabels) {
                     const nextVertex = vertices[index + 1];
-                    const angle = this.generateAngle(
+                    const [angle, inputElement] = this.generateAngle(
                         this.transformShapeControls.labelsGroup,
                         index,
                         nextVertex,
                         vertex,
                         previousVertex,
                     );
+                    inputElement.addEventListener('blur', (e) => {
+                        this.onBlur(e, index, 'angle');
+                    });
                     this.angles.push(angle);
                 }
             }
@@ -184,7 +187,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         inputElement.oninput = addPrefix.bind(inputElement);
 
         inputElement.addEventListener('blur', (e) => {
-            this.onBlur(e, index);
+            this.onBlur(e, index, 'line');
         });
 
         divElement.appendChild(inputElement);
@@ -204,12 +207,10 @@ export default class LabelsManager extends THREE.EventDispatcher {
         currentVertex: Vertex,
         previousVertex: Vertex,
     ) {
-        const arch = generateAngle(parent, nextVertex, currentVertex, previousVertex);
-
-        return arch;
+        return generateAngle(parent, nextVertex, currentVertex, previousVertex);
     }
 
-    onBlur(e: FocusEvent, index: number) {
+    onBlur(e: FocusEvent, index: number, type: 'line' | 'angle') {
         // Get value of input
         const inputElement = e.target as HTMLInputElement;
         const value = inputElement.value;
@@ -227,7 +228,11 @@ export default class LabelsManager extends THREE.EventDispatcher {
             return;
         }
 
-        this.transformShapeControls.setLineLength(index, number);
+        if (type === 'line') {
+            this.transformShapeControls.setLineLength(index, number);
+        } else if (type === 'angle') {
+            this.transformShapeControls.setLineAngle(index, number);
+        }
     }
 
     public dispose() {
