@@ -250,7 +250,7 @@ export const generateAngle = (
     parent.add(arch);
     parent.add(label);
 
-    return arch;
+    return [arch, inputElement] as const;
 };
 
 /**
@@ -340,4 +340,36 @@ export const getAngleLabelPosition = (
     }
 
     return _interpolatedVector.toArray();
+};
+
+export const setLineAngle = (index: number, angleInDegrees: number, vertices: Vertex[]): Vertex => {
+    const closedLine = vertices.length === index;
+    const firstVertex = closedLine ? vertices[vertices.length - 1] : vertices[index - 1];
+    const secondVertex = closedLine ? vertices[0] : vertices[index];
+    const thidVertex = closedLine ? vertices[0 + 1] : vertices[index + 1];
+
+    _firstVertex.fromArray(secondVertex);
+    _secondVertex.fromArray(thidVertex);
+    _line3B.subVectors(_secondVertex, _firstVertex);
+
+    const length = _line3B.length();
+
+    _firstVertex.fromArray(firstVertex);
+    _secondVertex.fromArray(secondVertex);
+    _direction3.subVectors(_secondVertex, _firstVertex);
+
+    _direction3.normalize();
+
+    const newLineDirection = _direction3
+        .clone()
+        .applyAxisAngle(_up, THREE.MathUtils.degToRad(angleInDegrees));
+
+    _secondVertex.fromArray(secondVertex);
+
+    const newLineEnd = new THREE.Vector3().addVectors(
+        _secondVertex,
+        newLineDirection.multiplyScalar(-length),
+    );
+
+    return newLineEnd.toArray();
 };

@@ -8,7 +8,7 @@ THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 import Shape3D from '../../Shape3D';
-import { getMidpoint, setLineLength } from '../../utils';
+import { getMidpoint, setLineAngle, setLineLength } from '../../utils';
 import LabelsManager from './LabelsManager';
 
 const _raycaster = new THREE.Raycaster();
@@ -1052,6 +1052,27 @@ class TransformShapeControls extends THREE.Object3D {
         const adjustedIndex = index === this.object!.getVertices().length ? 0 : index;
         const vertices = this.object!.getVertices();
         const newVertex = setLineLength(index, lineLength, vertices);
+        this.object.updateVertex(adjustedIndex, newVertex);
+        this.onVertexChanged();
+    }
+
+    setLineAngle(index: number, angleInDegrees: number) {
+        if (this.object == null) {
+            console.warn('No object attached');
+            return;
+        }
+        if (index < 0 || index > this.object!.getVertices().length) {
+            console.warn('Invalid index');
+            return;
+        }
+        if (angleInDegrees < 0) {
+            console.warn('Invalid line angle');
+            return;
+        }
+
+        const adjustedIndex = index === this.object!.getVertices().length ? 0 : index + 1;
+        const vertices = this.object!.getVertices();
+        const newVertex = setLineAngle(index, angleInDegrees, vertices);
         this.object.updateVertex(adjustedIndex, newVertex);
         this.onVertexChanged();
     }
