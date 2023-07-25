@@ -235,7 +235,12 @@ export const generateAngle = (
     divElement.appendChild(inputElement);
     const label = new CSS3DObject(divElement);
 
-    const angleLabelPosition = getAngleLabelPosition(nextVertex, currentVertex, previousVertex);
+    const angleLabelPosition = getAngleLabelPosition(
+        nextVertex,
+        currentVertex,
+        previousVertex,
+        humanReadableAngles,
+    );
 
     label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
 
@@ -306,6 +311,7 @@ export const getAngleLabelPosition = (
     nextVertex: Vertex,
     currentVertex: Vertex,
     previousVertex: Vertex,
+    humanReadableAngles: string,
 ): Vertex => {
     // Set first line.
     _firstVertex.fromArray(previousVertex);
@@ -325,6 +331,13 @@ export const getAngleLabelPosition = (
     // Add the interpolatedVector to the currentVertex.
     _firstVertex.fromArray(currentVertex);
     _interpolatedVector.add(_firstVertex);
+
+    if (humanReadableAngles === '180.00') {
+        _firstVertex.fromArray(previousVertex);
+        _secondVertex.fromArray(currentVertex);
+        _direction3.subVectors(_secondVertex, _firstVertex);
+        _interpolatedVector.add(_direction3.cross(_up).normalize().multiplyScalar(1));
+    }
 
     return _interpolatedVector.toArray();
 };
