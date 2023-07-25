@@ -87,7 +87,7 @@ export default class Shape3DCore extends THREE.Object3D {
         }
 
         this.vertices.splice(index, 1);
-        this.updateGeometry();
+        this.update();
     }
 
     public update(): void {
