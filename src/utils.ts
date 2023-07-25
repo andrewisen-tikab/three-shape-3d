@@ -24,6 +24,8 @@ const _center = new THREE.Vector3();
 // @ts-ignore
 const _direction3 = new THREE.Vector3();
 
+const _interpolatedVector = new THREE.Vector3();
+
 /**
  * Offset a midpoint from a center.
  * @param midpoint
@@ -294,7 +296,7 @@ export const shouldFlipAngle = (
 };
 
 /**
- *
+ * Get the position of the co-called `angleLabel`.
  * @param nextVertex
  * @param currentVertex
  * @param previousVertex
@@ -305,27 +307,24 @@ export const getAngleLabelPosition = (
     currentVertex: Vertex,
     previousVertex: Vertex,
 ): Vertex => {
+    // Set first line.
     _firstVertex.fromArray(previousVertex);
     _secondVertex.fromArray(currentVertex);
+    _line3A.subVectors(_secondVertex, _firstVertex).normalize();
 
-    const line3A = _line3A.subVectors(_secondVertex, _firstVertex).normalize().clone();
-
+    // Set second line.
     _firstVertex.fromArray(currentVertex);
     _secondVertex.fromArray(nextVertex);
+    _line3B.subVectors(_secondVertex, _firstVertex).normalize().multiplyScalar(-1);
 
-    const line3B = _line3B
-        .subVectors(_secondVertex, _firstVertex)
-        .normalize()
-        .multiplyScalar(-1)
-        .clone();
+    // Generate an interpolatedVector between the two lines.
+    _interpolatedVector.copy(_line3A.lerp(_line3B, 0.5));
+    // Normalize and add an offset.
+    _interpolatedVector.normalize().multiplyScalar(-1);
 
-    line3A.dot(line3A);
-    const interpolatedVector = line3A.clone().lerp(line3B, 0.5);
-
-    interpolatedVector.normalize().multiplyScalar(-1);
-
+    // Add the interpolatedVector to the currentVertex.
     _firstVertex.fromArray(currentVertex);
-    interpolatedVector.add(_firstVertex);
+    _interpolatedVector.add(_firstVertex);
 
-    return interpolatedVector.toArray();
+    return _interpolatedVector.toArray();
 };
