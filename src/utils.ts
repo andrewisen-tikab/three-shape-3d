@@ -21,6 +21,7 @@ const _midpoint3B = new THREE.Vector3();
 
 const _center = new THREE.Vector3();
 
+// @ts-ignore
 const _direction3 = new THREE.Vector3();
 
 /**
@@ -291,8 +292,6 @@ export const shouldFlipAngle = (
 
     return crossProduct < 0;
 };
-
-const angleOffset = 1.1;
 
 /**
  *
