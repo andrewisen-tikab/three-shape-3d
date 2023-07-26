@@ -1,15 +1,9 @@
 import * as THREE from 'three';
-import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
-
-// @ts-ignore
-THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-// @ts-ignore
-THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
-THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 import Shape3D from '../../Shape3D';
 import { getMidpoint, setLineAngle, setLineLength } from '../../utils';
 import LabelsManager from './LabelsManager';
+import VertexObject, { VertexMetadata } from './vertex';
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
@@ -29,13 +23,6 @@ const _mouseDownEvent: { type: 'mouseDown'; mode?: string } = { type: 'mouseDown
 const _mouseUpEvent: { type: 'mouseUp'; mode: string | null } = { type: 'mouseUp', mode: null };
 const _objectChangeEvent = { type: 'objectChange' };
 
-const handleGeometry = new THREE.BoxGeometry(1, 1, 1);
-// @ts-ignore
-handleGeometry.computeBoundsTree();
-const handleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-const scale = 1 / 4;
-
 type TransformShapeControlsGizmoParams = {
     centerGizmo: boolean;
     dragVertices: boolean;
@@ -44,14 +31,17 @@ type TransformShapeControlsGizmoParams = {
     showAngleLabels: boolean;
 };
 
-type VertexMetadata = {
-    type: 'vertex' | 'midpoint';
-    index: number;
-};
-
 type Mode = 'translate' | 'rotate' | 'scale';
 
+const scale = 1 / 4;
+
+// @ts-ignore
+interface LastSelectedVertex extends THREE.Mesh {
+    parent: VertexObject;
+}
 class TransformShapeControls extends THREE.Object3D {
+    public static VertexObject = VertexObject;
+
     public vertexGroup!: THREE.Group;
 
     public labelsGroup!: THREE.Group;
@@ -155,10 +145,8 @@ class TransformShapeControls extends THREE.Object3D {
 
     public vertexCenter: THREE.Vector3;
 
-    private lastSelectedVertex: THREE.Mesh | null = null;
+    private lastSelectedVertex: LastSelectedVertex | null = null;
     private lastSelectedVertexQuaternion: THREE.Quaternion;
-
-    private vertexHoverMaterial: THREE.MeshBasicMaterial;
 
     constructor(
         camera: THREE.Camera,
@@ -265,7 +253,6 @@ class TransformShapeControls extends THREE.Object3D {
         const vertexGroup = new THREE.Group();
         this.lastSelectedVertex = null;
         this.lastSelectedVertexQuaternion = new THREE.Quaternion();
-        this.vertexHoverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         this.add(vertexGroup);
 
         this.labelsManager = new LabelsManager(this);
@@ -460,7 +447,7 @@ class TransformShapeControls extends THREE.Object3D {
 
         if (this.lastSelectedVertex) {
             // @ts-ignore
-            this.lastSelectedVertex.material = this.lastSelectedVertex._material;
+            this.lastSelectedVertex.parent.endHover();
         }
         if (this.axis !== null) {
             this.lastSelectedVertex = null;
@@ -473,11 +460,13 @@ class TransformShapeControls extends THREE.Object3D {
             //     this.lastSelectedVertex = null;
             //     return;
             // }
-            const mesh = vertex.object as THREE.Mesh<THREE.BufferGeometry, THREE.Material>;
+            const mesh = vertex.object.parent as VertexObject;
+
+            mesh.beginHover();
             // @ts-ignore
-            mesh._material = vertex.object.material;
-            mesh.material = this.vertexHoverMaterial;
-            this.lastSelectedVertex = mesh;
+            // mesh._material = vertex.object.material;
+            // mesh.material = this.vertexHoverMaterial;
+            this.lastSelectedVertex = vertex.object;
         } else {
             this.lastSelectedVertex = null;
         }
@@ -520,6 +509,7 @@ class TransformShapeControls extends THREE.Object3D {
         // If dragging vertex, simply set dragging to true
         if (this.lastSelectedVertex !== null) {
             const metadata = this.lastSelectedVertex.userData as VertexMetadata;
+
             if (metadata.type === 'vertex') {
                 // Detect if right click
                 if (pointer.button !== 0) {
@@ -822,6 +812,10 @@ class TransformShapeControls extends THREE.Object3D {
             this.dispatchEvent(_mouseUpEvent);
         }
 
+        if (this.lastSelectedVertex) {
+            this.lastSelectedVertex.parent.endMove();
+        }
+
         this.dragging = false;
         this.axis = null;
     }
@@ -868,28 +862,35 @@ class TransformShapeControls extends THREE.Object3D {
     private addHandles() {
         this.vertexGroup.clear();
         const vertices = this.object!.getVertices();
+        const currentIndex =
+            (this.lastSelectedVertex?.userData as Partial<VertexMetadata>)?.index ?? -99;
 
         for (let index = 0; index < vertices.length; index++) {
             const vertex = vertices[index];
-            const cube = new THREE.Mesh(handleGeometry, handleMaterial);
+            const cube = new TransformShapeControls.VertexObject(this.domElement, {
+                type: 'vertex',
+            });
             cube.scale.setScalar(scale);
             cube.position.set(vertex[0], vertex[1], vertex[2]);
+
             const metadata: VertexMetadata = {
                 type: 'vertex',
                 index,
             };
-            cube.userData = metadata;
-            this.vertexGroup.add(cube);
+            cube.setMetadata(metadata);
+            this.vertexGroup.add(cube as unknown as THREE.Object3D);
+            if (index === currentIndex) {
+                cube.beginMove();
+            }
 
             if (this.params.allowCreatingNewVertices === false) continue;
             if (index === 0) continue;
 
             const previousVertex = vertices[index - 1];
 
-            const midpoint = new THREE.Mesh(
-                handleGeometry,
-                new THREE.MeshBasicMaterial({ color: 0x0000ff }),
-            );
+            const midpoint = new TransformShapeControls.VertexObject(this.domElement, {
+                type: 'midpoint',
+            });
             midpoint.scale.setScalar(scale);
 
             midpoint.position.set(...getMidpoint(vertex, previousVertex));
@@ -898,9 +899,9 @@ class TransformShapeControls extends THREE.Object3D {
                 type: 'midpoint',
                 index,
             };
-            midpoint.userData = middleMetadata;
+            midpoint.setMetadata(middleMetadata);
 
-            this.vertexGroup.add(midpoint);
+            this.vertexGroup.add(midpoint as unknown as THREE.Object3D);
         }
 
         if (this.object!.getCloseLine()) {
@@ -908,10 +909,9 @@ class TransformShapeControls extends THREE.Object3D {
             const vertex = vertices[0];
             const previousVertex = vertices[vertices.length - 1];
 
-            const midpoint = new THREE.Mesh(
-                handleGeometry,
-                new THREE.MeshBasicMaterial({ color: 0x0000ff }),
-            );
+            const midpoint = new TransformShapeControls.VertexObject(this.domElement, {
+                type: 'midpoint',
+            });
             midpoint.position.set(...getMidpoint(vertex, previousVertex));
             midpoint.scale.setScalar(scale);
 
@@ -1144,6 +1144,8 @@ function onPointerMove(this: TransformShapeControls, event: PointerEvent) {
 
 function onPointerUp(this: TransformShapeControls, event: PointerEvent) {
     if (!this.enabled) return;
+
+    this.domElement.style.cursor = 'default';
 
     this.domElement.releasePointerCapture(event.pointerId);
     // @ts-ignore
