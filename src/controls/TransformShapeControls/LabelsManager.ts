@@ -181,8 +181,8 @@ export default class LabelsManager extends THREE.EventDispatcher {
         } as any;
 
         inputElement.id = 'myInput';
-        inputElement.className = 'shape-3d-label';
-        inputElement.placeholder = `${length.toFixed(2)}`;
+        inputElement.className = 'shape-3d-label shape-3d-length-label';
+        inputElement.placeholder = `${length.toFixed(2)}m`;
         inputElement.setAttribute('size', `${inputElement.getAttribute('placeholder')!.length}`);
         inputElement.oninput = addPrefix.bind(inputElement);
 

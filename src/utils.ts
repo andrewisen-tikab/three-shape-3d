@@ -225,11 +225,16 @@ export const generateAngle = (
 
     const inputElement = document.createElement('input');
     inputElement.type = 'text';
+    inputElement.inputMode = 'numeric';
+    inputElement.readOnly = true;
+    inputElement.ondblclick = function (this: HTMLInputElement, _ev: MouseEvent) {
+        this.readOnly = '' as unknown as boolean;
+    } as any;
 
     const humanReadableAngles = THREE.MathUtils.radToDeg(Math.abs(angle)).toFixed(2);
-    inputElement.className = 'shape-3d-label';
-    inputElement.placeholder = humanReadableAngles;
-    inputElement.setAttribute('size', `${inputElement.getAttribute('placeholder')!.length}`);
+    inputElement.className = 'shape-3d-label shape-3d-angle-label';
+    inputElement.placeholder = `${humanReadableAngles}°`;
+    inputElement.setAttribute('size', `${inputElement.getAttribute('placeholder')!.length - 1}`);
     inputElement.oninput = addPrefix.bind(inputElement);
 
     divElement.appendChild(inputElement);
