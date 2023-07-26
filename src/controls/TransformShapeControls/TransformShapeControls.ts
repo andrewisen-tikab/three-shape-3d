@@ -925,7 +925,7 @@ class TransformShapeControls extends THREE.Object3D {
     }
 
     updateOffset() {
-        if (this.object == null || this.params.centerGizmo === false) {
+        if (this.object == null) {
             this.position.set(0, 0, 0);
             return;
         }
