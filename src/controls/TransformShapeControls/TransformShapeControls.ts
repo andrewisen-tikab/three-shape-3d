@@ -913,6 +913,7 @@ class TransformShapeControls extends THREE.Object3D {
                 new THREE.MeshBasicMaterial({ color: 0x0000ff }),
             );
             midpoint.position.set(...getMidpoint(vertex, previousVertex));
+            midpoint.scale.setScalar(scale);
 
             const middleMetadata: VertexMetadata = {
                 type: 'midpoint',
