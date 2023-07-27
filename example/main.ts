@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import CameraControls from 'camera-controls';
 
@@ -22,9 +23,13 @@ const example = (): void => {
     let scene: THREE.Scene;
     let group: THREE.Group;
     let gridHelperSize: number;
+    let backgroundPlane: THREE.Group;
+    let backgroundBuildings: THREE.Group;
 
     let renderer: THREE.WebGLRenderer;
     let cssRenderer: CSS3DRenderer;
+
+    let gltflLoader: GLTFLoader;
 
     // Setup the GUI
     const gui = new GUI();
@@ -32,12 +37,13 @@ const example = (): void => {
     const lineFolder = gui.addFolder('Line').open();
     const areaFolder = gui.addFolder('Area').close();
     const volumeFolder = gui.addFolder('Volumes').close();
+    const backgroundFolder = gui.addFolder('Background').close();
 
     const controlsFolder = gui.addFolder('Controls');
 
     const params = {
-        boundsX: 16,
-        boundsZ: 16,
+        boundsX: 50,
+        boundsZ: 50,
         shape: SUPPORTED_SHAPES.LINE,
         lineColor: 0xffffff,
         areaColor: 0xffffff,
@@ -51,6 +57,8 @@ const example = (): void => {
         translationSnap: 0,
         showLengthLabels: true,
         showAngleLabels: true,
+        showBackgroundPlane: true,
+        showBackgroundBuildings: true,
     };
 
     // Setup Stats.js
@@ -114,6 +122,32 @@ const example = (): void => {
         const planeGeometry = new THREE.PlaneGeometry(1, 1);
         planeGeometry.translate(1 / 2, -1 / 2, 0);
 
+        gltflLoader = new GLTFLoader();
+
+        const glftScale = 0.5;
+        const callback = (scene: THREE.Group) => {
+            scene.scale.set(glftScale, glftScale, glftScale);
+            scene.matrixAutoUpdate = false;
+            scene.traverse((child) => {
+                child.matrixAutoUpdate = false;
+            });
+            scene.updateMatrix();
+        };
+        gltflLoader.load('../base.glb', (gltf) => {
+            backgroundPlane = gltf.scene;
+            backgroundPlane.visible = params.showBackgroundPlane;
+            callback(gltf.scene);
+            scene.add(gltf.scene);
+        });
+
+        gltflLoader.load('../buildings.glb', (gltf) => {
+            backgroundBuildings = gltf.scene;
+            backgroundBuildings.visible = params.showBackgroundBuildings;
+
+            callback(gltf.scene);
+            scene.add(gltf.scene);
+        });
+
         const onWindowResize = (): void => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -161,8 +195,8 @@ const example = (): void => {
 
         const points: THREE.Vector3[] = [];
         points.push(new THREE.Vector3(0, 0, 0));
-        points.push(new THREE.Vector3(5, 0, 5));
-        points.push(new THREE.Vector3(0, 0, 5));
+        points.push(new THREE.Vector3(20, 0, 20));
+        points.push(new THREE.Vector3(0, 0, 20));
 
         shape3d = new Shape3D({
             lineColor: params.lineColor,
@@ -177,7 +211,7 @@ const example = (): void => {
         group.add(shape3d);
 
         // Everything ok, lets update the camera position
-        cameraControls.setPosition(0, gridHelperSize * 2, gridHelperSize * 2, true);
+        cameraControls.setPosition(0, gridHelperSize * 1, gridHelperSize * 1, true);
 
         // Create 1x1 grid
         const gridHelper = new THREE.GridHelper(gridHelperSize, gridHelperSize, 0xffffff, 0xffffff);
@@ -275,6 +309,20 @@ const example = (): void => {
         controlsFolder.add(params, 'showAngleLabels').onChange((value: boolean) => {
             transformControls.setShowAngleLabels(value);
         });
+
+        backgroundFolder
+            .add(params, 'showBackgroundPlane')
+            .name('Show background plane')
+            .onChange((value: boolean) => {
+                backgroundPlane.visible = value;
+            });
+
+        backgroundFolder
+            .add(params, 'showBackgroundBuildings')
+            .name('Show background buildings')
+            .onChange((value: boolean) => {
+                backgroundBuildings.visible = value;
+            });
     };
 
     // Functions are  created, let's call them!
