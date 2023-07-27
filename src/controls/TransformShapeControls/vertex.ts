@@ -16,12 +16,14 @@ const handleGeometry = new THREE.BoxGeometry(1, 1, 1);
 // @ts-ignore
 handleGeometry.computeBoundsTree();
 
+export type VertexType = 'vertex' | 'midpoint';
+
 export type VertexObjectParams = {
-    type: 'vertex' | 'midpoint';
+    type: VertexType;
 };
 
 export type VertexMetadata = {
-    type: 'vertex' | 'midpoint';
+    type: VertexType;
     index: number;
 };
 
@@ -61,15 +63,29 @@ interface Sprite extends THREE.Sprite {
     _material?: THREE.SpriteMaterial;
 }
 
+/**
+ * Class that handles the display of a vertex depending of an number of factors.
+ * For example, if the vertex is being hovered, it will display a different sprite.
+ */
 export default class VertexObject extends THREE.Object3D {
+    /**
+     * Reference to the dom element so we can change the cursor.
+     */
     private domElement: HTMLCanvasElement;
+    /**
+     * For now, we only have one sprite.
+     */
     private sprite!: Sprite;
-    private vertexType: 'vertex' | 'midpoint';
+    /**
+     * TODO: IMport as
+     */
+    private vertexType: VertexType;
 
     constructor(domElement: HTMLCanvasElement, { type = 'vertex' }: VertexObjectParams) {
         super();
         this.domElement = domElement;
         this.vertexType = type;
+
         switch (type) {
             case 'vertex':
                 this.addVertex();
@@ -85,14 +101,25 @@ export default class VertexObject extends THREE.Object3D {
         this.sprite._material = this.sprite.material;
     }
 
-    private addVertex() {
+    /**
+     * Adds a vertex sprite to the object.
+     */
+    private addVertex(): void {
         this.sprite = vertexSprite.clone();
     }
 
-    private addMidpoint() {
+    /**
+     * Adds a vertex sprite to the object.
+     */
+    private addMidpoint(): void {
         this.sprite = midpointSprite.clone();
     }
 
+    /**
+     * Set metadata for the children.
+     * Any raycast will hit the children, not this parent object.
+     * @param metadata {@link VertexMetadata}
+     */
     public setMetadata(metadata: VertexMetadata) {
         for (let i = 0; i < this.children.length; i++) {
             const child = this.children[i] as THREE.Object3D;
@@ -100,7 +127,10 @@ export default class VertexObject extends THREE.Object3D {
         }
     }
 
-    public beginHover() {
+    /**
+     * Begin hover state.
+     */
+    public beginHover(): void {
         this.sprite.material = vertexHappySprite.material;
 
         switch (this.vertexType) {
@@ -116,19 +146,33 @@ export default class VertexObject extends THREE.Object3D {
         }
     }
 
+    /**
+     * End hover state.
+     * Return everything to normal.
+     */
     public endHover() {
         this.end();
     }
 
+    /**
+     * Begin move state.
+     */
     public beginMove() {
         this.sprite.material = vertexMovingSprite.material;
         this.domElement.style.cursor = 'none';
     }
 
+    /**
+     * End move state.
+     * Return everything to normal.
+     */
     public endMove() {
         this.end();
     }
 
+    /**
+     * Return everything to normal.
+     */
     private end() {
         this.domElement.style.cursor = 'default';
         this.sprite.material = this.sprite._material!;
