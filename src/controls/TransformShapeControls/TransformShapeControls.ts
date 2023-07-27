@@ -33,7 +33,7 @@ type TransformShapeControlsGizmoParams = {
 
 type Mode = 'translate' | 'rotate' | 'scale';
 
-const scale = 1 / 4;
+const scale = 1;
 
 // @ts-ignore
 interface LastSelectedVertex extends THREE.Mesh {

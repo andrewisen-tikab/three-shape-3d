@@ -137,6 +137,8 @@ export const getLineRotationAsDeg = (firstVertex: Vertex, secondVertex: Vertex) 
     return angleDegrees;
 };
 
+const angleRadius = 4;
+
 /**
  * Get a curve representing the angle between two lines.
  * @param nextVertex
@@ -192,8 +194,8 @@ export const generateAngle = (
     const curve = new THREE.EllipseCurve(
         0,
         0, // centerX, centerY
-        0.5,
-        0.5, // xRadius, yRadius
+        angleRadius,
+        angleRadius, // xRadius, yRadius
         0,
         end, // startAngle, endAngle
         shouldFlip, // clockwise
@@ -202,7 +204,7 @@ export const generateAngle = (
 
     // And finally, convert to a set of 3D vertices.
     const positions: number[] = [];
-    const points = curve.getPoints(50);
+    const points = curve.getPoints(300);
     for (let index = 0; index < points.length; index += 2) {
         const point = points[index];
         // LineGeometry doesn't seem to  like a 2D array of points.
@@ -250,7 +252,7 @@ export const generateAngle = (
     label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
 
     label.rotateX(-Math.PI / 2);
-    label.scale.setScalar(1 / 50);
+    label.scale.setScalar(1 / 20);
 
     parent.add(arch);
     parent.add(label);
@@ -305,6 +307,8 @@ export const shouldFlipAngle = (
     return crossProduct < 0;
 };
 
+const angleOffsetDistance = 4;
+
 /**
  * Get the position of the co-called `angleLabel`.
  * @param nextVertex
@@ -331,7 +335,7 @@ export const getAngleLabelPosition = (
     // Generate an interpolatedVector between the two lines.
     _interpolatedVector.copy(_line3A.lerp(_line3B, 0.5));
     // Normalize and add an offset.
-    _interpolatedVector.normalize().multiplyScalar(-1);
+    _interpolatedVector.normalize().multiplyScalar(-angleOffsetDistance);
 
     // Add the interpolatedVector to the currentVertex.
     _firstVertex.fromArray(currentVertex);
@@ -341,7 +345,9 @@ export const getAngleLabelPosition = (
         _firstVertex.fromArray(previousVertex);
         _secondVertex.fromArray(currentVertex);
         _direction3.subVectors(_secondVertex, _firstVertex);
-        _interpolatedVector.add(_direction3.cross(_up).normalize().multiplyScalar(1));
+        _interpolatedVector.add(
+            _direction3.cross(_up).normalize().multiplyScalar(angleOffsetDistance),
+        );
     }
 
     return _interpolatedVector.toArray();

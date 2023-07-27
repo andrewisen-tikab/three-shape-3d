@@ -179,8 +179,6 @@ export default class LabelsManager extends THREE.EventDispatcher {
         inputElement.ondblclick = function (this: HTMLInputElement, _ev: MouseEvent) {
             this.readOnly = '' as unknown as boolean;
         } as any;
-
-        inputElement.id = 'myInput';
         inputElement.className = 'shape-3d-label shape-3d-length-label';
         inputElement.placeholder = `${length.toFixed(2)}m`;
         inputElement.setAttribute('size', `${inputElement.getAttribute('placeholder')!.length}`);
@@ -193,7 +191,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         divElement.appendChild(inputElement);
         const label = new CSS3DObject(divElement);
         label.rotateX(-Math.PI / 2);
-        label.scale.setScalar(1 / 50);
+        label.scale.setScalar(1 / 20);
         this.updateLabelPosition(label, firstVertex, secondVertex, center, offsetDistance);
         parent.add(label);
 
