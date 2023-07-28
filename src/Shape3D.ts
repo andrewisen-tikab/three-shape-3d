@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import CONFIG from './config';
 
 const rotateShapeGeometry = (geometry: THREE.BufferGeometry): void => {
     geometry.rotateX(-Math.PI / 2);
@@ -486,6 +487,7 @@ export default class Shape3D extends Shape3DCore {
         this.updateAreaMaterial();
 
         this.area = new THREE.Mesh(this.areaGeometry, this.areaMaterial);
+        this.area.position.setY(CONFIG.Z_FIGHTING_OFFSET); // render after the opaque (default) objects
     }
 
     /**

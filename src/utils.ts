@@ -5,6 +5,7 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import { addPrefix } from './controls/TransformShapeControls/labels';
 import { CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
+import CONFIG from './config';
 
 const lineMaterial = new LineMaterial({ color: 0xff0000, linewidth: 4 });
 lineMaterial.resolution.set(window.innerWidth, window.innerHeight);
@@ -252,7 +253,7 @@ export const generateAngle = (
     label.position.set(angleLabelPosition[0], angleLabelPosition[1], angleLabelPosition[2]);
 
     label.rotateX(-Math.PI / 2);
-    label.scale.setScalar(1 / 20);
+    label.scale.setScalar(CONFIG.ANGLE_LABEL_SCALE);
 
     parent.add(arch);
     parent.add(label);
