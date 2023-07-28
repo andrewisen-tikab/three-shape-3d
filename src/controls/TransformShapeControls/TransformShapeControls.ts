@@ -4,6 +4,7 @@ import Shape3D from '../../Shape3D';
 import { getMidpoint, setLineAngle, setLineLength } from '../../utils';
 import LabelsManager from './LabelsManager';
 import VertexObject, { VertexMetadata } from './vertex';
+import CONFIG from '../../config';
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
@@ -32,8 +33,6 @@ type TransformShapeControlsGizmoParams = {
 };
 
 type Mode = 'translate' | 'rotate' | 'scale';
-
-const scale = 1;
 
 // @ts-ignore
 interface LastSelectedVertex extends THREE.Mesh {
@@ -870,7 +869,7 @@ class TransformShapeControls extends THREE.Object3D {
             const cube = new TransformShapeControls.VertexObject(this.domElement, {
                 type: 'vertex',
             });
-            cube.scale.setScalar(scale);
+            cube.scale.setScalar(CONFIG.VERTEX_SCALE);
             cube.position.set(vertex[0], vertex[1], vertex[2]);
 
             const metadata: VertexMetadata = {
@@ -891,7 +890,7 @@ class TransformShapeControls extends THREE.Object3D {
             const midpoint = new TransformShapeControls.VertexObject(this.domElement, {
                 type: 'midpoint',
             });
-            midpoint.scale.setScalar(scale);
+            midpoint.scale.setScalar(CONFIG.VERTEX_SCALE);
 
             midpoint.position.set(...getMidpoint(vertex, previousVertex));
 
@@ -913,7 +912,7 @@ class TransformShapeControls extends THREE.Object3D {
                 type: 'midpoint',
             });
             midpoint.position.set(...getMidpoint(vertex, previousVertex));
-            midpoint.scale.setScalar(scale);
+            midpoint.scale.setScalar(CONFIG.VERTEX_SCALE);
 
             const middleMetadata: VertexMetadata = {
                 type: 'midpoint',

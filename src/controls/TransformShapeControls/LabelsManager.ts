@@ -9,6 +9,7 @@ import {
 } from '../../utils';
 import { addPrefix } from './labels';
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
+import CONFIG from '../../config';
 
 /**
  * Manages the labels for the {@link TransformShapeControls}.
@@ -191,7 +192,7 @@ export default class LabelsManager extends THREE.EventDispatcher {
         divElement.appendChild(inputElement);
         const label = new CSS3DObject(divElement);
         label.rotateX(-Math.PI / 2);
-        label.scale.setScalar(1 / 20);
+        label.scale.setScalar(CONFIG.ANGLE_LABEL_SCALE);
         this.updateLabelPosition(label, firstVertex, secondVertex, center, offsetDistance);
         parent.add(label);
 
