@@ -9,6 +9,7 @@ import CameraControls from 'camera-controls';
 
 import { Shape3D, TransformShapeControls } from '../src';
 import { SUPPORTED_SHAPES, SupportedShapes } from '../src/types';
+import CONFIG from '../src/config';
 
 CameraControls.install({ THREE: THREE });
 
@@ -45,9 +46,9 @@ const example = (): void => {
         boundsX: 50,
         boundsZ: 50,
         shape: SUPPORTED_SHAPES.LINE,
-        lineColor: 0xffffff,
-        areaColor: 0xffffff,
-        volumeColor: 0xffffff,
+        lineColor: CONFIG.LINE_COLOR,
+        areaColor: CONFIG.AREA_COLOR,
+        volumeColor: CONFIG.VOLUME_COLOR,
         alwaysShowLine: true,
         alwaysShowArea: true,
         closeLine: false,

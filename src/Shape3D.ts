@@ -46,9 +46,9 @@ export default class Shape3D extends Shape3DCore {
         super(params);
 
         const {
-            lineColor = 0xffffff,
-            areaColor,
-            volumeColor,
+            lineColor = CONFIG.LINE_COLOR,
+            areaColor = CONFIG.AREA_COLOR,
+            volumeColor = CONFIG.VOLUME_COLOR,
             closeLine = false,
             volumeHeight = 5,
             appearance = {
