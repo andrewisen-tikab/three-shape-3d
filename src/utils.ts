@@ -16,16 +16,15 @@ export const getMidpoint = (firstVertex: Vertex, secondVertex: Vertex): Vertex =
     (firstVertex[2] + secondVertex[2]) / 2,
 ];
 
-const _midpoint3A = new THREE.Vector3();
+const _midpoint3A = /* @__PURE__ */ new THREE.Vector3();
 
-const _midpoint3B = new THREE.Vector3();
+const _midpoint3B = /* @__PURE__ */ new THREE.Vector3();
 
-const _center = new THREE.Vector3();
+const _center /* @__PURE__ */ = new THREE.Vector3();
 
-// @ts-ignore
-const _direction3 = new THREE.Vector3();
+const _direction3 = /* @__PURE__ */ new THREE.Vector3();
 
-const _interpolatedVector = new THREE.Vector3();
+const _interpolatedVector = /* @__PURE__ */ new THREE.Vector3();
 
 /**
  * Offset a midpoint from a center.
@@ -49,18 +48,18 @@ export const getMidpointOffsetFromCenter = (
     return _midpoint3A.clone().add(displacement).toArray();
 };
 
-const _firstVertex = new THREE.Vector3();
-const _secondVertex = new THREE.Vector3();
-const _line3A = new THREE.Vector3();
-const _line3B = new THREE.Vector3();
-const _line2A = new THREE.Vector2();
-const _line2B = new THREE.Vector2();
+const _firstVertex = /* @__PURE__ */ new THREE.Vector3();
+const _secondVertex = /* @__PURE__ */ new THREE.Vector3();
+const _line3A = /* @__PURE__ */ new THREE.Vector3();
+const _line3B = /* @__PURE__ */ new THREE.Vector3();
+const _line2A = /* @__PURE__ */ new THREE.Vector2();
+const _line2B = /* @__PURE__ */ new THREE.Vector2();
 
-const _perpendicular = new THREE.Vector3();
-const _up = new THREE.Vector3(0, 1, 0);
+const _perpendicular = /* @__PURE__ */ new THREE.Vector3();
+const _up = /* @__PURE__ */ new THREE.Vector3(0, 1, 0);
 // @ts-ignore
-const _x3 = new THREE.Vector3(1, 0, 0);
-const _x2 = new THREE.Vector2(1, 0);
+const _x3 = /* @__PURE__ */ new THREE.Vector3(1, 0, 0);
+const _x2 = /* @__PURE__ */ new THREE.Vector2(1, 0);
 
 export const setOffsetPositionFromLine = (
     object: THREE.Object3D,
@@ -138,7 +137,7 @@ export const getLineRotationAsDeg = (firstVertex: Vertex, secondVertex: Vertex) 
     return angleDegrees;
 };
 
-const angleRadius = 4;
+const angleRadius = /* @__PURE__ */ 4;
 
 /**
  * Get a curve representing the angle between two lines.
@@ -308,7 +307,7 @@ export const shouldFlipAngle = (
     return crossProduct < 0;
 };
 
-const angleOffsetDistance = 4;
+const angleOffsetDistance = /* @__PURE__ */ 4;
 
 /**
  * Get the position of the co-called `angleLabel`.
