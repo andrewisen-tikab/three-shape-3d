@@ -385,3 +385,9 @@ export const setLineAngle = (index: number, angleInDegrees: number, vertices: Ve
 
     return newLineEnd.toArray();
 };
+
+export const rotateShapeGeometry = (geometry: THREE.BufferGeometry): void => {
+    geometry.rotateX(-Math.PI / 2);
+    geometry.rotateY(-Math.PI);
+    geometry.rotateZ(-Math.PI);
+};

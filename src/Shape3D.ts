@@ -13,12 +13,7 @@ import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 import CONFIG from './config';
-
-const rotateShapeGeometry = (geometry: THREE.BufferGeometry): void => {
-    geometry.rotateX(-Math.PI / 2);
-    geometry.rotateY(-Math.PI);
-    geometry.rotateZ(-Math.PI);
-};
+import { rotateShapeGeometry } from './utils';
 
 export default class Shape3D extends Shape3DCore {
     private lineColor: THREE.Color;
@@ -46,9 +41,9 @@ export default class Shape3D extends Shape3DCore {
         super(params);
 
         const {
-            lineColor = 0xffffff,
-            areaColor,
-            volumeColor,
+            lineColor = CONFIG.LINE_COLOR,
+            areaColor = CONFIG.AREA_COLOR,
+            volumeColor = CONFIG.VOLUME_COLOR,
             closeLine = false,
             volumeHeight = 5,
             appearance = {
