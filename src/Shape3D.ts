@@ -405,7 +405,12 @@ export default class Shape3D extends Shape3DCore {
         // N.B: LineGeometry is an InstancedBufferGeometry.
         // The easiest way to update the geometry is to create a new one.
         this.lineGeometry = new LineGeometry();
-        if (this.lineMaterial === null) this.lineMaterial = new LineMaterial({ linewidth: 5 });
+        if (this.lineMaterial === null)
+            this.lineMaterial = new LineMaterial({
+                linewidth: 5,
+                transparent: true,
+                opacity: CONFIG.LINE_OPACITY,
+            });
 
         this.updateLineGeometry();
         this.updateLineMaterial();
@@ -476,7 +481,11 @@ export default class Shape3D extends Shape3DCore {
 
         if (this.areaGeometry === null) this.areaGeometry = new THREE.ShapeGeometry();
         if (this.areaMaterial === null)
-            this.areaMaterial = new THREE.MeshBasicMaterial({ side: THREE.BackSide });
+            this.areaMaterial = new THREE.MeshBasicMaterial({
+                side: THREE.BackSide,
+                transparent: true,
+                opacity: CONFIG.AREA_OPACITY,
+            });
 
         this.updateAreaGeometry();
         this.updateAreaMaterial();
@@ -543,7 +552,7 @@ export default class Shape3D extends Shape3DCore {
             this.volumeMaterial = new THREE.MeshBasicMaterial({
                 side: THREE.BackSide,
                 transparent: true,
-                opacity: 0.5,
+                opacity: CONFIG.VOLUME_OPACITY,
             });
 
         this.updateVolumeGeometry();
