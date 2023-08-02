@@ -10,6 +10,7 @@ import CameraControls from 'camera-controls';
 import { Shape3D, TransformShapeControls } from '../src';
 import { SUPPORTED_SHAPES, SupportedShapes } from '../src/types';
 import CONFIG from '../src/config';
+import { Mode } from '../src/controls/TransformShapeControls/types';
 
 CameraControls.install({ THREE: THREE });
 
@@ -54,7 +55,7 @@ const example = (): void => {
         closeLine: false,
         volumeHeight: 5,
         centerGizmo: false,
-        gizmoMode: 'translate',
+        gizmoMode: 'none',
         translationSnap: 0,
         showLengthLabels: true,
         showAngleLabels: true,
@@ -107,6 +108,7 @@ const example = (): void => {
             showLengthLabels: params.showLengthLabels,
             showAngleLabels: params.showAngleLabels,
         });
+        transformControls.setMode(params.gizmoMode as Mode);
         transformControls.addEventListener('dragging-changed', (event) => {
             cameraControls.enabled = !event.value;
         });
@@ -294,7 +296,7 @@ const example = (): void => {
         });
 
         controlsFolder
-            .add(params, 'gizmoMode', ['translate', 'rotate', 'scale'])
+            .add(params, 'gizmoMode', ['none', 'translate', 'rotate', 'scale'])
             .onChange((value: string) => {
                 transformControls.setMode(value as any);
             });
