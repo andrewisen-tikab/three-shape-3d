@@ -973,6 +973,8 @@ class TransformShapeControls extends THREE.Object3D {
         this.visible = false;
         this.axis = null;
 
+        this.labelsManager.dispose();
+
         return this;
     }
 
@@ -1002,7 +1004,13 @@ class TransformShapeControls extends THREE.Object3D {
     }
 
     setMode(mode: Mode) {
-        if (mode !== 'none' && mode !== 'translate' && mode !== 'rotate' && mode !== 'scale')
+        if (
+            mode !== 'create' &&
+            mode !== 'edit' &&
+            mode !== 'translate' &&
+            mode !== 'rotate' &&
+            mode !== 'scale'
+        )
             throw new Error('Invalid mode');
 
         this.mode = mode;
@@ -1769,19 +1777,22 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
         this.picker = {};
         this.helper = {};
 
-        const none = new THREE.Object3D();
+        const empty = new THREE.Object3D();
 
-        this.add((this.gizmo['none'] = none));
+        this.add((this.gizmo['create'] = empty));
+        this.add((this.gizmo['edit'] = empty));
         this.add((this.gizmo['translate'] = setupGizmo(gizmoTranslate)));
         this.add((this.gizmo['rotate'] = setupGizmo(gizmoRotate)));
         this.add((this.gizmo['scale'] = setupGizmo(gizmoScale)));
 
-        this.add((this.picker['none'] = none));
+        this.add((this.picker['create'] = empty));
+        this.add((this.picker['edit'] = empty));
         this.add((this.picker['translate'] = setupGizmo(pickerTranslate)));
         this.add((this.picker['rotate'] = setupGizmo(pickerRotate)));
         this.add((this.picker['scale'] = setupGizmo(pickerScale)));
 
-        this.add((this.helper['none'] = none));
+        this.add((this.helper['create'] = empty));
+        this.add((this.helper['edit'] = empty));
         this.add((this.helper['translate'] = setupGizmo(helperTranslate)));
         this.add((this.helper['rotate'] = setupGizmo(helperRotate)));
         this.add((this.helper['scale'] = setupGizmo(helperScale)));
@@ -1812,6 +1823,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
         this.helper['scale'].visible = this.mode === 'scale';
 
         let handles: any[] = [];
+
         handles = handles.concat(this.picker[this.mode].children);
         handles = handles.concat(this.gizmo[this.mode].children);
         handles = handles.concat(this.helper[this.mode].children);
