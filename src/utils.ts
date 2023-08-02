@@ -137,8 +137,6 @@ export const getLineRotationAsDeg = (firstVertex: Vertex, secondVertex: Vertex) 
     return angleDegrees;
 };
 
-const angleRadius = /* @__PURE__ */ 4;
-
 /**
  * Get a curve representing the angle between two lines.
  * @param nextVertex
@@ -194,8 +192,8 @@ export const generateAngle = (
     const curve = new THREE.EllipseCurve(
         0,
         0, // centerX, centerY
-        angleRadius,
-        angleRadius, // xRadius, yRadius
+        CONFIG.ANGLE_RADIUS,
+        CONFIG.ANGLE_RADIUS, // xRadius, yRadius
         0,
         end, // startAngle, endAngle
         shouldFlip, // clockwise
@@ -204,7 +202,7 @@ export const generateAngle = (
 
     // And finally, convert to a set of 3D vertices.
     const positions: number[] = [];
-    const points = curve.getPoints(300);
+    const points = curve.getPoints(CONFIG.ANGLE_DIVISIONS);
     for (let index = 0; index < points.length; index += 2) {
         const point = points[index];
         // LineGeometry doesn't seem to  like a 2D array of points.
