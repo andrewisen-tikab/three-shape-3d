@@ -5,39 +5,31 @@ import { getMidpoint, setLineAngle, setLineLength } from '../../utils';
 import LabelsManager from './LabelsManager';
 import VertexObject, { VertexMetadata } from './vertex';
 import CONFIG from '../../config';
+import { LastSelectedVertex, Mode, TransformShapeControlsGizmoParams } from './types';
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
 _raycaster.firstHitOnly = true;
 
-const _tempVector = new THREE.Vector3();
-const _tempVector2 = new THREE.Vector3();
-const _tempQuaternion = new THREE.Quaternion();
-const _unit = {
+const _tempVector = /* @__PURE__ */ new THREE.Vector3();
+const _tempVector2 = /* @__PURE__ */ new THREE.Vector3();
+const _tempQuaternion = /* @__PURE__ */ new THREE.Quaternion();
+const _unit = /* @__PURE__ */ {
     X: new THREE.Vector3(1, 0, 0),
     Y: new THREE.Vector3(0, 1, 0),
     Z: new THREE.Vector3(0, 0, 1),
-};
+} as const;
 
-const _changeEvent = { type: 'change' };
-const _mouseDownEvent: { type: 'mouseDown'; mode?: string } = { type: 'mouseDown' };
-const _mouseUpEvent: { type: 'mouseUp'; mode: string | null } = { type: 'mouseUp', mode: null };
-const _objectChangeEvent = { type: 'objectChange' };
+const _changeEvent = /* @__PURE__ */ { type: 'change' } as const;
+const _mouseDownEvent: /* @__PURE__ */ { type: 'mouseDown'; mode?: string } = {
+    type: 'mouseDown',
+} as const;
+const _mouseUpEvent: /* @__PURE__ */ { type: 'mouseUp'; mode: string | null } = {
+    type: 'mouseUp',
+    mode: null,
+} as const;
+const _objectChangeEvent = /* @__PURE__ */ { type: 'objectChange' } as const;
 
-type TransformShapeControlsGizmoParams = {
-    centerGizmo: boolean;
-    dragVertices: boolean;
-    allowCreatingNewVertices: boolean;
-    showLengthLabels: boolean;
-    showAngleLabels: boolean;
-};
-
-type Mode = 'translate' | 'rotate' | 'scale';
-
-// @ts-ignore
-interface LastSelectedVertex extends THREE.Mesh {
-    parent: VertexObject;
-}
 class TransformShapeControls extends THREE.Object3D {
     public static VertexObject = VertexObject;
 
@@ -1010,7 +1002,7 @@ class TransformShapeControls extends THREE.Object3D {
     }
 
     setMode(mode: Mode) {
-        if (mode !== 'translate' && mode !== 'rotate' && mode !== 'scale')
+        if (mode !== 'none' && mode !== 'translate' && mode !== 'rotate' && mode !== 'scale')
             throw new Error('Invalid mode');
 
         this.mode = mode;
@@ -1777,12 +1769,19 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
         this.picker = {};
         this.helper = {};
 
+        const none = new THREE.Object3D();
+
+        this.add((this.gizmo['none'] = none));
         this.add((this.gizmo['translate'] = setupGizmo(gizmoTranslate)));
         this.add((this.gizmo['rotate'] = setupGizmo(gizmoRotate)));
         this.add((this.gizmo['scale'] = setupGizmo(gizmoScale)));
+
+        this.add((this.picker['none'] = none));
         this.add((this.picker['translate'] = setupGizmo(pickerTranslate)));
         this.add((this.picker['rotate'] = setupGizmo(pickerRotate)));
         this.add((this.picker['scale'] = setupGizmo(pickerScale)));
+
+        this.add((this.helper['none'] = none));
         this.add((this.helper['translate'] = setupGizmo(helperTranslate)));
         this.add((this.helper['rotate'] = setupGizmo(helperRotate)));
         this.add((this.helper['scale'] = setupGizmo(helperScale)));
