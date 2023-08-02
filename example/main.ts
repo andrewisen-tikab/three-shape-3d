@@ -14,6 +14,11 @@ import { Mode } from '../src/controls/TransformShapeControls/types';
 
 CameraControls.install({ THREE: THREE });
 
+const _raycaster = new THREE.Raycaster();
+// @ts-ignore
+_raycaster.firstHitOnly = true;
+const _pointer = new THREE.Vector2();
+
 /**
  * Example of how to use the `ThreeSpatialHashGrid` class.
  */
@@ -24,6 +29,7 @@ const example = (): void => {
 
     let scene: THREE.Scene;
     let group: THREE.Group;
+    let shapes: Shape3D[] = [];
     let gridHelperSize: number;
     let backgroundPlane: THREE.Group;
     let backgroundBuildings: THREE.Group;
@@ -32,6 +38,33 @@ const example = (): void => {
     let cssRenderer: CSS3DRenderer;
 
     let gltflLoader: GLTFLoader;
+
+    class Selector {
+        selectedShape: Shape3D | null;
+
+        constructor() {
+            this.selectedShape = null;
+        }
+
+        select(shape: Shape3D | null) {
+            if (!shape?.isShape3D) throw new Error("Can't select a non-Shape3D object.");
+            transformControls.attach(shape);
+            this.selectedShape = shape;
+        }
+
+        deselect() {
+            if (this.selectedShape) {
+                this.onDeselect();
+            }
+            this.selectedShape = null;
+        }
+
+        private onDeselect() {
+            transformControls.detach();
+        }
+    }
+
+    const selector = new Selector();
 
     // Setup the GUI
     const gui = new GUI();
@@ -55,7 +88,7 @@ const example = (): void => {
         closeLine: false,
         volumeHeight: 5,
         centerGizmo: false,
-        gizmoMode: 'none',
+        gizmoMode: 'edit',
         translationSnap: 0,
         showLengthLabels: true,
         showAngleLabels: true,
@@ -193,6 +226,7 @@ const example = (): void => {
 
         // Clear everything and re-add the grid.
         group.clear();
+        shapes.length = 0;
 
         // Create Shape3D object
 
@@ -212,6 +246,7 @@ const example = (): void => {
         }).setFromPoints(points);
 
         group.add(shape3d);
+        shapes.push(shape3d);
 
         // Everything ok, lets update the camera position
         cameraControls.setPosition(0, gridHelperSize * 1, gridHelperSize * 1, true);
@@ -235,7 +270,7 @@ const example = (): void => {
         group.add(axesHelper);
 
         // Attach object
-        transformControls.attach(shape3d);
+        // transformControls.attach(shape3d);
         scene.add(transformControls);
     };
 
@@ -296,7 +331,7 @@ const example = (): void => {
         });
 
         controlsFolder
-            .add(params, 'gizmoMode', ['none', 'translate', 'rotate', 'scale'])
+            .add(params, 'gizmoMode', ['edit', 'translate', 'rotate', 'scale'])
             .onChange((value: string) => {
                 transformControls.setMode(value as any);
             });
@@ -332,6 +367,41 @@ const example = (): void => {
     init();
     createScene();
     initDebug();
+
+    const onPointerMove = (event: PointerEvent): void => {
+        _pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        _pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    const onPointerDown = (_event: PointerEvent): void => {
+        // check raycast intersection
+        _raycaster.setFromCamera(_pointer, cameraControls.camera);
+        const intersects = _raycaster.intersectObjects(shapes);
+        if (intersects.length === 0) return;
+        const intersect = intersects[0];
+        const shape3d = intersect.object as Shape3D;
+        if (!shape3d) return;
+        let object: Shape3D | null = null;
+
+        if (!shape3d.isShape3D) {
+            const parent = shape3d.parent as Shape3D;
+            if (parent.isShape3D) object = parent;
+        } else object = shape3d;
+
+        if (object == null) return;
+
+        selector.select(object);
+    };
+
+    const onKeydown = (event: KeyboardEvent): void => {
+        if (event.key === 'Escape') {
+            selector.deselect();
+        }
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('keydown', onKeydown);
 };
 
 // Crate a new example and run it

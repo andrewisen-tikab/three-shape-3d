@@ -1,6 +1,6 @@
 import VertexObject from './vertex';
 
-export type Mode = 'none' | 'translate' | 'rotate' | 'scale';
+export type Mode = 'create' | 'edit' | 'translate' | 'rotate' | 'scale';
 
 export type TransformShapeControlsGizmoParams = {
     centerGizmo: boolean;

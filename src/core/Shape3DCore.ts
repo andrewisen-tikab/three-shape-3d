@@ -3,6 +3,7 @@ import { type Vertex, type SupportedShapes, type Shape3DParams, SUPPORTED_SHAPES
 import { getMidpoint } from '../utils';
 
 export default class Shape3DCore extends THREE.Object3D {
+    public isShape3D: boolean;
     protected vertices: Vertex[] = [];
 
     protected shape!: SupportedShapes;
@@ -10,6 +11,8 @@ export default class Shape3DCore extends THREE.Object3D {
     constructor(params?: Partial<Shape3DParams>) {
         super();
         const { shape = SUPPORTED_SHAPES.LINE, vertices = [] } = params || {};
+
+        this.isShape3D = true;
 
         this.setShape(shape);
         this.setVertices(vertices);
