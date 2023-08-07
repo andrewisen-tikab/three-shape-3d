@@ -16,7 +16,6 @@ export default class Shape3DCore extends THREE.Object3D {
 
         this.setShape(shape);
         this.setVertices(vertices);
-        this.update();
     }
     /**
      * Attempt to set the shape of the object
@@ -40,6 +39,7 @@ export default class Shape3DCore extends THREE.Object3D {
 
     public setVertices(vertices: Vertex[]): void {
         this.vertices = vertices;
+        this.update();
     }
 
     public getVertices(): Vertex[] {

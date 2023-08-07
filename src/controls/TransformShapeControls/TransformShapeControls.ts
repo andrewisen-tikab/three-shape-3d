@@ -35,6 +35,8 @@ class TransformShapeControls extends THREE.Object3D {
 
     public vertexGroup!: THREE.Group;
 
+    public ghostGroup!: THREE.Group;
+
     public labelsGroup!: THREE.Group;
 
     private labelsManager: LabelsManager;
@@ -138,6 +140,9 @@ class TransformShapeControls extends THREE.Object3D {
 
     private lastSelectedVertex: LastSelectedVertex | null = null;
     private lastSelectedVertexQuaternion: THREE.Quaternion;
+
+    private ghostVertex: VertexObject | null = null;
+    private ghostShape: Shape3D | null = null;
 
     constructor(
         camera: THREE.Camera,
@@ -246,6 +251,9 @@ class TransformShapeControls extends THREE.Object3D {
         this.lastSelectedVertexQuaternion = new THREE.Quaternion();
         this.add(vertexGroup);
 
+        const ghostGroup = new THREE.Group();
+        this.add(ghostGroup);
+
         this.labelsManager = new LabelsManager(this);
         const labelsGroup = new THREE.Group();
         this.add(labelsGroup);
@@ -253,6 +261,7 @@ class TransformShapeControls extends THREE.Object3D {
         defineProperty('camera', camera);
         defineProperty('object', undefined);
         defineProperty('vertexGroup', vertexGroup);
+        defineProperty('ghostGroup', ghostGroup);
         defineProperty('labelsGroup', labelsGroup);
 
         defineProperty('enabled', true);
@@ -383,18 +392,18 @@ class TransformShapeControls extends THREE.Object3D {
             }
 
             // Update vertex group
-            if (this.params.dragVertices) {
-                this.vertexGroup.position.copy(this.worldPosition);
-                this.vertexGroup.quaternion.copy(this.worldQuaternion);
-                this.vertexGroup.scale.copy(this._worldScale);
-            }
+            // if (this.params.dragVertices) {
+            //     this.vertexGroup.position.copy(this.worldPosition);
+            //     this.vertexGroup.quaternion.copy(this.worldQuaternion);
+            //     this.vertexGroup.scale.copy(this._worldScale);
+            // }
 
-            // Update vertex group
-            if (this.params.dragVertices) {
-                this.labelsGroup.position.copy(this.worldPosition);
-                this.labelsGroup.quaternion.copy(this.worldQuaternion);
-                this.labelsGroup.scale.copy(this._worldScale);
-            }
+            // // Update vertex group
+            // if (this.params.dragVertices) {
+            //     this.labelsGroup.position.copy(this.worldPosition);
+            //     this.labelsGroup.quaternion.copy(this.worldQuaternion);
+            //     this.labelsGroup.scale.copy(this._worldScale);
+            // }
 
             this._parentQuaternionInv.copy(this._parentQuaternion).invert();
             this._worldQuaternionInv.copy(this.worldQuaternion).invert();
@@ -424,42 +433,53 @@ class TransformShapeControls extends THREE.Object3D {
      * @param pointer
      */
     pointerHover(pointer: PointerEvent): void {
-        if (this.object === undefined || this.dragging === true) return;
+        if (this.object === undefined || this.dragging === true) {
+            return;
+        }
 
         _raycaster.setFromCamera(pointer as any, this.camera);
 
-        const intersect = intersectObjectWithRay(this._gizmo.picker[this.mode], _raycaster);
-
-        if (intersect) {
-            this.axis = intersect.object.name;
+        if (this.mode === 'create') {
+            // Do
+            const intersect = _raycaster.intersectObject(this._vertexPlane, false)[0];
+            if (intersect) {
+                this.ghostVertex!.position.copy(intersect.point);
+                this.updateGhostShape();
+            }
         } else {
-            this.axis = null;
-        }
+            const intersect = intersectObjectWithRay(this._gizmo.picker[this.mode], _raycaster);
 
-        if (this.lastSelectedVertex) {
-            // @ts-ignore
-            this.lastSelectedVertex.parent.endHover();
-        }
-        if (this.axis !== null) {
-            this.lastSelectedVertex = null;
-            return;
-        }
-        const vertex = intersectObjectWithRay(this.vertexGroup, _raycaster);
-        if (vertex) {
-            // const metadata = vertex.object.userData;
-            // if (metadata.type !== 'vertex') {
-            //     this.lastSelectedVertex = null;
-            //     return;
-            // }
-            const mesh = vertex.object.parent as VertexObject;
+            if (intersect) {
+                this.axis = intersect.object.name;
+            } else {
+                this.axis = null;
+            }
 
-            mesh.beginHover();
-            // @ts-ignore
-            // mesh._material = vertex.object.material;
-            // mesh.material = this.vertexHoverMaterial;
-            this.lastSelectedVertex = vertex.object;
-        } else {
-            this.lastSelectedVertex = null;
+            if (this.lastSelectedVertex) {
+                // @ts-ignore
+                this.lastSelectedVertex.parent.endHover();
+            }
+            if (this.axis !== null) {
+                this.lastSelectedVertex = null;
+                return;
+            }
+            const vertex = intersectObjectWithRay(this.vertexGroup, _raycaster);
+            if (vertex) {
+                // const metadata = vertex.object.userData;
+                // if (metadata.type !== 'vertex') {
+                //     this.lastSelectedVertex = null;
+                //     return;
+                // }
+                const mesh = vertex.object.parent as VertexObject;
+
+                mesh.beginHover();
+                // @ts-ignore
+                // mesh._material = vertex.object.material;
+                // mesh.material = this.vertexHoverMaterial;
+                this.lastSelectedVertex = vertex.object;
+            } else {
+                this.lastSelectedVertex = null;
+            }
         }
     }
 
@@ -468,6 +488,12 @@ class TransformShapeControls extends THREE.Object3D {
      * @param pointer
      */
     pointerDown(pointer: PointerEvent): void {
+        if (this.mode === 'create' && this.object) {
+            this.object.addPoint(this.ghostVertex!.position);
+            // TODO: Check points, add ghost line.
+            this.updateGhostShape();
+            return;
+        }
         if (this.object === undefined || this.dragging === true) return;
 
         if (this.axis !== null) {
@@ -824,6 +850,12 @@ class TransformShapeControls extends THREE.Object3D {
         });
     }
 
+    create(object: Shape3D) {
+        this.attach(object);
+        this.setMode('create');
+        this.beginCreate();
+    }
+
     // Set current object
     attach(object: Shape3D) {
         this.object = object;
@@ -1014,6 +1046,64 @@ class TransformShapeControls extends THREE.Object3D {
             throw new Error('Invalid mode');
 
         this.mode = mode;
+    }
+
+    private beginCreate() {
+        this.addGhostVertex();
+        this.addGhostShape();
+    }
+
+    private addGhostVertex() {
+        this.ghostVertex = new TransformShapeControls.VertexObject(this.domElement, {
+            type: 'ghost',
+        });
+        this.ghostGroup.add(this.ghostVertex);
+    }
+
+    private addGhostShape() {
+        this.ghostShape = new Shape3D({
+            lineColor: CONFIG.GHOST_LINE_COLOR,
+        });
+        this.ghostGroup.add(this.ghostShape);
+    }
+
+    private updateGhostShape() {
+        if (this.ghostShape == null) this.addGhostShape();
+        const vertices = this.object!.getVertices();
+        if (vertices.length < 1) return;
+        const adjustedVertices = [
+            vertices[vertices.length - 1],
+            this.ghostVertex!.position.toArray(),
+        ];
+
+        this.ghostShape!.setVertices(adjustedVertices);
+    }
+
+    public cancelCreate(): void {
+        const object = this.object;
+        if (object == null) return;
+
+        const parent = object.parent;
+        this.disposeGhosts();
+        this.detach();
+
+        if (parent) parent.remove(object);
+    }
+
+    private disposeGhosts() {
+        if (this.ghostVertex) {
+            this.vertexGroup.remove(this.ghostVertex);
+            this.ghostVertex.dispose();
+            this.ghostVertex = null;
+        }
+        if (this.ghostShape) {
+            this.vertexGroup.remove(this.ghostShape);
+            this.ghostShape.dispose();
+            this.ghostShape = null;
+        }
+        if (this.ghostGroup) {
+            this.ghostGroup.clear();
+        }
     }
 
     setTranslationSnap(translationSnap: number | null) {

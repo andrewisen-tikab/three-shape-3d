@@ -18,6 +18,7 @@ const CONFIG = {
     AREA_OPACITY: 1,
     VOLUME_COLOR: 0xffffff,
     VOLUME_OPACITY: 0.5,
+    GHOST_LINE_COLOR: 0xff0000,
     /**
      * The radius of the ellipse in the x and y direction. Expects a `Float`. Default is `1`.
      */
