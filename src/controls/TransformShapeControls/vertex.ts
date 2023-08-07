@@ -16,7 +16,7 @@ const handleGeometry = new THREE.BoxGeometry(1, 1, 1);
 // @ts-ignore
 handleGeometry.computeBoundsTree();
 
-export type VertexType = 'vertex' | 'midpoint';
+export type VertexType = 'vertex' | 'midpoint' | 'ghost';
 
 export type VertexObjectParams = {
     type: VertexType;
@@ -93,6 +93,9 @@ export default class VertexObject extends THREE.Object3D {
             case 'midpoint':
                 this.addMidpoint();
                 break;
+            case 'ghost':
+                this.addGhost();
+                break;
             default:
                 break;
         }
@@ -113,6 +116,13 @@ export default class VertexObject extends THREE.Object3D {
      */
     private addMidpoint(): void {
         this.sprite = midpointSprite.clone();
+    }
+
+    /**
+     * Adds a vertex sprite to the object.
+     */
+    private addGhost(): void {
+        this.sprite = vertexSprite.clone();
     }
 
     /**
@@ -176,5 +186,9 @@ export default class VertexObject extends THREE.Object3D {
     private end() {
         this.domElement.style.cursor = 'default';
         this.sprite.material = this.sprite._material!;
+    }
+
+    public dispose() {
+        this.clear();
     }
 }

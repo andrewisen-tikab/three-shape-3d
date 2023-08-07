@@ -151,6 +151,17 @@ export default class Shape3D extends Shape3DCore {
     }
 
     /**
+     * Set the vertices of the shape.
+     * @param points The vertices of the shape as {@link THREE.Vector3} array.
+     */
+    addPoint(point: THREE.Vector3): Shape3D {
+        const vertices = point.toArray();
+        this.vertices = [...this.vertices, vertices];
+        this.update();
+        return this;
+    }
+
+    /**
      * Set the line color.
      * @param color
      * @param force

@@ -53,21 +53,19 @@ const example = (): void => {
         }
 
         deselect() {
-            if (this.selectedShape) {
-                this.onDeselect();
-            }
+            if (this.selectedShape === null) return;
+            this.onDeselect();
             this.selectedShape = null;
         }
 
-        private onDeselect() {
-            transformControls.detach();
-        }
+        private onDeselect() {}
     }
 
     const selector = new Selector();
 
     // Setup the GUI
     const gui = new GUI();
+    const actionsFolder = gui.addFolder('Actions');
     const configFolder = gui.addFolder('Config');
     const lineFolder = gui.addFolder('Line').open();
     const areaFolder = gui.addFolder('Area').close();
@@ -94,6 +92,29 @@ const example = (): void => {
         showAngleLabels: true,
         showBackgroundPlane: true,
         showBackgroundBuildings: true,
+        createNewShape: () => {
+            selector.deselect();
+            const shape = new Shape3D({
+                lineColor: params.lineColor,
+                areaColor: params.areaColor,
+                volumeColor: params.volumeColor,
+                appearance: {
+                    alwaysShowLine: params.alwaysShowLine,
+                    alwaysShowArea: params.alwaysShowArea,
+                },
+            });
+
+            group.add(shape);
+            shapes.push(shape);
+            transformControls.create(shape);
+        },
+        deleteAllShapes: () => {
+            shapes.forEach((shape) => {
+                shape.dispose();
+                group.remove(shape);
+            });
+            shapes.length = 0;
+        },
     };
 
     // Setup Stats.js
@@ -245,8 +266,9 @@ const example = (): void => {
             },
         }).setFromPoints(points);
 
-        group.add(shape3d);
-        shapes.push(shape3d);
+        // Hide temporary
+        // group.add(shape3d);
+        // shapes.push(shape3d);
 
         // Everything ok, lets update the camera position
         cameraControls.setPosition(0, gridHelperSize * 1, gridHelperSize * 1, true);
@@ -361,6 +383,9 @@ const example = (): void => {
             .onChange((value: boolean) => {
                 backgroundBuildings.visible = value;
             });
+
+        actionsFolder.add(params, 'createNewShape').name('Create new shape');
+        actionsFolder.add(params, 'deleteAllShapes').name('Delete all shape');
     };
 
     // Functions are  created, let's call them!
@@ -395,6 +420,7 @@ const example = (): void => {
 
     const onKeydown = (event: KeyboardEvent): void => {
         if (event.key === 'Escape') {
+            transformControls.cancelCreate();
             selector.deselect();
         }
     };
