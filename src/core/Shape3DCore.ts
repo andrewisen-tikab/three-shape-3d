@@ -23,12 +23,6 @@ export default class Shape3DCore extends THREE.Object3D {
      * @returns The shape that was set.
      */
     public setShape(shape: SupportedShapes): SupportedShapes {
-        if (shape === SUPPORTED_SHAPES.AREA || shape === SUPPORTED_SHAPES.VOLUME) {
-            if (this.vertices.length < 3) {
-                console.warn('Shape must have at least 3 vertices');
-                return this.shape;
-            }
-        }
         this.shape = shape;
         return shape;
     }
