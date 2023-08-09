@@ -74,6 +74,29 @@ const example = (): void => {
 
     const controlsFolder = gui.addFolder('Controls');
 
+    const createNewShape = (shape: SupportedShapes) => {
+        selector.deselect();
+
+        const initialShape = new Shape3D({
+            lineColor: params.lineColor,
+            areaColor: params.areaColor,
+            volumeColor: params.volumeColor,
+            appearance: {
+                alwaysShowLine: params.alwaysShowLine,
+                alwaysShowArea: params.alwaysShowArea,
+            },
+        });
+
+        initialShape.setShape(shape);
+
+        group.add(initialShape);
+        shapes.push(initialShape);
+
+        console.log(initialShape.getShape());
+
+        transformControls.createShape3D(initialShape);
+    };
+
     const params = {
         boundsX: 50,
         boundsZ: 50,
@@ -92,23 +115,19 @@ const example = (): void => {
         showAngleLabels: true,
         showBackgroundPlane: true,
         showBackgroundBuildings: true,
-        createNewShape: () => {
-            selector.deselect();
-            const shape = new Shape3D({
-                lineColor: params.lineColor,
-                areaColor: params.areaColor,
-                volumeColor: params.volumeColor,
-                appearance: {
-                    alwaysShowLine: params.alwaysShowLine,
-                    alwaysShowArea: params.alwaysShowArea,
-                },
-            });
-
-            group.add(shape);
-            shapes.push(shape);
-            transformControls.create(shape);
+        createNewLine: () => {
+            createNewShape('line');
+        },
+        createNewArea: () => {
+            createNewShape('area');
+        },
+        createNewVolume: () => {
+            createNewShape('volume');
         },
         deleteAllShapes: () => {
+            selector.deselect();
+            transformControls.detach();
+
             shapes.forEach((shape) => {
                 shape.dispose();
                 group.remove(shape);
@@ -384,7 +403,10 @@ const example = (): void => {
                 backgroundBuildings.visible = value;
             });
 
-        actionsFolder.add(params, 'createNewShape').name('Create new shape');
+        actionsFolder.add(params, 'createNewLine').name('Create new Line');
+        actionsFolder.add(params, 'createNewArea').name('Create new Area');
+        actionsFolder.add(params, 'createNewVolume').name('Create new Volume');
+
         actionsFolder.add(params, 'deleteAllShapes').name('Delete all shape');
     };
 
@@ -435,7 +457,6 @@ const example = (): void => {
                     selector.deselect();
                     const object = transformControls.completeCreate();
                     if (object) {
-                        shapes.push(object);
                         selector.select(object);
                         transformControls.attach(object);
                     }

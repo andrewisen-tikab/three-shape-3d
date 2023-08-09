@@ -850,7 +850,13 @@ class TransformShapeControls extends THREE.Object3D {
         });
     }
 
-    create(object: Shape3D) {
+    /**
+     * Create a new {@link Shape3D} and attach it to the {@link Shape3DControls}.
+     * Set the mode to 'create' and begin creating the shape.
+     * @param _object
+     */
+    public createShape3D(_object?: Shape3D): void {
+        const object = _object ?? new Shape3D();
         this.attach(object);
         this.setMode('create');
         this.beginCreate();
@@ -1029,13 +1035,18 @@ class TransformShapeControls extends THREE.Object3D {
         return _raycaster;
     }
 
-    // TODO: deprecate
-
+    /**
+     * @returns The current {@link Mode} of the transform controls.
+     */
     getMode() {
         return this.mode;
     }
 
-    setMode(mode: Mode) {
+    /**
+     * Set the {@link Mode} of the transform controls.
+     * @param mode
+     */
+    public setMode(mode: Mode): void {
         if (
             mode !== 'create' &&
             mode !== 'edit' &&
@@ -1048,26 +1059,37 @@ class TransformShapeControls extends THREE.Object3D {
         this.mode = mode;
     }
 
+    /**
+     * Begin the creation of a new shape by setting up the ghost vertex and the ghost shape.
+     */
     private beginCreate() {
         this.addGhostVertex();
         this.addGhostShape();
     }
 
-    private addGhostVertex() {
+    /**
+     * Add the ghost vertex to the scene.
+     */
+    private addGhostVertex(): void {
         this.ghostVertex = new TransformShapeControls.VertexObject(this.domElement, {
             type: 'ghost',
         });
         this.ghostGroup.add(this.ghostVertex);
     }
 
-    private addGhostShape() {
+    /**
+     * Add the ghost shape to the scene.
+     */
+    private addGhostShape(): void {
         this.ghostShape = new Shape3D({
             lineColor: CONFIG.GHOST_LINE_COLOR,
         });
+
+        this.ghostShape.setShape(this.object!.getShape());
         this.ghostGroup.add(this.ghostShape);
     }
 
-    private updateGhostShape() {
+    private updateGhostShape(): void {
         if (this.ghostShape == null) this.addGhostShape();
         const vertices = this.object!.getVertices();
         if (vertices.length < 1) return;
@@ -1103,7 +1125,10 @@ class TransformShapeControls extends THREE.Object3D {
         if (parent) parent.remove(object);
     }
 
-    private disposeGhosts() {
+    /**
+     * Dispose of the ghost vertex and ghost shape.
+     */
+    private disposeGhosts(): void {
         if (this.ghostVertex) {
             this.vertexGroup.remove(this.ghostVertex);
             this.ghostVertex.dispose();
