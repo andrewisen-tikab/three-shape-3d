@@ -419,9 +419,30 @@ const example = (): void => {
     };
 
     const onKeydown = (event: KeyboardEvent): void => {
-        if (event.key === 'Escape') {
-            transformControls.cancelCreate();
-            selector.deselect();
+        const mode = transformControls.getMode();
+        switch (event.key) {
+            case 'Escape':
+                if (mode === 'create') {
+                    transformControls.cancelCreate();
+                    selector.deselect();
+                } else if (mode === 'edit') {
+                    transformControls.detach();
+                    selector.deselect();
+                }
+                break;
+            case 'Enter':
+                if (mode === 'create') {
+                    selector.deselect();
+                    const object = transformControls.completeCreate();
+                    if (object) {
+                        shapes.push(object);
+                        selector.select(object);
+                        transformControls.attach(object);
+                    }
+                }
+                break;
+            default:
+                break;
         }
     };
 

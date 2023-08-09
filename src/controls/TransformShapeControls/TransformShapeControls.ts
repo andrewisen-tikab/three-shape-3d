@@ -1079,7 +1079,20 @@ class TransformShapeControls extends THREE.Object3D {
         this.ghostShape!.setVertices(adjustedVertices);
     }
 
+    public completeCreate(): Shape3D | null {
+        if (this.mode !== 'create') return null;
+        this.setMode('edit');
+        const object = this.object;
+        if (object == null) return null;
+        this.disposeGhosts();
+        this.detach();
+        return object;
+    }
+
     public cancelCreate(): void {
+        if (this.mode !== 'create') return;
+        this.setMode('edit');
+
         const object = this.object;
         if (object == null) return;
 
