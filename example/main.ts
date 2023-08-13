@@ -11,7 +11,11 @@ import { Shape3D, TransformShapeControls, Shape3DFactory, RaycastUtils } from '.
 import CONFIG from '../src/config';
 import { Mode } from '../src/controls/TransformShapeControls/types';
 
-const SUPPORTED_SHAPES = { LINE: 'line', AREA: 'area', VOLUME: 'volume' } as const;
+const SUPPORTED_SHAPES = {
+    LINE: 'line',
+    AREA: 'area',
+    // VOLUME: 'volume'
+} as const;
 type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
 
 CameraControls.install({ THREE: THREE });
@@ -78,17 +82,15 @@ const example = (): void => {
 
     // const controlsFolder = gui.addFolder('Controls');
 
-    const createNewShape = (_shape: SupportedShapes) => {
+    const createNewShape = (shape: SupportedShapes) => {
         selector.deselect();
 
         const initialShape = factory.create({
-            shapeType: 'line',
+            shapeType: shape,
         });
 
         group.add(initialShape);
         shapes.push(initialShape);
-
-        console.log(initialShape.getShapeType());
 
         transformControls.createShape3D(initialShape);
     };
@@ -118,7 +120,7 @@ const example = (): void => {
             createNewShape('area');
         },
         createNewVolume: () => {
-            createNewShape('volume');
+            // createNewShape('volume');
         },
         deleteAllShapes: () => {
             selector.deselect();
@@ -405,7 +407,7 @@ const example = (): void => {
     //         });
 
     actionsFolder.add(params, 'createNewLine').name('Create new Line');
-    //     actionsFolder.add(params, 'createNewArea').name('Create new Area');
+    actionsFolder.add(params, 'createNewArea').name('Create new Area');
     //     actionsFolder.add(params, 'createNewVolume').name('Create new Volume');
 
     //     actionsFolder.add(params, 'deleteAllShapes').name('Delete all shape');

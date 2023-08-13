@@ -1085,30 +1085,20 @@ class TransformShapeControls extends THREE.Object3D {
      * Add the ghost shape to the scene.
      */
     private addGhostShape(): void {
-        // this.ghostShape = new Shape3D({
-        //     lineColor: CONFIG.GHOST_LINE_COLOR,
-        // });
-
-        console.log(this.factory);
-
         this.ghostShape = this.factory.create({
-            shapeType: 'line',
+            shapeType: this.object!.getShapeType(),
+            isGhost: true,
         });
 
-        this.ghostShape.setShapeType(this.object!.getShapeType());
         this.ghostGroup.add(this.ghostShape);
     }
 
+    // TODO: Move logic to factory
     private updateGhostShape(): void {
         if (this.ghostShape == null) this.addGhostShape();
         const vertices = this.object!.getVertices();
-        if (vertices.length < 1) return;
-        const adjustedVertices = [
-            vertices[vertices.length - 1],
-            this.ghostVertex!.position.toArray(),
-        ];
 
-        this.ghostShape!.setVertices(adjustedVertices);
+        this.factory.updateGhost(this.ghostShape!, this.ghostVertex!, vertices);
     }
 
     public completeCreate(): Shape3D | null {
