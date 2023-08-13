@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 
-import Shape3D from '../../Shape3D';
+import Shape3D from '../../core/Shape3D';
 import { getMidpoint, setLineAngle, setLineLength } from '../../utils';
 import LabelsManager from './LabelsManager';
 import VertexObject, { VertexMetadata } from './vertex';
 import CONFIG from '../../config';
 import { LastSelectedVertex, Mode, TransformShapeControlsGizmoParams } from './types';
+import Shape3DFactory from '../../factory/Shape3DFactory';
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
@@ -143,14 +144,17 @@ class TransformShapeControls extends THREE.Object3D {
 
     private ghostVertex: VertexObject | null = null;
     private ghostShape: Shape3D | null = null;
+    private factory: Shape3DFactory;
 
     constructor(
         camera: THREE.Camera,
         domElement: HTMLCanvasElement,
+        factory: Shape3DFactory,
         params: Partial<TransformShapeControlsGizmoParams> = {},
     ) {
         super();
 
+        this.factory = factory;
         // this.vertexGroup = new THREE.Group();
         // this.add(this.vertexGroup);
 
@@ -1081,11 +1085,17 @@ class TransformShapeControls extends THREE.Object3D {
      * Add the ghost shape to the scene.
      */
     private addGhostShape(): void {
-        this.ghostShape = new Shape3D({
-            lineColor: CONFIG.GHOST_LINE_COLOR,
+        // this.ghostShape = new Shape3D({
+        //     lineColor: CONFIG.GHOST_LINE_COLOR,
+        // });
+
+        console.log(this.factory);
+
+        this.ghostShape = this.factory.create({
+            shapeType: 'line',
         });
 
-        this.ghostShape.setShape(this.object!.getShape());
+        this.ghostShape.setShapeType(this.object!.getShapeType());
         this.ghostGroup.add(this.ghostShape);
     }
 
