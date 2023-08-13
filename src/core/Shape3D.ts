@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import Line from '../shapes/line';
 
 import { getMidpoint } from '../utils';
+import Area from '../shapes/area';
 
 /**
  * Extract the shape's TYPE static property.
@@ -28,7 +29,7 @@ export default class Shape3D extends THREE.Object3D {
      * Modify this array to add/remove shapes.
      * TypeScript will automatically infer the type of the array.
      */
-    public static readonly SUPPORTED_SHAPES = [Line] as const;
+    public static readonly SUPPORTED_SHAPES = [Line, Area] as const;
 
     /**
      * Helper property to check if an object is a {@link Shape3D}.
