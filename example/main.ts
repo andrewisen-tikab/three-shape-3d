@@ -7,12 +7,16 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import CameraControls from 'camera-controls';
 
-import { Shape3D, TransformShapeControls } from '../src';
-import { SUPPORTED_SHAPES, SupportedShapes } from '../src/types';
+import { Shape3D, TransformShapeControls, Shape3DFactory, RaycastUtils } from '../src';
 import CONFIG from '../src/config';
 import { Mode } from '../src/controls/TransformShapeControls/types';
 
+const SUPPORTED_SHAPES = { LINE: 'line', AREA: 'area', VOLUME: 'volume' } as const;
+type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
+
 CameraControls.install({ THREE: THREE });
+
+const factory = new Shape3DFactory();
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore
@@ -66,33 +70,25 @@ const example = (): void => {
     // Setup the GUI
     const gui = new GUI();
     const actionsFolder = gui.addFolder('Actions');
-    const configFolder = gui.addFolder('Config');
-    const lineFolder = gui.addFolder('Line').open();
-    const areaFolder = gui.addFolder('Area').close();
-    const volumeFolder = gui.addFolder('Volumes').close();
-    const backgroundFolder = gui.addFolder('Background').close();
+    // const configFolder = gui.addFolder('Config');
+    // const lineFolder = gui.addFolder('Line').open();
+    // const areaFolder = gui.addFolder('Area').close();
+    // const volumeFolder = gui.addFolder('Volumes').close();
+    // const backgroundFolder = gui.addFolder('Background').close();
 
-    const controlsFolder = gui.addFolder('Controls');
+    // const controlsFolder = gui.addFolder('Controls');
 
-    const createNewShape = (shape: SupportedShapes) => {
+    const createNewShape = (_shape: SupportedShapes) => {
         selector.deselect();
 
-        const initialShape = new Shape3D({
-            lineColor: params.lineColor,
-            areaColor: params.areaColor,
-            volumeColor: params.volumeColor,
-            appearance: {
-                alwaysShowLine: params.alwaysShowLine,
-                alwaysShowArea: params.alwaysShowArea,
-            },
+        const initialShape = factory.create({
+            shapeType: 'line',
         });
-
-        initialShape.setShape(shape);
 
         group.add(initialShape);
         shapes.push(initialShape);
 
-        console.log(initialShape.getShape());
+        console.log(initialShape.getShapeType());
 
         transformControls.createShape3D(initialShape);
     };
@@ -176,7 +172,7 @@ const example = (): void => {
 
         cameraControls = new CameraControls(camera, renderer.domElement);
         // Add custom transform shape controls
-        transformControls = new TransformShapeControls(camera, renderer.domElement, {
+        transformControls = new TransformShapeControls(camera, renderer.domElement, factory, {
             centerGizmo: params.centerGizmo,
             showLengthLabels: params.showLengthLabels,
             showAngleLabels: params.showAngleLabels,
@@ -275,15 +271,20 @@ const example = (): void => {
         points.push(new THREE.Vector3(20, 0, 20));
         points.push(new THREE.Vector3(0, 0, 20));
 
-        shape3d = new Shape3D({
-            lineColor: params.lineColor,
-            areaColor: params.areaColor,
-            volumeColor: params.volumeColor,
-            appearance: {
-                alwaysShowLine: params.alwaysShowLine,
-                alwaysShowArea: params.alwaysShowArea,
-            },
-        }).setFromPoints(points);
+        // shape3d = new Shape3D({
+        //     lineColor: params.lineColor,
+        //     areaColor: params.areaColor,
+        //     volumeColor: params.volumeColor,
+        //     appearance: {
+        //         alwaysShowLine: params.alwaysShowLine,
+        //         alwaysShowArea: params.alwaysShowArea,
+        //     },
+        // })
+
+        shape3d = factory.create({
+            shapeType: 'line',
+        });
+        shape3d.setFromPoints(points);
 
         // Hide temporary
         // group.add(shape3d);
@@ -315,105 +316,105 @@ const example = (): void => {
         scene.add(transformControls);
     };
 
-    const initDebug = (): void => {
-        configFolder
-            .add(params, 'shape', Object.values(SUPPORTED_SHAPES))
-            .onChange((shape: SupportedShapes) => {
-                const currentShape = shape3d.setShape(shape);
-                params.shape = currentShape as any;
-                lineFolder.close();
-                areaFolder.close();
-                volumeFolder.close();
-                switch (currentShape) {
-                    case SUPPORTED_SHAPES.LINE:
-                        lineFolder.open();
-                        break;
-                    case SUPPORTED_SHAPES.AREA:
-                        areaFolder.open();
-                        break;
-                    case SUPPORTED_SHAPES.VOLUME:
-                        volumeFolder.open();
-                        break;
-                    default:
-                        break;
-                }
-            });
+    // const initDebug = (): void => {
+    //     configFolder
+    //         .add(params, 'shape', Object.values(SUPPORTED_SHAPES))
+    //         .onChange((shape: SupportedShapes) => {
+    //             const currentShape = shape3d.setShapeType(shape);
+    //             params.shape = currentShape as any;
+    //             lineFolder.close();
+    //             areaFolder.close();
+    //             volumeFolder.close();
+    //             switch (currentShape) {
+    //                 case SUPPORTED_SHAPES.LINE:
+    //                     lineFolder.open();
+    //                     break;
+    //                 case SUPPORTED_SHAPES.AREA:
+    //                     areaFolder.open();
+    //                     break;
+    //                 case SUPPORTED_SHAPES.VOLUME:
+    //                     volumeFolder.open();
+    //                     break;
+    //                 default:
+    //                     break;
+    //             }
+    //         });
 
-        lineFolder.addColor(params, 'lineColor').onChange((color: number) => {
-            shape3d.setLineColor(color, true);
-        });
+    //     // lineFolder.addColor(params, 'lineColor').onChange((color: number) => {
+    //     //     shape3d.setLineColor(color, true);
+    //     // });
 
-        lineFolder.add(params, 'alwaysShowLine').onChange((value: boolean) => {
-            shape3d.setAppearance({ alwaysShowLine: value });
-        });
+    //     // lineFolder.add(params, 'alwaysShowLine').onChange((value: boolean) => {
+    //     //     shape3d.setAppearance({ alwaysShowLine: value });
+    //     // });
 
-        areaFolder.addColor(params, 'areaColor').onChange((color: number) => {
-            shape3d.setAreaColor(color, true);
-        });
+    //     // areaFolder.addColor(params, 'areaColor').onChange((color: number) => {
+    //     //     shape3d.setAreaColor(color, true);
+    //     // });
 
-        areaFolder.add(params, 'alwaysShowArea').onChange((value: boolean) => {
-            shape3d.setAppearance({ alwaysShowArea: value });
-        });
+    //     // areaFolder.add(params, 'alwaysShowArea').onChange((value: boolean) => {
+    //     //     shape3d.setAppearance({ alwaysShowArea: value });
+    //     // });
 
-        volumeFolder.addColor(params, 'volumeColor').onChange((color: number) => {
-            shape3d.setVolumeColor(color, true);
-        });
+    //     // volumeFolder.addColor(params, 'volumeColor').onChange((color: number) => {
+    //     //     shape3d.setVolumeColor(color, true);
+    //     // });
 
-        lineFolder.add(params, 'closeLine').onChange((value: boolean) => {
-            shape3d.setCloseLine(value);
-        });
+    //     // lineFolder.add(params, 'closeLine').onChange((value: boolean) => {
+    //     //     shape3d.setCloseLine(value);
+    //     // });
 
-        volumeFolder.add(params, 'volumeHeight', 1, 100).onChange((value: number) => {
-            shape3d.setVolumeHeight(value);
-        });
+    //     // volumeFolder.add(params, 'volumeHeight', 1, 100).onChange((value: number) => {
+    //     //     shape3d.setVolumeHeight(value);
+    //     // });
 
-        controlsFolder.add(params, 'centerGizmo').onChange((value: boolean) => {
-            transformControls.setCenterGizmo(value);
-        });
+    //     controlsFolder.add(params, 'centerGizmo').onChange((value: boolean) => {
+    //         transformControls.setCenterGizmo(value);
+    //     });
 
-        controlsFolder
-            .add(params, 'gizmoMode', ['edit', 'translate', 'rotate', 'scale'])
-            .onChange((value: string) => {
-                transformControls.setMode(value as any);
-            });
+    //     controlsFolder
+    //         .add(params, 'gizmoMode', ['edit', 'translate', 'rotate', 'scale'])
+    //         .onChange((value: string) => {
+    //             transformControls.setMode(value as any);
+    //         });
 
-        controlsFolder.add(params, 'translationSnap', 0, 10).onChange((value: number) => {
-            transformControls.setTranslationSnap(value === 0 ? null : value);
-        });
+    //     controlsFolder.add(params, 'translationSnap', 0, 10).onChange((value: number) => {
+    //         transformControls.setTranslationSnap(value === 0 ? null : value);
+    //     });
 
-        controlsFolder.add(params, 'showLengthLabels').onChange((value: boolean) => {
-            transformControls.setShowLengthLabels(value);
-        });
+    //     controlsFolder.add(params, 'showLengthLabels').onChange((value: boolean) => {
+    //         transformControls.setShowLengthLabels(value);
+    //     });
 
-        controlsFolder.add(params, 'showAngleLabels').onChange((value: boolean) => {
-            transformControls.setShowAngleLabels(value);
-        });
+    //     controlsFolder.add(params, 'showAngleLabels').onChange((value: boolean) => {
+    //         transformControls.setShowAngleLabels(value);
+    //     });
 
-        backgroundFolder
-            .add(params, 'showBackgroundPlane')
-            .name('Show background plane')
-            .onChange((value: boolean) => {
-                backgroundPlane.visible = value;
-            });
+    //     backgroundFolder
+    //         .add(params, 'showBackgroundPlane')
+    //         .name('Show background plane')
+    //         .onChange((value: boolean) => {
+    //             backgroundPlane.visible = value;
+    //         });
 
-        backgroundFolder
-            .add(params, 'showBackgroundBuildings')
-            .name('Show background buildings')
-            .onChange((value: boolean) => {
-                backgroundBuildings.visible = value;
-            });
+    //     backgroundFolder
+    //         .add(params, 'showBackgroundBuildings')
+    //         .name('Show background buildings')
+    //         .onChange((value: boolean) => {
+    //             backgroundBuildings.visible = value;
+    //         });
 
-        actionsFolder.add(params, 'createNewLine').name('Create new Line');
-        actionsFolder.add(params, 'createNewArea').name('Create new Area');
-        actionsFolder.add(params, 'createNewVolume').name('Create new Volume');
+    actionsFolder.add(params, 'createNewLine').name('Create new Line');
+    //     actionsFolder.add(params, 'createNewArea').name('Create new Area');
+    //     actionsFolder.add(params, 'createNewVolume').name('Create new Volume');
 
-        actionsFolder.add(params, 'deleteAllShapes').name('Delete all shape');
-    };
+    //     actionsFolder.add(params, 'deleteAllShapes').name('Delete all shape');
+    // };
 
     // Functions are  created, let's call them!
     init();
     createScene();
-    initDebug();
+    // initDebug();
 
     const onPointerMove = (event: PointerEvent): void => {
         _pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -426,18 +427,11 @@ const example = (): void => {
         const intersects = _raycaster.intersectObjects(shapes);
         if (intersects.length === 0) return;
         const intersect = intersects[0];
-        const shape3d = intersect.object as Shape3D;
+        const shape3d = RaycastUtils.getShape3DParent(intersect.object);
+
         if (!shape3d) return;
-        let object: Shape3D | null = null;
 
-        if (!shape3d.isShape3D) {
-            const parent = shape3d.parent as Shape3D;
-            if (parent.isShape3D) object = parent;
-        } else object = shape3d;
-
-        if (object == null) return;
-
-        selector.select(object);
+        selector.select(shape3d);
     };
 
     const onKeydown = (event: KeyboardEvent): void => {

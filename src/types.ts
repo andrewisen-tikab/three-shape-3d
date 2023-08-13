@@ -7,9 +7,6 @@ export type Vertex = THREE.Vector3Tuple;
 export type HEX = number;
 export type ColorRepresentation = HEX;
 
-export const SUPPORTED_SHAPES = { LINE: 'line', AREA: 'area', VOLUME: 'volume' } as const;
-export type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
-
 export type Appearance = {
     alwaysShowLine: boolean;
     alwaysShowArea: boolean;
@@ -17,7 +14,7 @@ export type Appearance = {
 
 export type Shape3DParams = {
     vertices: Vertex[];
-    shape: SupportedShapes;
+
     lineColor: ColorRepresentation;
     areaColor: ColorRepresentation;
     volumeColor: ColorRepresentation;
