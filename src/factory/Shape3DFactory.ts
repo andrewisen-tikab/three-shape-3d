@@ -25,16 +25,19 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
 
         switch (shapeType) {
             case Line.TYPE:
-                this.updateLine(shape3D);
+                this.updateLine(shape3D, params);
                 break;
             default:
                 break;
         }
     }
 
-    private updateLine(shape3D: Shape3D) {
+    private updateLine(shape3D: Shape3D, params: Partial<CreateParams>) {
         const shape = new Line(shape3D);
         shape3D.addShape(shape);
+        if (params?.isGhost) {
+            shape.setLineColor(0xff0000);
+        }
     }
 }
 
@@ -55,6 +58,7 @@ export type Factory = {
 
 export type CreateParams = {
     shapeType: SupportedShapes;
+    isGhost: boolean;
 };
 
 export type SupportedShapes = ExtractShapeType<

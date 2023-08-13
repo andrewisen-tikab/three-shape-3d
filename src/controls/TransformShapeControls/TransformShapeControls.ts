@@ -1093,6 +1093,7 @@ class TransformShapeControls extends THREE.Object3D {
 
         this.ghostShape = this.factory.create({
             shapeType: 'line',
+            isGhost: true,
         });
 
         this.ghostShape.setShapeType(this.object!.getShapeType());
