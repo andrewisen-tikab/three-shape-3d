@@ -70,7 +70,15 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
                 break;
             case Area.TYPE:
             case Volume.TYPE:
-                vertices = [...shape3DVertices, ghostVertex.position.toArray()];
+                const allVertices = [...shape3DVertices];
+                const { length } = allVertices;
+                if (length >= 2) {
+                    vertices = [
+                        allVertices[length - 1],
+                        ghostVertex.position.toArray(),
+                        allVertices[0],
+                    ];
+                }
                 break;
             default:
                 break;
