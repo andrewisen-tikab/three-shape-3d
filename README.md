@@ -54,10 +54,11 @@ TODO
 
 ## Example
 
-See the [example](./example) folder for an example.
+See the [examples](./examples) folder for an example.
 Or, view the live demo here:
 
-[https://andrewisen-tikab.github.io/three-shape-3d/example/](https://andrewisen-tikab.github.io/three-shape-3d/example/)
+-   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/create/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/create/)
+-   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/edit/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/edit/)
 
 ## Docs
 
