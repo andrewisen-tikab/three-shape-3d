@@ -4,6 +4,7 @@ import type { ExtractShapeType } from '../core/Shape3D';
 import Line from '../shapes/line';
 import Area from '../shapes/area';
 import { Vertex } from '../types';
+import Volume from '../shapes/volume';
 
 export default class Shape3DFactory extends THREE.EventDispatcher implements Factory {
     isShape3DFactory: boolean;
@@ -31,6 +32,9 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
                 break;
             case Area.TYPE:
                 this.updateArea(shape3D, params);
+                break;
+            case Volume.TYPE:
+                this.updateVolume(shape3D, params);
                 break;
             default:
                 break;
@@ -65,8 +69,8 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
                 ];
                 break;
             case Area.TYPE:
+            case Volume.TYPE:
                 vertices = [...shape3DVertices, ghostVertex.position.toArray()];
-
                 break;
             default:
                 break;
@@ -87,6 +91,16 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
         shape3D.addShape(shape);
         if (params?.isGhost) {
             this.updateLine(shape3D, params);
+            // shape.setAreaColor(0xff0000);
+        }
+    }
+
+    private updateVolume(shape3D: Shape3D, params: Partial<CreateParams>) {
+        const shape = new Volume(shape3D);
+        shape3D.addShape(shape);
+        if (params?.isGhost) {
+            this.updateLine(shape3D, params);
+            shape.setVolumeColor(0xff0000);
             // shape.setAreaColor(0xff0000);
         }
     }
