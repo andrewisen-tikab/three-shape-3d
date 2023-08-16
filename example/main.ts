@@ -14,8 +14,9 @@ import { Mode } from '../src/controls/TransformShapeControls/types';
 const SUPPORTED_SHAPES = {
     LINE: 'line',
     AREA: 'area',
-    // VOLUME: 'volume'
+    VOLUME: 'volume',
 } as const;
+
 type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
 
 CameraControls.install({ THREE: THREE });
@@ -120,7 +121,7 @@ const example = (): void => {
             createNewShape('area');
         },
         createNewVolume: () => {
-            // createNewShape('volume');
+            createNewShape('volume');
         },
         deleteAllShapes: () => {
             selector.deselect();
@@ -408,7 +409,7 @@ const example = (): void => {
 
     actionsFolder.add(params, 'createNewLine').name('Create new Line');
     actionsFolder.add(params, 'createNewArea').name('Create new Area');
-    //     actionsFolder.add(params, 'createNewVolume').name('Create new Volume');
+    actionsFolder.add(params, 'createNewVolume').name('Create new Volume');
 
     //     actionsFolder.add(params, 'deleteAllShapes').name('Delete all shape');
     // };
