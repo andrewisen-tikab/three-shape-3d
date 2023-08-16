@@ -12,7 +12,7 @@ EXAMPLES.forEach((example) => {
 export default defineConfig({
     base: './',
     build: {
-        outDir: './dist/examples/examples',
+        outDir: './dist/examples',
         rollupOptions: {
             input,
         },
