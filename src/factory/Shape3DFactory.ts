@@ -3,7 +3,7 @@ import Shape3D from '../core/Shape3D';
 import type { ExtractShapeType } from '../core/Shape3D';
 import Line from '../shapes/line';
 import Area from '../shapes/area';
-import { Vertex } from '../types';
+import { AddObjectsOnShapeParams, Vertex } from '../types';
 import Volume from '../shapes/volume';
 
 export default class Shape3DFactory extends THREE.EventDispatcher implements Factory {
@@ -115,6 +115,48 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
             this.updateLine(shape3D, params);
             shape.setVolumeColor(0xff0000);
             // shape.setAreaColor(0xff0000);
+        }
+    }
+
+    public addObjectsOnShape(
+        parent: THREE.Object3D,
+        object: THREE.Object3D,
+        shape3D: Shape3D | Readonly<Shape3D>,
+        params: Partial<AddObjectsOnShapeParams> = {},
+    ): void {
+        parent.clear();
+        const vertices = shape3D.getVertices();
+
+        const previousVertex = new THREE.Vector3();
+        const currentVertex = new THREE.Vector3();
+        const line = new THREE.Vector3();
+
+        const quaternion = new THREE.Quaternion();
+        const up = new THREE.Vector3(0, 0, 1);
+        for (let i = 1; i < vertices.length; i++) {
+            const _previousVertex = vertices[i - 1];
+            const _currentVertex = vertices[i];
+
+            previousVertex.fromArray(_previousVertex);
+            currentVertex.fromArray(_currentVertex);
+
+            line.subVectors(currentVertex, previousVertex);
+            const distance = line.length();
+            const width = params?.width ?? 1;
+            const numberOfObjects = Math.floor(distance / width);
+
+            for (let j = 0; j < numberOfObjects; j++) {
+                const objectClone = object.clone();
+                const position = previousVertex.clone().addScaledVector(line, j / numberOfObjects);
+                objectClone.position.copy(position);
+
+                // Rotate object to match the line
+                quaternion.setFromUnitVectors(up, line.clone().normalize());
+                objectClone.quaternion.copy(quaternion);
+                objectClone.rotateY(Math.PI / 2);
+
+                parent.add(objectClone);
+            }
         }
     }
 }

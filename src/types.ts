@@ -14,11 +14,14 @@ export type Appearance = {
 
 export type Shape3DParams = {
     vertices: Vertex[];
-
     lineColor: ColorRepresentation;
     areaColor: ColorRepresentation;
     volumeColor: ColorRepresentation;
     closeLine: boolean;
     volumeHeight: number;
     appearance: Appearance;
+};
+
+export type AddObjectsOnShapeParams = {
+    width: number;
 };
