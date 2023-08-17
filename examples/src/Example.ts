@@ -409,4 +409,27 @@ export default class Example {
             this.transformShapeControls.attach(shape3d);
         }
     }
+
+    public memoryTest(bound: number = 1): void {
+        // Random value between 0 and 20
+        const random = (min: number, max: number): number => {
+            return Math.random() * (max - min) + min;
+        };
+
+        const x = random(0, bound);
+        const z = random(0, bound);
+
+        const points: THREE.Vector3[] = [];
+        points.push(new THREE.Vector3(0, 0, 0));
+        points.push(new THREE.Vector3(x, 0, z));
+        points.push(new THREE.Vector3(0, 0, z));
+
+        const shape3d = this.factory.create({
+            shapeType: 'line',
+        });
+        shape3d.setFromPoints(points);
+
+        this.group.add(shape3d);
+        this.shapes.push(shape3d);
+    }
 }

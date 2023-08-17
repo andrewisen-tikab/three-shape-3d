@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
-const EXAMPLES = ['create', 'edit'] as const;
+const EXAMPLES = ['create', 'edit', 'memory'] as const;
 
 const input: { [key: string]: resolve } = {};
 
