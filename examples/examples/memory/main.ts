@@ -30,4 +30,4 @@ setInterval(() => {
     if (!memoryParams.addShapes) return;
     example.memoryTest(bound);
     bound += 0.01;
-}, 10);
+}, 5);
