@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import Example from '../../src/Example';
+import ObjectsOnShapeFactory from '../../src/ObjectsOnShapeFactory';
 
 const example = new Example();
 example.createScene();
 example.addDummyShape(true);
 
-const { gltflLoader, factory, selector } = example;
+const { gltflLoader, selector } = example;
 
 let modelWidth: number;
 
@@ -16,8 +17,12 @@ let model: THREE.Object3D;
 const modelGroup = new THREE.Group();
 selectedObject.add(modelGroup);
 
+const objectsOnShapeFactory = new ObjectsOnShapeFactory();
+
 const addObjectsOnShape = () => {
-    factory.addObjectsOnShape(modelGroup, model, selectedObject, { width: modelWidth });
+    objectsOnShapeFactory.addObjectsOnShape(modelGroup, model, selectedObject, {
+        width: modelWidth,
+    });
 };
 
 gltflLoader.load('../../../yellow-fence.glb', (gltf) => {
