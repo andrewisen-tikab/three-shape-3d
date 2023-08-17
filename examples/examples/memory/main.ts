@@ -1,5 +1,5 @@
 import { Shape3D } from '../../../src';
-import Example, { SUPPORTED_SHAPES, SupportedShapes } from '../../src/Example';
+import Example from '../../src/Example';
 
 const example = new Example();
 example.createScene();
