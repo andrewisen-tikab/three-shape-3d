@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import Example, { SUPPORTED_SHAPES, SupportedShapes } from '../../src/Example';
+import Example from '../../src/Example';
 
 const example = new Example();
 example.createScene();
 example.addDummyShape(true);
 
-const { scene, gltflLoader, factory, selector } = example;
+const { gltflLoader, factory, selector } = example;
 
 let modelWidth: number;
 
