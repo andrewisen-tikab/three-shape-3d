@@ -21,5 +21,9 @@ export default class Selector {
         this.selectedShape = null;
     }
 
+    public getSelectedShape(): Readonly<Shape3D> | null {
+        return this.selectedShape;
+    }
+
     private onDeselect() {}
 }
