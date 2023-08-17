@@ -12,13 +12,13 @@ import Selector from './Selector';
 
 import '../style.css';
 
-const SUPPORTED_SHAPES = {
+export const SUPPORTED_SHAPES = {
     LINE: 'line',
     AREA: 'area',
     VOLUME: 'volume',
 } as const;
 
-type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
+export type SupportedShapes = (typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
 
 const _raycaster = new THREE.Raycaster();
 // @ts-ignore

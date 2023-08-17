@@ -22,23 +22,27 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
         return shape3D;
     }
 
-    public update(shape3D: Shape3D, params: Partial<CreateParams>): void {
+    public update(shape3D: Shape3D | Readonly<Shape3D>, params: Partial<CreateParams> = {}): void {
+        shape3D.dispose();
+
         const { shapeType = Line.TYPE } = params;
         shape3D.setShapeType(shapeType);
 
         switch (shapeType) {
             case Line.TYPE:
-                this.updateLine(shape3D, params);
+                this.updateLine(shape3D as Shape3D, params);
                 break;
             case Area.TYPE:
-                this.updateArea(shape3D, params);
+                this.updateArea(shape3D as Shape3D, params);
                 break;
             case Volume.TYPE:
-                this.updateVolume(shape3D, params);
+                this.updateVolume(shape3D as Shape3D, params);
                 break;
             default:
                 break;
         }
+
+        shape3D.update();
     }
 
     public updateGhost(
@@ -97,6 +101,7 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
     private updateArea(shape3D: Shape3D, params: Partial<CreateParams>) {
         const shape = new Area(shape3D);
         shape3D.addShape(shape);
+
         if (params?.isGhost) {
             this.updateLine(shape3D, params);
             // shape.setAreaColor(0xff0000);
