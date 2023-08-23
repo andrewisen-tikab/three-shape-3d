@@ -30,6 +30,7 @@ const _mouseUpEvent: /* @__PURE__ */ { type: 'mouseUp'; mode: string | null } = 
     mode: null,
 } as const;
 const _objectChangeEvent = /* @__PURE__ */ { type: 'objectChange' } as const;
+const _vertexChangeEvent = /* @__PURE__ */ { type: 'vertexChange' } as const;
 
 class TransformShapeControls extends THREE.Object3D {
     public static VertexObject = VertexObject;
@@ -885,6 +886,8 @@ class TransformShapeControls extends THREE.Object3D {
         this.updateOffset();
 
         this.updateLabels();
+
+        this.dispatchEvent(_vertexChangeEvent);
     }
 
     private updateHandles() {

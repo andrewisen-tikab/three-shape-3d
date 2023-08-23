@@ -392,8 +392,11 @@ export default class Example {
 
     public addDummyShape(select = false): void {
         const points: THREE.Vector3[] = [];
+        // points.push(new THREE.Vector3(0, 0, 0));
+        // points.push(new THREE.Vector3(10, 0, 0));
+
         points.push(new THREE.Vector3(0, 0, 0));
-        points.push(new THREE.Vector3(20, 0, 20));
+        points.push(new THREE.Vector3(20, 0, 0));
         points.push(new THREE.Vector3(0, 0, 20));
 
         const shape3d = this.factory.create({
