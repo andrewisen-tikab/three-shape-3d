@@ -59,6 +59,10 @@ Or, view the live demo here:
 
 -   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/create/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/create/)
 -   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/edit/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/edit/)
+-   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/memory/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/memory/)
+-   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/objects/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/objects/)
+
+<img src="https://github.com/andrewisen-tikab/three-shape-3d/blob/feature/resources/example.gif?raw=true" width="100%" />
 
 ## Docs
 
