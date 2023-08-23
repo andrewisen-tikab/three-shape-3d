@@ -8,10 +8,13 @@ const _currentVertex = /* @__PURE__ */ new THREE.Vector3();
 const _line = /* @__PURE__ */ new THREE.Vector3();
 const _position = /* @__PURE__ */ new THREE.Vector3();
 const _quaternion = /* @__PURE__ */ new THREE.Quaternion();
-const scale = /* @__PURE__ */ 1;
-const _scale = /* @__PURE__ */ new THREE.Vector3(scale, scale, scale);
+const scaleScalar = /* @__PURE__ */ 1;
+const _scale = /* @__PURE__ */ new THREE.Vector3(scaleScalar, scaleScalar, scaleScalar);
 const _matrix = /* @__PURE__ */ new THREE.Matrix4();
 const _up = /* @__PURE__ */ new THREE.Vector3(0, 0, 1);
+/**
+ * Helper variable to keep track of the index of the object in the pool.
+ */
 let _objectIndex = /* @__PURE__ */ 0;
 
 /**
@@ -20,41 +23,73 @@ let _objectIndex = /* @__PURE__ */ 0;
  */
 export default class ObjectsOnShapeFactory extends THREE.EventDispatcher {
     /**
-     * Pool size for the objects.
-     * @default 1_0000
+     * The position of the pool.
+     * Place the pool far away from the scene, so it does not interfere with the scene.
      */
     private poolPosition: THREE.Vector3;
 
-    private object?: InstancedGLTF;
+    /**
+     * The instanced object that is used to place objects on the shape.
+     */
+    private instancedGLTF?: InstancedGLTF;
 
     constructor() {
         super();
         this.poolPosition = new THREE.Vector3(0, -1_000_000, 0);
     }
 
+    /**
+     * Set the position of the pool.
+     * @param position The position of the pool.
+     */
     public setPoolPosition(position: THREE.Vector3Tuple): void {
         this.poolPosition.set(...position);
     }
 
+    /**
+     * @returns Read-only access to the position of the pool.
+     */
     public getPoolPosition(): Readonly<THREE.Vector3> {
         return this.poolPosition;
     }
 
-    public setPoolObject(parent: THREE.Object3D, object: THREE.Object3D): void {
+    /**
+     * Set the instanced object that is used to place objects on the shape.
+     * Also add the instanced object to the parent.
+     * @param parent
+     * @param object
+     */
+    public setInstancedGLTF(parent: THREE.Object3D, object: THREE.Object3D): void {
         const instancedGLTF = new InstancedGLTF(object, this.poolPosition);
-        this.object = instancedGLTF;
+        this.instancedGLTF = instancedGLTF;
         parent.add(instancedGLTF);
     }
 
+    /**
+     * @param totalNumberOfObjects Actual number of objects that will be placed on the shape.
+     * @returns An estimated of pool size.
+     */
     private getEstimatedPoolSize(totalNumberOfObjects: number): Readonly<number> {
+        // TODO: Improve this estimation.
         return totalNumberOfObjects ^ 100;
     }
 
-    public getPoolObject(): Readonly<THREE.Object3D | undefined> {
-        return this.object;
+    /**
+     * @returns Read-only access to the instanced object that is used to place objects on the shape.
+     */
+    public getInstancedGLTF(): Readonly<THREE.Object3D | undefined> {
+        return this.instancedGLTF;
     }
 
-    public beginPool(
+    /**
+     * Prepare the pool to add objects on a `parent` using the `shape3D` as a base.
+     * This will add lots of objects on the pool, so it is recommended to call `endPool` after this.
+     * @param parent Parent object to add the objects on.
+     * @param object Object to add on the parent.
+     * @param shape3D Shape that holds the vertices.
+     * @param params {@link AddObjectsOnShapeParams}
+     */
+    public preparePool(
         parent: THREE.Object3D,
         object: THREE.Object3D,
         shape3D: Shape3D | Readonly<Shape3D>,
@@ -63,32 +98,41 @@ export default class ObjectsOnShapeFactory extends THREE.EventDispatcher {
         const totalNumberOfObjects = this.getTotalObjects(shape3D, params);
         const count = this.getEstimatedPoolSize(totalNumberOfObjects);
 
+        // Clear parent just in case.
         parent.children.forEach((_child) => {
             const child = _child as InstancedGLTF;
             child?.dispose();
             parent.remove(child);
         });
 
-        this.setPoolObject(parent, object);
+        this.setInstancedGLTF(parent, object);
 
-        this.object!.setCount(count);
-        this.object!.generate();
+        this.instancedGLTF!.setCount(count);
+        this.instancedGLTF!.generate();
 
         this.addObjectsOnShape(shape3D, params);
     }
 
-    public adjustPool(
+    /**
+     * Adjust the {@link THREE.Matrix4} (mainly the position) of the objects on the pool.
+     * @param shape3D
+     * @param params
+     */
+    public adjustPoolMatrices(
         shape3D: Shape3D | Readonly<Shape3D>,
         params: Partial<AddObjectsOnShapeParams> = {},
     ) {
         this.addObjectsOnShape(shape3D, params);
-        this.object!.updateRest(_objectIndex);
+        this.instancedGLTF!.updateRest(_objectIndex);
     }
 
+    /**
+     * Remove unnecessary objects from the pool.
+     */
     public endPool(): void {
-        if (!this.object) throw new Error('No object to pool');
-        this.object!.setCount(_objectIndex);
-        this.object!.generate();
+        if (!this.instancedGLTF) throw new Error('No object to pool');
+        this.instancedGLTF!.setCount(_objectIndex);
+        this.instancedGLTF!.generate();
     }
 
     /**
@@ -134,6 +178,13 @@ export default class ObjectsOnShapeFactory extends THREE.EventDispatcher {
         }
     }
 
+    /**
+     * Get the number of objects that will be added on a line.
+     * @param previousVertex Previous {@link Vertex}
+     * @param currentVertex Current {@link Vertex}
+     * @param params {@link AddObjectsOnShapeParams}
+     * @returns
+     */
     private getNumberOfObjects(
         previousVertex: Vertex,
         currentVertex: Vertex,
@@ -150,7 +201,7 @@ export default class ObjectsOnShapeFactory extends THREE.EventDispatcher {
     }
 
     /**
-     * Add multiple objects on a line.s
+     * Add **multiple (!)** objects on a line.
      * @param shape3D Shape that holds the vertices.
      * @param params {@link AddObjectsOnShapeParams}
      */
@@ -167,7 +218,7 @@ export default class ObjectsOnShapeFactory extends THREE.EventDispatcher {
     }
 
     /**
-     * Add a single object on a line.
+     * Add **a single (!)** object on a line.
      * @param index Current object index.
      * @param numberOfObjects Total number of objects.
      */
@@ -175,6 +226,6 @@ export default class ObjectsOnShapeFactory extends THREE.EventDispatcher {
         _position.copy(_previousVertex).addScaledVector(_line, index / numberOfObjects);
         _quaternion.setFromUnitVectors(_up, _line.clone().normalize());
         _matrix.compose(_position, _quaternion, _scale);
-        this.object!.updateAt(_objectIndex + index, _matrix);
+        this.instancedGLTF!.updateAt(_objectIndex + index, _matrix);
     }
 }
