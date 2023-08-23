@@ -6,31 +6,49 @@ const example = new Example();
 example.createScene();
 example.addDummyShape(true);
 
-const { gltflLoader, selector } = example;
+const { gltflLoader, selector, transformShapeControls } = example;
 
 let modelWidth: number;
 
-const selectedObject = selector.getSelectedShape();
-if (!selectedObject) throw new Error('No selected object');
+const selectedShape3D = selector.getSelectedShape();
+if (!selectedShape3D) throw new Error('No selected object');
 
 let model: THREE.Object3D;
 const modelGroup = new THREE.Group();
-selectedObject.add(modelGroup);
+selectedShape3D.add(modelGroup);
 
 const objectsOnShapeFactory = new ObjectsOnShapeFactory();
+objectsOnShapeFactory.setPoolPosition([0, -1_000_000, 0]);
 
 const addObjectsOnShape = () => {
-    objectsOnShapeFactory.addObjectsOnShape(modelGroup, model, selectedObject, {
-        width: modelWidth,
-    });
+    beginPool();
+    adjustPool();
+    // endPool();
 };
 
-gltflLoader.load('../../../yellow-fence.glb', (gltf) => {
+const beginPool = () => {
+    objectsOnShapeFactory.beginPool(modelGroup, model, selectedShape3D, { width: modelWidth });
+};
+
+const adjustPool = () => {
+    objectsOnShapeFactory.adjustPool(selectedShape3D, { width: modelWidth });
+};
+
+const endPool = () => {
+    objectsOnShapeFactory.endPool();
+};
+
+gltflLoader.load('../../../metal-fence.glb', (gltf) => {
     model = gltf.scene;
 
     const box = new THREE.Box3().setFromObject(model);
-    modelWidth = box.max.x - box.min.x;
+    modelWidth = box.max.z - box.min.z;
+
     addObjectsOnShape();
 });
 
-selectedObject.addEventListener('vertex-updated', addObjectsOnShape);
+// selectedObject.addEventListener('vertex-updated', addObjectsOnShape);
+transformShapeControls.addEventListener('mouseDown', beginPool);
+transformShapeControls.addEventListener('vertexChange', adjustPool);
+
+transformShapeControls.addEventListener('mouseUp', endPool);

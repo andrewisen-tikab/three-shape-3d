@@ -99,6 +99,10 @@ A volume is an area with a positive height.
 As stated by the design, this library is for you if you want to create and manipulate geometric shapes in three.js.
 There are some limitations to what shapes you can create. Any complex shapes are very hard to work with.
 
+## Assets
+
+["Simple Metal Fence" by Blender3D](https://sketchfab.com/3d-models/simple-metal-fence-9450c03e6c074982b9f86cd73866b461)
+
 ```
 
 ```
