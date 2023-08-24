@@ -2,11 +2,35 @@ import * as THREE from 'three';
 import Example from '../../src/Example';
 import ObjectsOnShapeFactory from '../../src/ObjectsOnShapeFactory';
 
+const GLB_MODELS = {
+    metalFence: {
+        name: 'Metal fence',
+        url: 'metal-fence',
+        model: new THREE.Object3D(),
+        box: new THREE.Box3(),
+        modelWidth: 0,
+    },
+    scaffolding: {
+        name: 'Scaffolding',
+        url: 'scaffolding',
+        model: new THREE.Object3D(),
+        box: new THREE.Box3(),
+        modelWidth: 0,
+    },
+    woodenBarricade: {
+        name: 'Wooden barricade',
+        url: 'wooden-barricade',
+        model: new THREE.Object3D(),
+        box: new THREE.Box3(),
+        modelWidth: 0,
+    },
+};
+
 const example = new Example();
 example.createScene();
 example.addDummyShape(true);
 
-const { gltflLoader, selector, transformShapeControls } = example;
+const { gltflLoader, selector, transformShapeControls, gui } = example;
 
 let modelWidth: number;
 
@@ -62,17 +86,42 @@ const endPool = () => {
 // selectedObject.addEventListener('vertex-updated', addObjectsOnShape);
 transformShapeControls.addEventListener('mouseDown', beginPool);
 transformShapeControls.addEventListener('vertexChange', adjustPool);
-
 transformShapeControls.addEventListener('mouseUp', endPool);
 
-// Finally, load the model.
-gltflLoader.load('../../../scaffolding.glb', (gltf) => {
-    model = gltf.scene;
+// Setup the GUI.
+const modelKeys: string[] = [];
 
-    const box = new THREE.Box3().setFromObject(model);
-    modelWidth = box.max.z - box.min.z;
+const loadModelsAsync = async () => {
+    // First, load all models
+    for await (const [key, value] of Object.entries(GLB_MODELS)) {
+        const { url, box } = value;
+        const gltf = await gltflLoader.loadAsync(`../../../${url}.glb`);
+        box.setFromObject(gltf.scene);
+        value.modelWidth = box.max.z - box.min.z;
+        value.model = gltf.scene;
 
-    console.log(model);
+        modelKeys.push(key);
+    }
 
+    // Then, build the GUI
+    const modelsFolder = gui.addFolder('Models');
+    const modelParams = {
+        model: modelKeys[0],
+    };
+
+    // When the user selects a model, we will update the model and add the objects on the shape.
+    modelsFolder.add(modelParams, 'model', modelKeys).onChange((value: string) => {
+        const glb = GLB_MODELS[value as keyof typeof GLB_MODELS];
+        if (glb == null) throw new Error('Model not found');
+        model = glb.model;
+        addObjectsOnShape();
+    });
+
+    // Add the first model to the scene.
+    const glbKey = modelKeys[0] as keyof typeof GLB_MODELS;
+    const glb = GLB_MODELS[glbKey];
+    model = glb.model;
     addObjectsOnShape();
-});
+};
+
+loadModelsAsync();
