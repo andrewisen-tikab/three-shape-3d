@@ -109,6 +109,8 @@ There are some limitations to what shapes you can create. Any complex shapes are
 
 ["Wooden barricade" by BlackMike](https://sketchfab.com/3d-models/wooden-barricade-4de45fef6da2497c828ef76d195e9f7f)
 
+["New York Scaffolding" by s4shko](https://sketchfab.com/3d-models/new-york-scaffolding-a73967fe00f6418d838f8b57e69e7b43)
+
 ```
 
 ```
