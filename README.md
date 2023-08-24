@@ -107,6 +107,8 @@ There are some limitations to what shapes you can create. Any complex shapes are
 
 ["Simple Metal Fence" by Blender3D](https://sketchfab.com/3d-models/simple-metal-fence-9450c03e6c074982b9f86cd73866b461)
 
+["Wooden barricade" by BlackMike](https://sketchfab.com/3d-models/wooden-barricade-4de45fef6da2497c828ef76d195e9f7f)
+
 ```
 
 ```
