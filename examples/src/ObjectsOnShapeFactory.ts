@@ -195,8 +195,10 @@ export default class ObjectsOnShapeFactory extends THREE.EventDispatcher {
 
         _line.subVectors(_currentVertex, _previousVertex);
         const distance = _line.length();
+        const spacing = params?.spacing ?? 0;
         const width = params?.width ?? 1;
-        const numberOfObjects = Math.floor(distance / width);
+        const actualWidth = width + spacing;
+        const numberOfObjects = Math.floor(distance / actualWidth);
         return numberOfObjects;
     }
 
