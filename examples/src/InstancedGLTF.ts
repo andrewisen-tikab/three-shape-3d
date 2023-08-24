@@ -81,6 +81,7 @@ export default class InstancedGLTF extends THREE.Object3D {
     }
 
     public generate() {
+        this.gltf.updateWorldMatrix(true, true);
         this.gltf.traverse((_child) => {
             const child = _child as THREE.Mesh;
             if (!child.isMesh) return;
@@ -92,11 +93,8 @@ export default class InstancedGLTF extends THREE.Object3D {
     private generateInstancedMesh(child: THREE.Mesh): void {
         const clone = child.clone();
         clone.geometry = clone.geometry.clone();
-        clone.updateMatrix();
-        clone.updateMatrixWorld();
 
         const matrix = clone.matrixWorld.clone();
-
         clone.geometry.applyMatrix4(matrix);
 
         const instancedMesh = new InstancedGLTFMesh(clone.geometry, clone.material, this.count);
