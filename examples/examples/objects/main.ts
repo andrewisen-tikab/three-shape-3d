@@ -66,7 +66,7 @@ transformShapeControls.addEventListener('vertexChange', adjustPool);
 transformShapeControls.addEventListener('mouseUp', endPool);
 
 // Finally, load the model.
-gltflLoader.load('../../../wooden-barricade.glb', (gltf) => {
+gltflLoader.load('../../../scaffolding.glb', (gltf) => {
     model = gltf.scene;
 
     const box = new THREE.Box3().setFromObject(model);
