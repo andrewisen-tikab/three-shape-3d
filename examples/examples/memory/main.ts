@@ -2,6 +2,7 @@ import { Shape3D } from '../../../src';
 import Example from '../../src/Example';
 
 const example = new Example();
+example.initAsync();
 example.createScene();
 example.memoryTest();
 

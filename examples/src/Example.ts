@@ -136,7 +136,6 @@ export default class Example {
      */
     constructor() {
         this.install();
-        this.init();
     }
 
     /**
@@ -149,7 +148,7 @@ export default class Example {
     /**
      * Initializes the scene.
      */
-    private init(): void {
+    public async initAsync(): Promise<void> {
         this.gui = new GUI();
         this.shapes = [];
         this.selector = new Selector();
@@ -210,6 +209,7 @@ export default class Example {
         light.castShadow = true;
         light.shadow.mapSize.set(2048, 2048);
         light.position.set(10, 10, 10);
+
         this.scene.add(light);
         this.scene.add(new THREE.AmbientLight(0xb0bec5, 0.8));
 
@@ -229,20 +229,19 @@ export default class Example {
             scene.updateMatrix();
         };
 
-        this.gltflLoader.load('../../../base.glb', (gltf) => {
-            this.backgroundPlane = gltf.scene;
-            this.backgroundPlane.visible = this.params.showBackgroundPlane;
-            callback(gltf.scene);
-            this.scene.add(gltf.scene);
-        });
+        const backgroundPlane = await this.gltflLoader.loadAsync('../../../base.glb');
 
-        this.gltflLoader.load('../../../buildings.glb', (gltf) => {
-            this.backgroundBuildings = gltf.scene;
-            this.backgroundBuildings.visible = this.params.showBackgroundBuildings;
+        this.backgroundPlane = backgroundPlane.scene;
+        this.backgroundPlane.visible = this.params.showBackgroundPlane;
+        callback(backgroundPlane.scene);
+        this.scene.add(backgroundPlane.scene);
 
-            callback(gltf.scene);
-            this.scene.add(gltf.scene);
-        });
+        const backgroundBuildings = await this.gltflLoader.loadAsync('../../../buildings.glb');
+        this.backgroundBuildings = backgroundBuildings.scene;
+        this.backgroundBuildings.visible = this.params.showBackgroundBuildings;
+
+        callback(backgroundBuildings.scene);
+        this.scene.add(backgroundBuildings.scene);
 
         const onWindowResize = (): void => {
             camera.aspect = window.innerWidth / window.innerHeight;

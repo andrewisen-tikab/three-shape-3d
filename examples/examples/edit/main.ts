@@ -1,6 +1,7 @@
 import Example, { SUPPORTED_SHAPES, SupportedShapes } from '../../src/Example';
 
 const example = new Example();
+example.initAsync();
 example.createScene();
 example.addDummyShape(true);
 

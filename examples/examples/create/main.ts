@@ -1,6 +1,7 @@
 import Example from '../../src/Example';
 
 const example = new Example();
+example.initAsync();
 example.createScene();
 
 const { gui, params } = example;

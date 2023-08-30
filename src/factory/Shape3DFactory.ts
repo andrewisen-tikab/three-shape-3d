@@ -5,6 +5,7 @@ import Line from '../shapes/line';
 import Area from '../shapes/area';
 import { Vertex } from '../types';
 import Volume from '../shapes/volume';
+import { SUPPORTED_SHAPES } from '../../examples/src/Example';
 
 export default class Shape3DFactory extends THREE.EventDispatcher implements Factory {
     isShape3DFactory: boolean;
@@ -22,7 +23,7 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
         return shape3D;
     }
 
-    public update(shape3D: Shape3D | Readonly<Shape3D>, params: Partial<CreateParams> = {}): void {
+    public update(shape3D: Shape3D | Readonly<Shape3D>, params: UpdateParams = {}): void {
         shape3D.dispose();
 
         const { shapeType = Line.TYPE } = params;
@@ -30,13 +31,13 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
 
         switch (shapeType) {
             case Line.TYPE:
-                this.updateLine(shape3D as Shape3D, params);
+                this._updateLine(shape3D as Shape3D, params);
                 break;
             case Area.TYPE:
-                this.updateArea(shape3D as Shape3D, params);
+                this._updateArea(shape3D as Shape3D, params);
                 break;
             case Volume.TYPE:
-                this.updateVolume(shape3D as Shape3D, params);
+                this._updateVolume(shape3D as Shape3D, params);
                 break;
             default:
                 break;
@@ -90,7 +91,12 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
         if (vertices) ghostShape3D.setVertices(vertices);
     }
 
-    private updateLine(shape3D: Shape3D, params: Partial<CreateParams>) {
+    public updateLine(shape3D: Shape3D | Readonly<Shape3D>, params: Partial<CreateParams>): void {
+        params.shapeType = SUPPORTED_SHAPES.LINE;
+        this.update(shape3D, params);
+    }
+
+    private _updateLine(shape3D: Shape3D, params: Partial<CreateParams>) {
         const shape = new Line(shape3D);
         shape3D.addShape(shape);
         if (params?.isGhost) {
@@ -98,24 +104,50 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
         }
     }
 
-    private updateArea(shape3D: Shape3D, params: Partial<CreateParams>) {
-        const shape = new Area(shape3D);
+    public updateArea(shape3D: Shape3D | Readonly<Shape3D>, params: Partial<CreateParams>) {
+        params.shapeType = SUPPORTED_SHAPES.AREA;
+        this.update(shape3D, params);
+    }
+
+    private _updateArea(shape3D: Shape3D | Readonly<Shape3D>, params: Partial<CreateParams>) {
+        const shape = new Area(shape3D as Shape3D);
         shape3D.addShape(shape);
 
         if (params?.isGhost) {
-            this.updateLine(shape3D, params);
+            this._updateLine(shape3D as Shape3D, params);
             // shape.setAreaColor(0xff0000);
         }
     }
 
-    private updateVolume(shape3D: Shape3D, params: Partial<CreateParams>) {
-        const shape = new Volume(shape3D);
+    public updateVolume(
+        shape3D: Shape3D | Readonly<Shape3D>,
+        params: Partial<CreateVolumeParams>,
+    ): void {
+        params.shapeType = SUPPORTED_SHAPES.VOLUME;
+        this.update(shape3D, params);
+    }
+
+    private _updateVolume(
+        shape3D: Shape3D | Readonly<Shape3D>,
+        params: Partial<CreateVolumeParams>,
+    ) {
+        const shape = new Volume(shape3D as Shape3D);
         shape3D.addShape(shape);
         if (params?.isGhost) {
-            this.updateLine(shape3D, params);
+            this._updateLine(shape3D as Shape3D, params);
             shape.setVolumeColor(0xff0000);
             // shape.setAreaColor(0xff0000);
         }
+        if (params?.volumeHeight) {
+            shape.setVolumeHeight(params.volumeHeight);
+        }
+    }
+
+    public getVolume(shape3D: Shape3D | Readonly<Shape3D>): Volume {
+        const shapes = shape3D.getShapes();
+        const volume = shapes.find((shape) => shape instanceof Volume);
+        if (volume == null) throw new Error('Volume is null');
+        return volume as Volume;
     }
 }
 
@@ -134,10 +166,25 @@ export type Factory = {
     update(shape3D: Shape3D, params?: Partial<CreateParams>): void;
 };
 
+export type UpdateParams =
+    | ({
+          shapeType?: typeof SUPPORTED_SHAPES.LINE;
+      } & Partial<CreateParams>)
+    | ({
+          shapeType?: typeof SUPPORTED_SHAPES.AREA;
+      } & Partial<CreateParams>)
+    | ({
+          shapeType?: typeof SUPPORTED_SHAPES.VOLUME;
+      } & Partial<CreateVolumeParams>);
+
 export type CreateParams = {
     shapeType: SupportedShapes;
     isGhost: boolean;
 };
+
+export interface CreateVolumeParams extends CreateParams {
+    volumeHeight: number;
+}
 
 export type SupportedShapes = ExtractShapeType<
     typeof Shape3DFactory.Shape3D.SUPPORTED_SHAPES
