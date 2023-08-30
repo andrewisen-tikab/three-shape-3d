@@ -23,7 +23,7 @@ export default class Shape3DFactory extends THREE.EventDispatcher implements Fac
         return shape3D;
     }
 
-    public update(shape3D: Shape3D | Readonly<Shape3D>, params: Partial<CreateParams> = {}): void {
+    public update(shape3D: Shape3D | Readonly<Shape3D>, params: UpdateParams = {}): void {
         shape3D.dispose();
 
         const { shapeType = Line.TYPE } = params;
@@ -165,6 +165,17 @@ export type Factory = {
      */
     update(shape3D: Shape3D, params?: Partial<CreateParams>): void;
 };
+
+export type UpdateParams =
+    | ({
+          shapeType?: typeof SUPPORTED_SHAPES.LINE;
+      } & Partial<CreateParams>)
+    | ({
+          shapeType?: typeof SUPPORTED_SHAPES.AREA;
+      } & Partial<CreateParams>)
+    | ({
+          shapeType?: typeof SUPPORTED_SHAPES.VOLUME;
+      } & Partial<CreateVolumeParams>);
 
 export type CreateParams = {
     shapeType: SupportedShapes;

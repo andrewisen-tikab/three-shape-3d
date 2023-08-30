@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import CSGFactory from '../../src/CSGFactory';
-import Example from '../../src/Example';
+import Example, { SUPPORTED_SHAPES } from '../../src/Example';
 import { Shape3D } from '../../../src';
 
 const example = new Example();
@@ -9,6 +9,7 @@ example.initAsync().then(() => {
     example.addDummyShape(true);
 
     const {
+        gui,
         factory,
         selector,
         // TODO: Switch to async loading!!!
@@ -19,7 +20,15 @@ example.initAsync().then(() => {
 
     const shape3D = selector.getSelectedShape();
     if (shape3D == null) throw new Error('Shape3D is null');
-    factory.updateVolume(shape3D, { volumeHeight: -5 });
+
+    const params = {
+        volumeDepth: 0.5,
+    };
+
+    factory.update(shape3D, {
+        shapeType: SUPPORTED_SHAPES.VOLUME,
+        volumeHeight: -params.volumeDepth,
+    });
 
     const result = new THREE.Object3D();
     group.add(result);
@@ -30,8 +39,23 @@ example.initAsync().then(() => {
     backgroundPlane.visible = false;
 
     const updateCSG = () => {
+        csgFactory.hideVolume();
         csgFactory.update();
     };
 
     transformShapeControls.addEventListener('vertexChange', updateCSG);
+
+    gui.add(params, 'volumeDepth')
+        .name('Volume depth')
+        .min(0.1)
+        .max(100)
+        .step(0.1)
+        .onChange((volumeDepth: number) => {
+            factory.update(shape3D, {
+                shapeType: SUPPORTED_SHAPES.VOLUME,
+                volumeHeight: -volumeDepth,
+            });
+
+            updateCSG();
+        });
 });

@@ -61,13 +61,13 @@ export default class CSGFactory extends THREE.EventDispatcher {
         this._csgEvaluator = new Evaluator();
 
         this._result = result;
-        this._hideVolume();
+        this.hideVolume();
     }
 
     /**
      * Hide the existing volume. This should be replaced by or CSG result.
      */
-    private _hideVolume(): void {
+    public hideVolume(): void {
         const volume = this._factory.getVolume(this._shape3D);
         if (volume == null) throw new Error('Volume is null');
         volume.object.visible = false;
