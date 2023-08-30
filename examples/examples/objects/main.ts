@@ -27,6 +27,7 @@ const GLB_MODELS = {
 };
 
 const example = new Example();
+example.initAsync();
 example.createScene();
 example.addDummyShape(true);
 

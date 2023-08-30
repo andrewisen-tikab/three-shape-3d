@@ -67,13 +67,16 @@ export default class Volume implements Shape {
 
         const geometry = new THREE.ExtrudeGeometry(shape, {
             bevelEnabled: false,
-            depth: this.volumeHeight,
+            // Depth is always positive.
+            depth: Math.abs(this.volumeHeight),
         });
 
         this.volumeGeometry = geometry;
 
         rotateShapeGeometry(geometry);
-        geometry.translate(0, this.volumeHeight, 0);
+
+        // Only translate the volume if the height is positive.
+        geometry.translate(0, Math.max(this.volumeHeight, 0), 0);
 
         if (this.volume) this.volume.geometry = geometry;
     }
@@ -99,5 +102,20 @@ export default class Volume implements Shape {
     setVolumeColor(color: ColorRepresentation) {
         this.volumeColor.set(color);
         this.update();
+    }
+
+    /**
+     * Set the volume height.
+     * @param height
+     */
+    setVolumeHeight(height: number): void {
+        this.volumeHeight = height;
+        this.update();
+    }
+
+    getVolumeGeometry(): Readonly<THREE.ExtrudeGeometry> {
+        if (this.volumeGeometry == null) throw new Error('VolumeGeometry is null');
+
+        return this.volumeGeometry;
     }
 }

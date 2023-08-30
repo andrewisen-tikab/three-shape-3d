@@ -1,6 +1,7 @@
 import type { ColorRepresentation, Shape3DParams, Vertex } from '../types';
 
 import * as THREE from 'three';
+import polylabel from 'polylabel';
 
 import Line from '../shapes/line';
 
@@ -274,6 +275,42 @@ export default class Shape3D extends THREE.Object3D {
      */
     getCloseLine(): Readonly<boolean> {
         return this.closeLine;
+    }
+
+    getShapes(): Readonly<Shape[]> {
+        return this.shapes;
+    }
+
+    /**
+     * Calculate the center between N points,
+     * where N is a finite set of points in 3D space.
+     * @param _center
+     * @returns
+     */
+    getCenter(_center: THREE.Vector3) {
+        const center = _center || new THREE.Vector3();
+        const vertices = this.getVertices();
+        const { length } = vertices;
+        for (let i = 0; i < length; i++) {
+            center.add(new THREE.Vector3(...vertices[i]));
+        }
+        center.divideScalar(length);
+        return center;
+    }
+
+    /**
+     * Calculate the `centroid` (center of mass) between N points,
+     * where N is a finite set of points in 2D space.
+     * @param _center
+     * @returns
+     */
+    getCentroid(_center: THREE.Vector3) {
+        const center = _center || new THREE.Vector3();
+        const vertices = this.getVertices();
+        const flatPoints = vertices.map((p) => [p[0], p[2]]);
+        const [x, z] = polylabel([flatPoints]);
+        center.set(x, 0, z);
+        return center;
     }
 }
 

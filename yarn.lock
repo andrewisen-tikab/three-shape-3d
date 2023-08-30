@@ -361,6 +361,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/polylabel@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@types/polylabel@npm:1.1.0"
+  checksum: db4936f2a12d7895e9ca9d530850d81c3545edd1da2be2b4f4c25240d402b414716454da3944538d7e2d3d955b7b099cba11f306594b67900bd9e7ca33e52526
+  languageName: node
+  linkType: hard
+
 "@types/stats.js@npm:*":
   version: 0.17.0
   resolution: "@types/stats.js@npm:0.17.0"
@@ -1594,6 +1601,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"polylabel@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "polylabel@npm:1.1.0"
+  dependencies:
+    tinyqueue: ^2.0.3
+  checksum: 637ab098034b95e41c88c5af3657c4c52ce16e7cb5fda25a4d00bfb848c3fb9c52b04e2d0718483e667febecc1413a5c9fa734df8263e4ad6e209b73d9d1f0fc
+  languageName: node
+  linkType: hard
+
 "postcss@npm:^8.4.25":
   version: 8.4.26
   resolution: "postcss@npm:8.4.26"
@@ -1938,6 +1954,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"three-bvh-csg@npm:^0.0.9":
+  version: 0.0.9
+  resolution: "three-bvh-csg@npm:0.0.9"
+  peerDependencies:
+    three: ">=0.144.0"
+    three-mesh-bvh: ^0.6.0
+  checksum: bb93ebc252ffd8516b0068548b8241e9a36d580fdf318aeea04b13f69c787abcb51129ffa0f58f612bee4f122e7c12e777db13b583c5ba557ece0977d87454e0
+  languageName: node
+  linkType: hard
+
 "three-mesh-bvh@npm:^0.6.1":
   version: 0.6.1
   resolution: "three-mesh-bvh@npm:0.6.1"
@@ -1951,9 +1977,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "three-shape-3d@workspace:."
   dependencies:
+    "@types/polylabel": ^1.1.0
     "@types/three": ^0.154.0
     camera-controls: ^2.7.0
+    polylabel: ^1.1.0
     three: ^0.154.0
+    three-bvh-csg: ^0.0.9
     three-mesh-bvh: ^0.6.1
     typedoc: ^0.24.8
     typescript: ^5.0.2
@@ -1966,6 +1995,13 @@ __metadata:
   version: 0.154.0
   resolution: "three@npm:0.154.0"
   checksum: 90ad3cafef8b866641366977ab7189d56f7352c6cdc014cbab946544e42782ec4ea7e56b959b43590433a0fcdc4bd8f8029b18a75074ba10005182c5a73bcc88
+  languageName: node
+  linkType: hard
+
+"tinyqueue@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "tinyqueue@npm:2.0.3"
+  checksum: 0b6bda46b680dca072f84aef1acd22a7085a2ff2aa8e222bb41045c61a056943805056d77d7f976587ed6a0597872beb5c416043f65f0314304432d6c178dd20
   languageName: node
   linkType: hard
 
