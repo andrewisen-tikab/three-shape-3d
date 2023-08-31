@@ -1,6 +1,5 @@
 {
     "name": "three-shape-3d",
-    "private": true,
     "version": "0.0.26",
     "type": "module",
     "main": "dist/three-shape-3d.js",
