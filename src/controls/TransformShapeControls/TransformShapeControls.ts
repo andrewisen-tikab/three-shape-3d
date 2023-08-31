@@ -1448,18 +1448,18 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
             new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0], 3),
         );
         // @ts-ignore
-        lineGeometry.computeBoundsTree();
+        // lineGeometry.computeBoundsTree();
 
         const lineGeometry2 = new THREE.CylinderGeometry(0.0075, 0.0075, 0.5, 3);
         lineGeometry2.translate(0, 0.25, 0);
 
         // @ts-ignore
-        lineGeometry2.computeBoundsTree();
+        // lineGeometry2.computeBoundsTree();
 
         function CircleGeometry(radius: number, arc: number) {
             const geometry = new THREE.TorusGeometry(radius, 0.0075, 3, 64, arc * Math.PI * 2);
             // @ts-ignore
-            geometry.computeBoundsTree();
+            // geometry.computeBoundsTree();
             geometry.rotateY(Math.PI / 2);
             geometry.rotateX(Math.PI / 2);
             return geometry;
@@ -1848,7 +1848,7 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
                 array.forEach((object: THREE.Mesh) => {
                     if (!object?.geometry) return;
                     // @ts-ignore
-                    object.geometry.computeBoundsTree();
+                    // object.geometry.computeBoundsTree();
                 });
             });
         });

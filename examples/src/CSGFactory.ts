@@ -137,6 +137,8 @@ export default class CSGFactory extends THREE.EventDispatcher {
             volumeBrush,
             CSGOperations.SUBTRACTION,
         );
+        volumeResultBrush.receiveShadow = true;
+        volumeResultBrush.castShadow = false;
         result.add(volumeResultBrush);
 
         // Setup volume cut brush
@@ -168,7 +170,7 @@ export default class CSGFactory extends THREE.EventDispatcher {
             CSGOperations.SUBTRACTION,
         );
         volumeCutResultBrush.receiveShadow = true;
-        volumeCutResultBrush.castShadow = true;
+        volumeCutResultBrush.castShadow = false;
         result.add(volumeCutResultBrush);
 
         // Add edges to make the volume cut more visible

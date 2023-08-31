@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
+import { CSM } from 'three/addons/csm/CSM.js';
 
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -161,6 +162,8 @@ export default class Example {
         this.group = new THREE.Group();
         this.scene.add(this.group);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         const bgColor = new THREE.Color(0x263238);
         this.renderer.setClearColor(bgColor, 1);
@@ -180,10 +183,10 @@ export default class Example {
         // We'll use the `camera-controls` library to handle our camera.
         const clock = new THREE.Clock();
         const camera = new THREE.PerspectiveCamera(
-            60,
+            70,
             window.innerWidth / window.innerHeight,
-            1,
-            1000,
+            0.1,
+            5000,
         );
 
         this.factory = new Shape3DFactory();
@@ -204,14 +207,69 @@ export default class Example {
             this.cameraControls.enabled = !event.value;
         });
 
-        // Setup a basic lighting
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.castShadow = true;
-        light.shadow.mapSize.set(2048, 2048);
-        light.position.set(10, 10, 10);
+        const csmParams = {
+            orthographic: false,
+            fade: false,
+            far: 200,
+            mode: 'practical',
+            lightX: -1,
+            lightY: -1,
+            lightZ: -1,
+            margin: 100,
+            lightFar: 5000,
+            lightNear: 1,
+            autoUpdateHelper: true,
+        };
 
-        this.scene.add(light);
-        this.scene.add(new THREE.AmbientLight(0xb0bec5, 0.8));
+        const csm = new CSM({
+            maxFar: csmParams.far,
+            cascades: 4,
+            mode: csmParams.mode as any,
+            parent: this.scene,
+            shadowMapSize: 1024,
+            lightDirection: new THREE.Vector3(
+                csmParams.lightX,
+                csmParams.lightY,
+                csmParams.lightZ,
+            ).normalize(),
+            camera,
+        });
+
+        // this.gui
+        //     .add(csmParams, 'far', 1, 5000)
+        //     .step(1)
+        //     .name('shadow far')
+        //     .onChange(function (value: number) {
+        //         csm.maxFar = value;
+        //         csm.updateFrustums();
+        //     });
+
+        // this.gui
+        //     .add(csmParams, 'lightNear', 1, 10000)
+        //     .name('light near')
+        //     .onChange(function (value: number) {
+        //         for (let i = 0; i < csm.lights.length; i++) {
+        //             csm.lights[i].shadow.camera.near = value;
+        //             csm.lights[i].shadow.camera.updateProjectionMatrix();
+        //         }
+        //     });
+
+        // this.gui
+        //     .add(csmParams, 'margin', 0, 200)
+        //     .name('light margin')
+        //     .onChange(function (value: number) {
+        //         csm.lightMargin = value;
+        //     });
+
+        // this.gui
+        //     .add(csmParams, 'lightFar', 1, 10000)
+        //     .name('light far')
+        //     .onChange(function (value: number) {
+        //         for (let i = 0; i < csm.lights.length; i++) {
+        //             csm.lights[i].shadow.camera.far = value;
+        //             csm.lights[i].shadow.camera.updateProjectionMatrix();
+        //         }
+        //     });
 
         // Setup a positional helper
         const planeGeometry = new THREE.PlaneGeometry(1, 1);
@@ -223,10 +281,25 @@ export default class Example {
         const callback = (scene: THREE.Group) => {
             scene.scale.set(glftScale, glftScale, glftScale);
             scene.matrixAutoUpdate = false;
-            scene.traverse((child) => {
+            scene.traverse((_child) => {
+                const child = _child as THREE.Mesh<THREE.BufferGeometry, THREE.Material>;
                 child.matrixAutoUpdate = false;
+                child.receiveShadow = true;
+                child.castShadow = true;
+                child.updateMatrix();
+                if (child.isMesh && child.material) {
+                    csm.setupMaterial(child.material);
+                }
+                // if (child.material) {
+                //     child.material = new THREE.MeshPhongMaterial({
+                //         // grey color
+                //         color: 0x808080,
+                //     });
+                // }
             });
             scene.updateMatrix();
+            scene.receiveShadow = true;
+            scene.castShadow = true;
         };
 
         const backgroundPlane = await this.gltflLoader.loadAsync('../../../base.glb');
@@ -234,6 +307,7 @@ export default class Example {
         this.backgroundPlane = backgroundPlane.scene;
         this.backgroundPlane.visible = this.params.showBackgroundPlane;
         callback(backgroundPlane.scene);
+
         this.scene.add(backgroundPlane.scene);
 
         const backgroundBuildings = await this.gltflLoader.loadAsync('../../../buildings.glb');
@@ -260,6 +334,8 @@ export default class Example {
             // Camera controls
             const delta = clock.getDelta();
             this.cameraControls.update(delta);
+            camera.updateMatrixWorld();
+            csm.update();
 
             // Render
             requestAnimationFrame(animate);
