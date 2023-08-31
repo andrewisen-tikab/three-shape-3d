@@ -161,6 +161,7 @@ export default class Example {
         this.group = new THREE.Group();
         this.scene.add(this.group);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.shadowMap.enabled = true;
 
         const bgColor = new THREE.Color(0x263238);
         this.renderer.setClearColor(bgColor, 1);
@@ -205,13 +206,13 @@ export default class Example {
         });
 
         // Setup a basic lighting
-        const light = new THREE.DirectionalLight(0xffffff, 1);
+        const light = new THREE.DirectionalLight(0xffffff, 1 * Math.PI);
         light.castShadow = true;
         light.shadow.mapSize.set(2048, 2048);
         light.position.set(10, 10, 10);
 
         this.scene.add(light);
-        this.scene.add(new THREE.AmbientLight(0xb0bec5, 0.8));
+        this.scene.add(new THREE.AmbientLight(0xb0bec5, 0.8 * Math.PI));
 
         // Setup a positional helper
         const planeGeometry = new THREE.PlaneGeometry(1, 1);
