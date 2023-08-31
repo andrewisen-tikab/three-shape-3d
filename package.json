@@ -9,7 +9,8 @@
         "build:example": "tsc && vite build && vite build -c vite.config.example.ts",
         "preview": "vite preview",
         "ts": "tsc",
-        "docs": "typedoc"
+        "docs": "typedoc",
+        "test": "cd test && yarn run cypress open"
     },
     "devDependencies": {
         "@types/polylabel": "^1.1.0",
