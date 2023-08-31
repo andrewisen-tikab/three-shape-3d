@@ -137,6 +137,8 @@ export default class CSGFactory extends THREE.EventDispatcher {
             volumeBrush,
             CSGOperations.SUBTRACTION,
         );
+        volumeResultBrush.receiveShadow = true;
+        volumeResultBrush.castShadow = false;
         result.add(volumeResultBrush);
 
         // Setup volume cut brush
