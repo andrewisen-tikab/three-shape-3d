@@ -16,16 +16,58 @@ You can create a shape from a set of points and build either a:
 
 ## Installation
 
+Install with npm:
+
 ```bash
-todo
+npm install three-shape-3d
+```
+
+Install with yarn:
+
+```bash
+yarn add three-shape-3d
 ```
 
 ## Usage
 
 ```ts
-import Shape3D from 'three-shape-3d';
+import { Shape3D } from 'three-shape-3d';
 const shape = new Shape3D();
 scene.add(shape);
+```
+
+This will create an empty shape.
+To make anything useful, you need to add points to the shape.
+
+```ts
+import { Shape3DFactory } from 'three-shape-3d';
+
+// The factory can help you create shapes
+const factory = new Shape3DFactory();
+
+// Array of points
+const points: THREE.Vector3[] = [];
+
+// Arbitrary points
+points.push(new THREE.Vector3(0, 0, 0));
+points.push(new THREE.Vector3(20, 0, 0));
+points.push(new THREE.Vector3(0, 0, 20));
+
+// Use the factory to create a shape
+const shape3d = factory.create({
+    shapeType: 'line',
+});
+shape3d.setFromPoints(points);
+```
+
+Now, if you want to update the shape, you can do so by calling the factory.
+
+```ts
+// Convert the line shape to a volume shape.
+factory.update(shape3D, {
+    shapeType: SUPPORTED_SHAPES.VOLUME, // New shape type
+    volumeHeight: 10,
+});
 ```
 
 ### Line
@@ -112,6 +154,17 @@ There are some limitations to what shapes you can create. Any complex shapes are
 
 ["New York Scaffolding" by s4shko](https://sketchfab.com/3d-models/new-york-scaffolding-a73967fe00f6418d838f8b57e69e7b43)
 
+````
+
 ```
 
 ```
+
+```
+
+```
+
+```
+
+```
+````

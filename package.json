@@ -3,6 +3,7 @@
     "private": true,
     "version": "0.0.25",
     "type": "module",
+    "main": "dist/three-shape-3d.js",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
@@ -26,5 +27,8 @@
     },
     "dependencies": {
         "polylabel": "^1.1.0"
+    },
+    "peerDependencies": {
+        "three": "^0.155.0"
     }
 }
