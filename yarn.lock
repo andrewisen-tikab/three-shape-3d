@@ -375,9 +375,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.154.0":
-  version: 0.154.0
-  resolution: "@types/three@npm:0.154.0"
+"@types/three@npm:^0.155.1":
+  version: 0.155.1
+  resolution: "@types/three@npm:0.155.1"
   dependencies:
     "@tweenjs/tween.js": ~18.6.4
     "@types/stats.js": "*"
@@ -385,7 +385,7 @@ __metadata:
     fflate: ~0.6.9
     lil-gui: ~0.17.0
     meshoptimizer: ~0.18.1
-  checksum: 623067f84e342afc2641b4e547a95d25882b01a108abd8987df6e3c9af5d83d710e13cc974174867c0298573c93b4e0f1b2233d9bab650a7c2ef3cbb73a5e842
+  checksum: dbe682fed53b59776d09140eec755677aedb49df6a16333a507f87a4ade2cbd4ea0fa46984e28425f3c3026d5eb9a8568e75a1a362fb4f1889427e4c6df4b640
   languageName: node
   linkType: hard
 
@@ -1978,7 +1978,7 @@ __metadata:
   resolution: "three-shape-3d@workspace:."
   dependencies:
     "@types/polylabel": ^1.1.0
-    "@types/three": ^0.154.0
+    "@types/three": ^0.155.1
     camera-controls: ^2.7.1
     polylabel: ^1.1.0
     three: ^0.155.0
