@@ -347,6 +347,13 @@ export default class Example {
         animate();
 
         this.setupEvents();
+        this.addE2ETest();
+    }
+
+    private addE2ETest() {
+        const div = document.createElement('div');
+        div.id = 'e2e';
+        document.body.appendChild(div);
     }
 
     /**
