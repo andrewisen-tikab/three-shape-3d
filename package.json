@@ -18,7 +18,7 @@
         "three": "^0.155.0",
         "three-bvh-csg": "^0.0.9",
         "three-mesh-bvh": "^0.6.5",
-        "typedoc": "^0.24.8",
+        "typedoc": "^0.25.0",
         "typescript": "^5.0.2",
         "vite": "^4.4.9",
         "vite-plugin-dts": "^3.3.0"
