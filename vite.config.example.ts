@@ -13,8 +13,11 @@ export default defineConfig({
     base: './',
     build: {
         outDir: './dist/examples',
+        minify: false,
+        sourcemap: true,
         rollupOptions: {
             input,
+            treeshake: false,
         },
     },
 });
