@@ -375,9 +375,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.154.0":
-  version: 0.154.0
-  resolution: "@types/three@npm:0.154.0"
+"@types/three@npm:^0.155.1":
+  version: 0.155.1
+  resolution: "@types/three@npm:0.155.1"
   dependencies:
     "@tweenjs/tween.js": ~18.6.4
     "@types/stats.js": "*"
@@ -385,7 +385,7 @@ __metadata:
     fflate: ~0.6.9
     lil-gui: ~0.17.0
     meshoptimizer: ~0.18.1
-  checksum: 623067f84e342afc2641b4e547a95d25882b01a108abd8987df6e3c9af5d83d710e13cc974174867c0298573c93b4e0f1b2233d9bab650a7c2ef3cbb73a5e842
+  checksum: dbe682fed53b59776d09140eec755677aedb49df6a16333a507f87a4ade2cbd4ea0fa46984e28425f3c3026d5eb9a8568e75a1a362fb4f1889427e4c6df4b640
   languageName: node
   linkType: hard
 
@@ -648,7 +648,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"camera-controls@npm:^2.7.0":
+"camera-controls@npm:^2.7.1":
   version: 2.7.1
   resolution: "camera-controls@npm:2.7.1"
   peerDependencies:
@@ -1346,7 +1346,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^9.0.0, minimatch@npm:^9.0.1":
+"minimatch@npm:^9.0.0, minimatch@npm:^9.0.1, minimatch@npm:^9.0.3":
   version: 9.0.3
   resolution: "minimatch@npm:9.0.3"
   dependencies:
@@ -1944,7 +1944,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three-mesh-bvh@npm:^0.6.1":
+"three-mesh-bvh@npm:^0.6.5":
   version: 0.6.5
   resolution: "three-mesh-bvh@npm:0.6.5"
   peerDependencies:
@@ -1958,16 +1958,16 @@ __metadata:
   resolution: "three-shape-3d@workspace:."
   dependencies:
     "@types/polylabel": ^1.1.0
-    "@types/three": ^0.154.0
-    camera-controls: ^2.7.0
+    "@types/three": ^0.155.1
+    camera-controls: ^2.7.1
     polylabel: ^1.1.0
     three: ^0.155.0
     three-bvh-csg: ^0.0.9
-    three-mesh-bvh: ^0.6.1
-    typedoc: ^0.24.8
-    typescript: ^5.0.2
-    vite: ^4.4.0
-    vite-plugin-dts: ^3.3.0
+    three-mesh-bvh: ^0.6.5
+    typedoc: ^0.25.0
+    typescript: ^5.2.2
+    vite: ^4.4.9
+    vite-plugin-dts: ^3.5.3
   languageName: unknown
   linkType: soft
 
@@ -1992,23 +1992,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc@npm:^0.24.8":
-  version: 0.24.8
-  resolution: "typedoc@npm:0.24.8"
+"typedoc@npm:^0.25.0":
+  version: 0.25.0
+  resolution: "typedoc@npm:0.25.0"
   dependencies:
     lunr: ^2.3.9
     marked: ^4.3.0
-    minimatch: ^9.0.0
+    minimatch: ^9.0.3
     shiki: ^0.14.1
   peerDependencies:
-    typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x
+    typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x
   bin:
     typedoc: bin/typedoc
-  checksum: a46a14497f789fb3594e6c3af2e45276934ac46df40b7ed15a504ee51dc7a8013a2ffb3a54fd73abca6a2b71f97d3ec9ad356fa9aa81d29743e4645a965a2ae0
+  checksum: f0c5980017858969f037b136d9f305fa70162be891e7b169a92701cff67e1eed5c33895121265ec7da5b4a19d0042e649c103a6719c2b42736325b22fd85ff6a
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.0.2":
+"typescript@npm:^5.2.2":
   version: 5.2.2
   resolution: "typescript@npm:5.2.2"
   bin:
@@ -2028,7 +2028,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^5.0.2#~builtin<compat/typescript>":
+"typescript@patch:typescript@^5.2.2#~builtin<compat/typescript>":
   version: 5.2.2
   resolution: "typescript@patch:typescript@npm%3A5.2.2#~builtin<compat/typescript>::version=5.2.2&hash=bda367"
   bin:
@@ -2096,7 +2096,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-dts@npm:^3.3.0":
+"vite-plugin-dts@npm:^3.5.3":
   version: 3.5.3
   resolution: "vite-plugin-dts@npm:3.5.3"
   dependencies:
@@ -2116,7 +2116,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.4.0":
+"vite@npm:^4.4.9":
   version: 4.4.9
   resolution: "vite@npm:4.4.9"
   dependencies:
