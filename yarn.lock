@@ -650,12 +650,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"camera-controls@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "camera-controls@npm:2.7.0"
+"camera-controls@npm:^2.7.1":
+  version: 2.7.1
+  resolution: "camera-controls@npm:2.7.1"
   peerDependencies:
     three: ">=0.126.1"
-  checksum: 86caa08faf2e6b52a709758c133b2c987ca08082d2138cc2556970d11ec086228d50ccef6f42a6afe338aa1de60bbac602e434acce1359a7b34fd6e74859e55d
+  checksum: ad1d7c3426581d1cd1bd20164f59c27a42287b5e54f44e1d2a8d8e05a8a63247831c4867e5fb41e8bbecf7022d514b54f861bc4b413d3c257214e60eeaa9bf79
   languageName: node
   linkType: hard
 
@@ -1979,7 +1979,7 @@ __metadata:
   dependencies:
     "@types/polylabel": ^1.1.0
     "@types/three": ^0.154.0
-    camera-controls: ^2.7.0
+    camera-controls: ^2.7.1
     polylabel: ^1.1.0
     three: ^0.155.0
     three-bvh-csg: ^0.0.9
