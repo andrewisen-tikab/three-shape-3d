@@ -1,6 +1,5 @@
 {
     "name": "three-shape-3d-test",
-    "private": true,
     "packageManager": "yarn@3.2.0",
     "devDependencies": {
         "cypress": "^13.0.0"
