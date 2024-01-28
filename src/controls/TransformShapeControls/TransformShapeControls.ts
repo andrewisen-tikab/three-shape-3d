@@ -31,6 +31,11 @@ const _mouseUpEvent: /* @__PURE__ */ { type: 'mouseUp'; mode: string | null } = 
 } as const;
 const _objectChangeEvent = /* @__PURE__ */ { type: 'objectChange' } as const;
 const _vertexChangeEvent = /* @__PURE__ */ { type: 'vertexChange' } as const;
+const _ghostChangeEvent = /* @__PURE__ */ { type: 'ghostChange' } as const;
+const _attachEvent = /* @__PURE__ */ { type: 'attach' } as const;
+const _detachEvent = /* @__PURE__ */ { type: 'detach' } as const;
+const _completeEvent = /* @__PURE__ */ { type: 'complete' } as const;
+const _cancelEvent = /* @__PURE__ */ { type: 'cancel' } as const;
 
 class TransformShapeControls extends THREE.Object3D {
     public static VertexObject = VertexObject;
@@ -877,6 +882,8 @@ class TransformShapeControls extends THREE.Object3D {
 
         this.visible = true;
 
+        this.dispatchEvent(_attachEvent);
+
         return this;
     }
 
@@ -1020,6 +1027,8 @@ class TransformShapeControls extends THREE.Object3D {
 
         this.labelsManager.dispose();
 
+        this.dispatchEvent(_detachEvent);
+
         return this;
     }
 
@@ -1102,6 +1111,7 @@ class TransformShapeControls extends THREE.Object3D {
         const vertices = this.object!.getVertices();
 
         this.factory.updateGhost(this.ghostShape!, this.ghostVertex!, vertices);
+        this.dispatchEvent(_ghostChangeEvent);
     }
 
     public completeCreate(): Shape3D | null {
@@ -1111,6 +1121,9 @@ class TransformShapeControls extends THREE.Object3D {
         if (object == null) return null;
         this.disposeGhosts();
         this.detach();
+
+        this.dispatchEvent(_completeEvent);
+
         return object;
     }
 
@@ -1126,6 +1139,8 @@ class TransformShapeControls extends THREE.Object3D {
         this.detach();
 
         if (parent) parent.remove(object);
+
+        this.dispatchEvent(_cancelEvent);
     }
 
     /**
