@@ -1,1 +1,4 @@
 .yarn
+examples
+dist/examples
+*.glb
