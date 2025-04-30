@@ -41,6 +41,8 @@ jobs:
                   branch: bot/update-version
             - name: 🛠️ Publish
               run: |
+                  corepack enable
+                  yarn set version stable
                   yarn install
                   yarn build
                   yarn build:example
