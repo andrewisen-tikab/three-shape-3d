@@ -1827,7 +1827,7 @@ __metadata:
     vite: "npm:^4.4.9"
     vite-plugin-dts: "npm:^3.5.3"
   peerDependencies:
-    three: ^0.155.0
+    three: ^0.169.0
   languageName: unknown
   linkType: soft
 
