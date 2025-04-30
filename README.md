@@ -99,11 +99,7 @@ TODO
 See the [examples](./examples) folder for an example.
 Or, view the live demo here:
 
--   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/create/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/create/)
--   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/edit/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/edit/)
--   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/memory/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/memory/)
--   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/objects/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/objects/)
--   [https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/csg/](https://andrewisen-tikab.github.io/three-shape-3d/examples/examples/csg/)
+-   [https://andrewisen-tikab.github.io/three-shape-3d/examples/](https://andrewisen-tikab.github.io/three-shape-3d/examples/)
 
 <img src="https://github.com/andrewisen-tikab/three-shape-3d/blob/feature/resources/example.gif?raw=true" width="100%" />
 
@@ -153,18 +149,3 @@ There are some limitations to what shapes you can create. Any complex shapes are
 ["Wooden barricade" by BlackMike](https://sketchfab.com/3d-models/wooden-barricade-4de45fef6da2497c828ef76d195e9f7f)
 
 ["New York Scaffolding" by s4shko](https://sketchfab.com/3d-models/new-york-scaffolding-a73967fe00f6418d838f8b57e69e7b43)
-
-````
-
-```
-
-```
-
-```
-
-```
-
-```
-
-```
-````
