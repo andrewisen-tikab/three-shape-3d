@@ -2,7 +2,9 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import { EXAMPLES } from './examples';
 
-const input: { [key: string]: resolve } = {};
+const input: { [key: string]: resolve } = {
+    examples: resolve(__dirname, `examples/index.html`),
+};
 
 EXAMPLES.forEach((example) => {
     input[example] = resolve(__dirname, `examples/examples/${example}/index.html`);
