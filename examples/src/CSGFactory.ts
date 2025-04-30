@@ -42,8 +42,8 @@ const _vertex = new THREE.Vector3();
  */
 export default class CSGFactory extends THREE.EventDispatcher {
     private _shape3D: Shape3D;
-    private _csgObjects: THREE.Object3D<THREE.Event>[];
-    private _result: THREE.Object3D<THREE.Event>;
+    private _csgObjects: THREE.Object3D[];
+    private _result: THREE.Object3D;
     private _csgEvaluator: Evaluator;
     private _factory: Shape3DFactory;
 

@@ -18,6 +18,7 @@ lineFolder.add(params, 'closeLine').onChange((value: boolean) => {
 });
 
 configFolder
+    // @ts-ignore
     .add(params, 'shape', Object.values(SUPPORTED_SHAPES))
     .onChange((shapeType: SupportedShapes) => {
         const shape3D = selector.getSelectedShape();

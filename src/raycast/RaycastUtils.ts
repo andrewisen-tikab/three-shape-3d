@@ -1,5 +1,5 @@
+import * as THREE from 'three';
 import type Shape3D from '../core/Shape3D';
-
 interface Shape3DChild extends THREE.Object3D {
     shape3DParent: Shape3D;
 }

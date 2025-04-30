@@ -66,14 +66,20 @@ const addObjectsOnShape = () => {
  * Called when **before (!)** the user starts to drag the shape.
  */
 const beginPool = () => {
-    objectsOnShapeFactory.preparePool(modelGroup, model, selectedShape3D, { width: modelWidth });
+    objectsOnShapeFactory.preparePool(modelGroup, model, selectedShape3D, {
+        // @ts-ignore
+        width: modelWidth,
+    });
 };
 
 /**
  * Called when the user drags the shape.
  */
 const adjustPool = () => {
-    objectsOnShapeFactory.adjustPoolMatrices(selectedShape3D, { width: modelWidth });
+    objectsOnShapeFactory.adjustPoolMatrices(selectedShape3D, {
+        // @ts-ignore
+        width: modelWidth,
+    });
 };
 
 /**

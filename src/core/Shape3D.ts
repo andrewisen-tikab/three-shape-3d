@@ -17,6 +17,40 @@ export type ExtractShapeType<T = any> = {
     [K in keyof T]: T[K]['TYPE'];
 };
 
+export interface Shape3DEvents extends THREE.Object3DEventMap {
+    'vertices-updated': {
+        type: 'vertices-updated';
+        vertices: THREE.Vector3Tuple[];
+    };
+    'vertex-removed': {
+        type: 'vertex-removed';
+        index: number;
+    };
+    'vertex-updated': {
+        type: 'vertex-updated';
+        index: number;
+    };
+    'point-added': {
+        type: 'point-added';
+        point: THREE.Vector3;
+    };
+    'shape-type-updated': {
+        type: 'shape-type-updated';
+        shapeType: SupportedShapes;
+    };
+    'edge-splitted': {
+        type: 'edge-splitted';
+        index: number;
+    };
+    'shape-added': {
+        type: 'shape-added';
+        shape: Shape;
+    };
+    'close-line-changed': {
+        type: 'close-line-changed';
+    };
+}
+
 /**
  * This is the base class for {@link Shape}s.
  *
@@ -24,7 +58,7 @@ export type ExtractShapeType<T = any> = {
  *
  * A factory decides which {@link Shape3D.SUPPORTED_SHAPES} to add based on the {@link Shape3D.shapeType}.
  */
-export default class Shape3D extends THREE.Object3D {
+export default class Shape3D extends THREE.Object3D<Shape3DEvents> {
     /**
      * The supported shapes.
      *
