@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import VertexObject from './vertex';
 
 export type Mode = 'create' | 'edit' | 'translate' | 'rotate' | 'scale';

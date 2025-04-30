@@ -37,7 +37,21 @@ const _detachEvent = /* @__PURE__ */ { type: 'detach' } as const;
 const _completeEvent = /* @__PURE__ */ { type: 'complete' } as const;
 const _cancelEvent = /* @__PURE__ */ { type: 'cancel' } as const;
 
-class TransformShapeControls extends THREE.Object3D {
+export interface TransformShapeControlsEvents extends THREE.Object3DEventMap {
+    change: { type: 'change' };
+    mouseDown: { type: 'mouseDown'; mode?: string };
+    mouseUp: { type: 'mouseUp'; mode: string | null };
+    objectChange: { type: 'objectChange' };
+    vertexChange: { type: 'vertexChange' };
+    attach: { type: 'attach' };
+    detach: { type: 'detach' };
+    complete: { type: 'complete' };
+    cancel: { type: 'cancel' };
+    ghostChange: { type: 'ghostChange' };
+    'dragging-changed': { type: 'dragging-changed'; value: boolean };
+}
+
+class TransformShapeControls extends THREE.Object3D<TransformShapeControlsEvents> {
     public static VertexObject = VertexObject;
 
     public vertexGroup!: THREE.Group;
@@ -239,7 +253,11 @@ class TransformShapeControls extends THREE.Object3D {
                         // @ts-ignore
                         _gizmo[propName] = value;
 
-                        scope.dispatchEvent({ type: propName + '-changed', value: value });
+                        scope.dispatchEvent({
+                            // @ts-ignore
+                            type: propName + '-changed',
+                            value: value,
+                        });
                         scope.dispatchEvent(_changeEvent);
                     }
                 },

@@ -35,9 +35,9 @@ export default class InstancedGLTF extends THREE.Object3D {
      */
     public matrices: THREE.Matrix4[] = [];
 
-    private gltf: THREE.Object3D<THREE.Event>;
+    private gltf: THREE.Object3D;
 
-    private count: number = 0;
+    public count: number = 0;
 
     private poolPosition: THREE.Vector3;
 
