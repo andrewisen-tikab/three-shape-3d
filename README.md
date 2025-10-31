@@ -16,17 +16,12 @@ You can create a shape from a set of points and build either a:
 
 ## Installation
 
-Install with npm:
+Install with bun:
 
 ```bash
-npm install three-shape-3d
+bun add three-shape-3d
 ```
 
-Install with yarn:
-
-```bash
-yarn add three-shape-3d
-```
 
 ## Usage
 

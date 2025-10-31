@@ -1,59 +1,59 @@
 name: Release
 on:
-    release:
-        types: [published]
-    workflow_dispatch:
+  release:
+    types: [published]
+  workflow_dispatch:
 permissions:
-    contents: read
-    pages: write
-    id-token: write
+  contents: read
+  pages: write
+  id-token: write
 jobs:
-    main:
-        name: 🎉 Release
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        steps:
-            - name: ⤵️ Checkout
-              uses: actions/checkout@v3
-              with:
-                  ref: dev
-            - uses: actions/setup-node@v3
-              with:
-                  node-version: 18
-                  registry-url: 'https://registry.npmjs.org'
-            - name: 🤖 Setup Bot
-              run: |
-                  git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-                  git config --local user.name "github-actions[bot]"
-            - name: 🛠️ Build
-              run: |
-                  npm --no-git-tag-version version patch
-                  git add -A
-                  git commit -m "🤖 Update version" -a
-            - name: Create Pull Request
-              id: cpr
-              uses: peter-evans/create-pull-request@v5
-              with:
-                  token: ${{ secrets.PAT }}
-                  title: Update version
-                  body: Automated changes by Bot 🤖
-                  commit-message: 🤖 Update version
-                  branch: bot/update-version
-            - name: 🛠️ Publish
-              run: |
-                  corepack enable
-                  yarn set version stable
-                  yarn install
-                  yarn build
-                  yarn build:example
-                  yarn docs
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  path: './dist/examples'
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v4
-            - run: npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  main:
+    name: 🎉 Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: ⤵️ Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+      - name: 🛠️ Setup Bun
+        uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: "https://registry.npmjs.org"
+      - name: 🤖 Setup Bot
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      - name: 🛠️ Patch
+        run: |
+          npm --no-git-tag-version version patch
+          git add -A
+          git commit -m "🤖 Update version" -a
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.PAT }}
+          title: Update version
+          body: Automated changes by Bot 🤖
+          commit-message: 🤖 Update version
+          branch: bot/update-version
+      - name: 🛠️ Publish
+        run: |
+          bun install
+          bun run build
+          bun run build:example
+          bun run docs
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./dist/examples"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

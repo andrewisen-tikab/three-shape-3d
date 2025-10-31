@@ -2,7 +2,7 @@ name: PR Checker
 on:
     pull_request:
         branches:
-            - 'dev'
+            - "dev"
     workflow_dispatch:
 jobs:
     typescript:
@@ -11,12 +11,12 @@ jobs:
         timeout-minutes: 5
         steps:
             - name: ⤵️ Checkout "dev"
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+            - name: 🛠️ Setup Bun
+              uses: oven-sh/setup-bun@v2
             - name: 🛠️ Install Dependencies
               run: |
-                  corepack enable
-                  yarn set version stable
-                  yarn install
+                  bun install
             - name: ⏳ Checking TypeScript...
               run: |
-                  yarn ts
+                  bun run ts
