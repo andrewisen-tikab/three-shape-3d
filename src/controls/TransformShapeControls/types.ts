@@ -1,16 +1,16 @@
-import * as THREE from 'three';
-import VertexObject from './vertex';
+import type * as THREE from "three";
+import type VertexObject from "./vertex";
 
-export type Mode = 'create' | 'edit' | 'translate' | 'rotate' | 'scale';
+export type Mode = "create" | "edit" | "translate" | "rotate" | "scale";
 
 export type TransformShapeControlsGizmoParams = {
-    centerGizmo: boolean;
-    dragVertices: boolean;
-    allowCreatingNewVertices: boolean;
-    showLengthLabels: boolean;
-    showAngleLabels: boolean;
+	centerGizmo: boolean;
+	dragVertices: boolean;
+	allowCreatingNewVertices: boolean;
+	showLengthLabels: boolean;
+	showAngleLabels: boolean;
 };
 
 export interface LastSelectedVertex extends THREE.Mesh {
-    parent: VertexObject;
+	parent: VertexObject;
 }

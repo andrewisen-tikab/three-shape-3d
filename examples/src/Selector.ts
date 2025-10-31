@@ -1,29 +1,29 @@
-import type { Shape3D } from '../../src';
-import { TransformShapeControls } from '../../src';
+import type { Shape3D, TransformShapeControls } from "../../src";
 
 export default class Selector {
-    public selectedShape: Shape3D | null;
-    private transformControls?: TransformShapeControls;
+	public selectedShape: Shape3D | null;
+	private transformControls?: TransformShapeControls;
 
-    constructor() {
-        this.selectedShape = null;
-    }
+	constructor() {
+		this.selectedShape = null;
+	}
 
-    select(shape: Shape3D | null) {
-        if (!shape?.isShape3D) throw new Error("Can't select a non-Shape3D object.");
-        this.transformControls?.attach(shape);
-        this.selectedShape = shape;
-    }
+	select(shape: Shape3D | null) {
+		if (!shape?.isShape3D)
+			throw new Error("Can't select a non-Shape3D object.");
+		this.transformControls?.attach(shape);
+		this.selectedShape = shape;
+	}
 
-    deselect() {
-        if (this.selectedShape === null) return;
-        this.onDeselect();
-        this.selectedShape = null;
-    }
+	deselect() {
+		if (this.selectedShape === null) return;
+		this.onDeselect();
+		this.selectedShape = null;
+	}
 
-    public getSelectedShape(): Readonly<Shape3D> | null {
-        return this.selectedShape;
-    }
+	public getSelectedShape(): Readonly<Shape3D> | null {
+		return this.selectedShape;
+	}
 
-    private onDeselect() {}
+	private onDeselect() {}
 }

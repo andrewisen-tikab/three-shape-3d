@@ -1,7 +1,8 @@
-import * as THREE from 'three';
-import type Shape3D from '../core/Shape3D';
+import type * as THREE from "three";
+import type Shape3D from "../core/Shape3D";
+
 interface Shape3DChild extends THREE.Object3D {
-    shape3DParent: Shape3D;
+	shape3DParent: Shape3D;
 }
 
 /**
@@ -10,7 +11,7 @@ interface Shape3DChild extends THREE.Object3D {
  * @param parent Parent to set.
  */
 const setShape3DParent = (object: THREE.Object3D, parent: Shape3D): void => {
-    (object as Shape3DChild).shape3DParent = parent;
+	(object as Shape3DChild).shape3DParent = parent;
 };
 
 /**
@@ -19,15 +20,15 @@ const setShape3DParent = (object: THREE.Object3D, parent: Shape3D): void => {
  * @returns Parent of the object as a {@link Shape3D}.
  */
 const getShape3DParent = (object: THREE.Object3D): Shape3D | undefined => {
-    return (object as Shape3DChild).shape3DParent;
+	return (object as Shape3DChild).shape3DParent;
 };
 
 /**
  * An object with several raycast utility functions.
  */
 const RaycastUtils = {
-    setShape3DParent,
-    getShape3DParent,
+	setShape3DParent,
+	getShape3DParent,
 } as const;
 
 export default RaycastUtils;

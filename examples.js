@@ -1,1 +1,1 @@
-export const EXAMPLES = ['create', 'edit', 'memory', 'objects', 'csg'];
+export const EXAMPLES = ["create", "edit", "memory", "objects", "csg"];
