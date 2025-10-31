@@ -1,30 +1,30 @@
 body {
-    margin: 0;
+	margin: 0;
 }
 
 .shape-3d-css-renderer {
-    pointer-events: none;
+	pointer-events: none;
 }
 
 .shape-3d-label-container {
-    pointer-events: none;
-    position: relative;
+	pointer-events: none;
+	position: relative;
 }
 
 .shape-3d-label {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: auto !important;
-    z-index: 2;
-    color: white;
-    background: none;
-    border: none;
-    transform-style: preserve-3d;
-    background: rgba(0, 0, 0, 1);
-    border-radius: 5px;
-    padding-left: 5px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	pointer-events: auto !important;
+	z-index: 2;
+	color: white;
+	background: none;
+	border: none;
+	transform-style: preserve-3d;
+	background: rgba(0, 0, 0, 1);
+	border-radius: 5px;
+	padding-left: 5px;
 }
 
 .shape-3d-length-label {
@@ -34,11 +34,11 @@ body {
 }
 
 .shape-3d-label::placeholder {
-    color: white;
-    opacity: 1;
+	color: white;
+	opacity: 1;
 }
 
 .shape-3d-label:focus,
 input:focus {
-    outline: none;
+	outline: none;
 }

@@ -1,7 +1,11 @@
 {
-    "name": "three-shape-3d-test",
-    "packageManager": "yarn@3.2.0",
-    "devDependencies": {
-        "cypress": "^13.0.0"
-    }
+	"name": "three-shape-3d-test",
+	"packageManager": "yarn@3.2.0",
+	"devDependencies": {
+		"cypress": "^13.0.0"
+	},
+	"scripts": {
+		"cy:open": "cypress open",
+		"cy:run": "cypress run"
+	}
 }

@@ -1,61 +1,67 @@
-import * as THREE from 'three';
-import CSGFactory from '../../src/CSGFactory';
-import Example, { SUPPORTED_SHAPES } from '../../src/Example';
-import { Shape3D } from '../../../src';
+import * as THREE from "three";
+import type { Shape3D } from "../../../src";
+import CSGFactory from "../../src/CSGFactory";
+import Example, { SUPPORTED_SHAPES } from "../../src/Example";
 
 const example = new Example();
 example.initAsync().then(() => {
-    example.createScene();
-    example.addDummyShape(true);
+	example.createScene();
+	example.addDummyShape(true);
 
-    const {
-        gui,
-        factory,
-        selector,
-        // TODO: Switch to async loading!!!
-        backgroundPlane,
-        group,
-        transformShapeControls,
-    } = example;
+	const {
+		gui,
+		factory,
+		selector,
+		// TODO: Switch to async loading!!!
+		backgroundPlane,
+		group,
+		transformShapeControls,
+	} = example;
 
-    const shape3D = selector.getSelectedShape();
-    if (shape3D == null) throw new Error('Shape3D is null');
+	const shape3D = selector.getSelectedShape();
+	if (shape3D == null) throw new Error("Shape3D is null");
 
-    const params = {
-        volumeDepth: 0.5,
-    };
+	const params = {
+		volumeDepth: 0.5,
+	};
 
-    factory.update(shape3D, {
-        shapeType: SUPPORTED_SHAPES.VOLUME,
-        volumeHeight: -params.volumeDepth,
-    });
+	factory.update(shape3D, {
+		shapeType: SUPPORTED_SHAPES.VOLUME,
+		volumeHeight: -params.volumeDepth,
+	});
 
-    const result = new THREE.Object3D();
-    group.add(result);
+	const result = new THREE.Object3D();
+	group.add(result);
 
-    const csgFactory = new CSGFactory(shape3D as Shape3D, factory, [backgroundPlane], result);
+	const csgFactory = new CSGFactory(
+		shape3D as Shape3D,
+		factory,
+		[backgroundPlane],
+		result,
+	);
 
-    csgFactory.update();
-    backgroundPlane.visible = false;
+	csgFactory.update();
+	backgroundPlane.visible = false;
 
-    const updateCSG = () => {
-        csgFactory.hideVolume();
-        csgFactory.update();
-    };
+	const updateCSG = () => {
+		csgFactory.hideVolume();
+		csgFactory.update();
+	};
 
-    transformShapeControls.addEventListener('vertexChange', updateCSG);
+	transformShapeControls.addEventListener("vertexChange", updateCSG);
 
-    gui.add(params, 'volumeDepth')
-        .name('Volume depth')
-        .min(0.1)
-        .max(100)
-        .step(0.1)
-        .onChange((volumeDepth: number) => {
-            factory.update(shape3D, {
-                shapeType: SUPPORTED_SHAPES.VOLUME,
-                volumeHeight: -volumeDepth,
-            });
+	gui
+		.add(params, "volumeDepth")
+		.name("Volume depth")
+		.min(0.1)
+		.max(100)
+		.step(0.1)
+		.onChange((volumeDepth: number) => {
+			factory.update(shape3D, {
+				shapeType: SUPPORTED_SHAPES.VOLUME,
+				volumeHeight: -volumeDepth,
+			});
 
-            updateCSG();
-        });
+			updateCSG();
+		});
 });

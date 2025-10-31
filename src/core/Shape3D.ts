@@ -1,54 +1,53 @@
-import type { ColorRepresentation, Shape3DParams, Vertex } from '../types';
+import polylabel from "polylabel";
 
-import * as THREE from 'three';
-import polylabel from 'polylabel';
+import * as THREE from "three";
+import Area from "../shapes/area";
 
-import Line from '../shapes/line';
-
-import { getMidpoint } from '../utils';
-import Area from '../shapes/area';
-import Volume from '../shapes/volume';
+import Line from "../shapes/line";
+import Volume from "../shapes/volume";
+import type { ColorRepresentation, Shape3DParams, Vertex } from "../types";
+import { getMidpoint } from "../utils";
 
 /**
  * Extract the shape's TYPE static property.
  */
 export type ExtractShapeType<T = any> = {
-    // @ts-ignore
-    [K in keyof T]: T[K]['TYPE'];
+	// @ts-expect-error
+	[K in keyof T]: T[K]["TYPE"];
 };
 
 export interface Shape3DEvents extends THREE.Object3DEventMap {
-    'vertices-updated': {
-        type: 'vertices-updated';
-        vertices: THREE.Vector3Tuple[];
-    };
-    'vertex-removed': {
-        type: 'vertex-removed';
-        index: number;
-    };
-    'vertex-updated': {
-        type: 'vertex-updated';
-        index: number;
-    };
-    'point-added': {
-        type: 'point-added';
-        point: THREE.Vector3;
-    };
-    'shape-type-updated': {
-        type: 'shape-type-updated';
-        shapeType: SupportedShapes;
-    };
-    'edge-splitted': {
-        type: 'edge-splitted';
-        index: number;
-    };
-    'shape-added': {
-        type: 'shape-added';
-        shape: Shape;
-    };
-    'close-line-changed': {
-        type: 'close-line-changed';
-    };
+	"vertices-updated": {
+		type: "vertices-updated";
+		vertices: THREE.Vector3Tuple[];
+	};
+	"vertex-removed": {
+		type: "vertex-removed";
+		index: number;
+	};
+	"vertex-updated": {
+		type: "vertex-updated";
+		index: number;
+	};
+	"point-added": {
+		type: "point-added";
+		point: THREE.Vector3;
+	};
+	"shape-type-updated": {
+		type: "shape-type-updated";
+		shapeType: SupportedShapes;
+	};
+	"edge-splitted": {
+		type: "edge-splitted";
+		index: number;
+	};
+	"shape-added": {
+		type: "shape-added";
+		shape: Shape;
+	};
+	"close-line-changed": {
+		type: "close-line-changed";
+	};
 }
 
 /**
@@ -59,302 +58,310 @@ export interface Shape3DEvents extends THREE.Object3DEventMap {
  * A factory decides which {@link Shape3D.SUPPORTED_SHAPES} to add based on the {@link Shape3D.shapeType}.
  */
 export default class Shape3D extends THREE.Object3D<Shape3DEvents> {
-    /**
-     * The supported shapes.
-     *
-     * Modify this array to add/remove shapes.
-     * TypeScript will automatically infer the type of the array.
-     */
-    public static readonly SUPPORTED_SHAPES = [Line, Area, Volume] as const;
+	/**
+	 * The supported shapes.
+	 *
+	 * Modify this array to add/remove shapes.
+	 * TypeScript will automatically infer the type of the array.
+	 */
+	public static readonly SUPPORTED_SHAPES = [Line, Area, Volume] as const;
 
-    /**
-     * Helper property to check if an object is a {@link Shape3D}.
-     */
-    public isShape3D: boolean;
+	/**
+	 * Helper property to check if an object is a {@link Shape3D}.
+	 */
+	public isShape3D: boolean;
 
-    /**
-     * The type that {@link Shape3D} represents.
-     */
-    private shapeType: SupportedShapes;
+	/**
+	 * The type that {@link Shape3D} represents.
+	 */
+	private shapeType: SupportedShapes;
 
-    /**
-     * The {@links Shape}s that make up the {@link Shape3D} object.
-     */
-    private shapes: Shape[] = [];
+	/**
+	 * The {@links Shape}s that make up the {@link Shape3D} object.
+	 */
+	private shapes: Shape[] = [];
 
-    /**
-     * Ordered list of vertices.
-     * First item is the start point, last item is the end point.
-     */
-    protected vertices: Vertex[];
+	/**
+	 * Ordered list of vertices.
+	 * First item is the start point, last item is the end point.
+	 */
+	protected vertices: Vertex[];
 
-    /**
-     * Whether the line should be closed or not.
-     * Some shapes will ignore this property and close the line anyway.
-     */
-    private closeLine: boolean;
+	/**
+	 * Whether the line should be closed or not.
+	 * Some shapes will ignore this property and close the line anyway.
+	 */
+	private closeLine: boolean;
 
-    /**
-     * Setup an empty {@link Shape3D} object.
-     * Use a factory method to create a {@link Shape3D} object.
-     * @param _params
-     */
-    constructor(_params?: Partial<Shape3DParams>) {
-        super();
-        this.isShape3D = true;
-        this.vertices = [];
-        this.shapes = [];
-        this.shapeType = Line.TYPE;
-        this.closeLine = false;
-    }
+	/**
+	 * Setup an empty {@link Shape3D} object.
+	 * Use a factory method to create a {@link Shape3D} object.
+	 * @param _params
+	 */
+	constructor(_params?: Partial<Shape3DParams>) {
+		super();
+		this.isShape3D = true;
+		this.vertices = [];
+		this.shapes = [];
+		this.shapeType = Line.TYPE;
+		this.closeLine = false;
+	}
 
-    /**
-     * Overrides the {@link Shape3D.vertices} with the given vertices.
-     * @param vertices {@link Vertex}
-     */
-    public setVertices(vertices: Vertex[]): Shape3D {
-        this.vertices = vertices;
-        this.update();
+	/**
+	 * Overrides the {@link Shape3D.vertices} with the given vertices.
+	 * @param vertices {@link Vertex}
+	 */
+	public setVertices(vertices: Vertex[]): Shape3D {
+		this.vertices = vertices;
+		this.update();
 
-        this.dispatchEvent({ type: 'vertices-updated', vertices });
+		this.dispatchEvent({ type: "vertices-updated", vertices });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * @returns Readonly {@link Shape3D.vertices}
-     */
-    public getVertices(): Readonly<Vertex[]> {
-        return this.vertices;
-    }
+	/**
+	 * @returns Readonly {@link Shape3D.vertices}
+	 */
+	public getVertices(): Readonly<Vertex[]> {
+		return this.vertices;
+	}
 
-    /**
-     * Update a single vertex at the given index.
-     * @param index The index of the {@link Vertex} to update. First item is the start point, last item is the end point.
-     * @param vertex The new {@link Vertex}.
-     */
-    public updateVertex(index: number, vertex: Vertex): Shape3D {
-        if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
-        this.vertices[index] = vertex;
-        this.update();
+	/**
+	 * Update a single vertex at the given index.
+	 * @param index The index of the {@link Vertex} to update. First item is the start point, last item is the end point.
+	 * @param vertex The new {@link Vertex}.
+	 */
+	public updateVertex(index: number, vertex: Vertex): Shape3D {
+		if (index < 0 || index >= this.vertices.length)
+			throw new Error("Invalid index");
+		this.vertices[index] = vertex;
+		this.update();
 
-        this.dispatchEvent({ type: 'vertex-updated', index });
+		this.dispatchEvent({ type: "vertex-updated", index });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * Split the **edge (!)** at the given index
-     * I.e. `index - (index - 1)`
-     *
-     * @param index N.B: Midpoints start at index 1.
-     */
-    public splitEdge(index: number): Shape3D {
-        if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
-        const midpoint: Vertex = getMidpoint(this.vertices[index - 1], this.vertices[index]);
+	/**
+	 * Split the **edge (!)** at the given index
+	 * I.e. `index - (index - 1)`
+	 *
+	 * @param index N.B: Midpoints start at index 1.
+	 */
+	public splitEdge(index: number): Shape3D {
+		if (index < 0 || index >= this.vertices.length)
+			throw new Error("Invalid index");
+		const midpoint: Vertex = getMidpoint(
+			this.vertices[index - 1],
+			this.vertices[index],
+		);
 
-        // Insert the midpoint at index and shift the rest of the vertices
-        this.vertices.splice(index, 0, midpoint);
+		// Insert the midpoint at index and shift the rest of the vertices
+		this.vertices.splice(index, 0, midpoint);
 
-        this.update();
+		this.update();
 
-        this.dispatchEvent({ type: 'edge-splitted', index });
+		this.dispatchEvent({ type: "edge-splitted", index });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * Remove the vertex at the given index.
-     * @param index The index of the {@link Vertex} to remove. First item is the start point, last item is the end point.
-     */
-    public removeVertex(index: number): Shape3D {
-        if (index < 0 || index >= this.vertices.length) throw new Error('Invalid index');
-        this.vertices.splice(index, 1);
+	/**
+	 * Remove the vertex at the given index.
+	 * @param index The index of the {@link Vertex} to remove. First item is the start point, last item is the end point.
+	 */
+	public removeVertex(index: number): Shape3D {
+		if (index < 0 || index >= this.vertices.length)
+			throw new Error("Invalid index");
+		this.vertices.splice(index, 1);
 
-        this.update();
+		this.update();
 
-        this.dispatchEvent({ type: 'vertex-removed', index });
+		this.dispatchEvent({ type: "vertex-removed", index });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * Set the {@link Shape3D.shapeType} of the {@link Shape3D} object.
-     * @param newShapeType The new {@link Shape3D.shapeType}.
-     */
-    public setShapeType(newShapeType: SupportedShapes): Shape3D {
-        if (this.shapeType === newShapeType) return this;
-        this.shapeType = newShapeType;
+	/**
+	 * Set the {@link Shape3D.shapeType} of the {@link Shape3D} object.
+	 * @param newShapeType The new {@link Shape3D.shapeType}.
+	 */
+	public setShapeType(newShapeType: SupportedShapes): Shape3D {
+		if (this.shapeType === newShapeType) return this;
+		this.shapeType = newShapeType;
 
-        this.update();
+		this.update();
 
-        this.dispatchEvent({ type: 'shape-type-updated', shapeType: newShapeType });
+		this.dispatchEvent({ type: "shape-type-updated", shapeType: newShapeType });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * @returns Readonly {@link Shape3D.shapeType}
-     */
-    public getShapeType(): Readonly<SupportedShapes> {
-        return this.shapeType;
-    }
+	/**
+	 * @returns Readonly {@link Shape3D.shapeType}
+	 */
+	public getShapeType(): Readonly<SupportedShapes> {
+		return this.shapeType;
+	}
 
-    /**
-     * Dispose entire object.
-     */
-    public dispose(): void {
-        // Clear first, then dispose.
-        this.clear();
-        this.disposeShapes();
-    }
+	/**
+	 * Dispose entire object.
+	 */
+	public dispose(): void {
+		// Clear first, then dispose.
+		this.clear();
+		this.disposeShapes();
+	}
 
-    /**
-     * Set the vertices of the shape from an array of {@link THREE.Vector3}.
-     * @param points The vertices of the shape as {@link THREE.Vector3} array.
-     */
-    setFromPoints(points: THREE.Vector3[]): Shape3D {
-        const vertices: Vertex[] = points.map((point) => point.toArray());
-        this.vertices = vertices;
+	/**
+	 * Set the vertices of the shape from an array of {@link THREE.Vector3}.
+	 * @param points The vertices of the shape as {@link THREE.Vector3} array.
+	 */
+	setFromPoints(points: THREE.Vector3[]): Shape3D {
+		const vertices: Vertex[] = points.map((point) => point.toArray());
+		this.vertices = vertices;
 
-        this.update();
+		this.update();
 
-        this.dispatchEvent({ type: 'vertices-updated', vertices });
+		this.dispatchEvent({ type: "vertices-updated", vertices });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * Add a vertex to the end of the vertex list.
-     * @param point A single {@link THREE.Vector3}.
-     */
-    addPoint(point: THREE.Vector3): Shape3D {
-        const vertices = point.toArray();
-        this.vertices = [...this.vertices, vertices];
+	/**
+	 * Add a vertex to the end of the vertex list.
+	 * @param point A single {@link THREE.Vector3}.
+	 */
+	addPoint(point: THREE.Vector3): Shape3D {
+		const vertices = point.toArray();
+		this.vertices = [...this.vertices, vertices];
 
-        this.update();
+		this.update();
 
-        this.dispatchEvent({ type: 'point-added', point });
+		this.dispatchEvent({ type: "point-added", point });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * Add a {@link Shape} to the {@link Shape3D} object.
-     * @param shape The {@link Shape} to add.
-     */
-    addShape(shape: Shape): Shape3D {
-        const { object } = shape;
-        this.add(object);
-        this.shapes.push(shape);
+	/**
+	 * Add a {@link Shape} to the {@link Shape3D} object.
+	 * @param shape The {@link Shape} to add.
+	 */
+	addShape(shape: Shape): Shape3D {
+		const { object } = shape;
+		this.add(object);
+		this.shapes.push(shape);
 
-        this.dispatchEvent({ type: 'shape-added', shape });
+		this.dispatchEvent({ type: "shape-added", shape });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     * Rebuild the shape from the vertices.
-     */
-    public update(): void {
-        if (this.vertices.length === 0) return;
-        this.updateShapes();
-    }
+	/**
+	 * Rebuild the shape from the vertices.
+	 */
+	public update(): void {
+		if (this.vertices.length === 0) return;
+		this.updateShapes();
+	}
 
-    /**
-     * Internal method to update all shapes.
-     * Each shape has its own update method.
-     */
-    private updateShapes(): void {
-        for (let i = 0; i < this.shapes.length; i++) {
-            this.shapes[i].update();
-        }
-    }
+	/**
+	 * Internal method to update all shapes.
+	 * Each shape has its own update method.
+	 */
+	private updateShapes(): void {
+		for (let i = 0; i < this.shapes.length; i++) {
+			this.shapes[i].update();
+		}
+	}
 
-    /**
-     * Dispose all shapes.
-     */
-    private disposeShapes(): void {
-        for (let i = 0; i < this.shapes.length; i++) {
-            this.disposeShape(this.shapes[i]);
-        }
-        this.shapes = [];
-    }
+	/**
+	 * Dispose all shapes.
+	 */
+	private disposeShapes(): void {
+		for (let i = 0; i < this.shapes.length; i++) {
+			this.disposeShape(this.shapes[i]);
+		}
+		this.shapes = [];
+	}
 
-    /**
-     * Dispose a single {@link Shape}.
-     */
-    private disposeShape(shape: Shape): void {
-        const { object } = shape;
-        if (object) this.remove(object);
-        shape.dispose();
-    }
+	/**
+	 * Dispose a single {@link Shape}.
+	 */
+	private disposeShape(shape: Shape): void {
+		const { object } = shape;
+		if (object) this.remove(object);
+		shape.dispose();
+	}
 
-    /**
-     * Set the {@link Shape3D.closeLine} property and update the shape.
-     */
-    setCloseLine(closeLine: boolean): Shape3D {
-        this.closeLine = closeLine;
+	/**
+	 * Set the {@link Shape3D.closeLine} property and update the shape.
+	 */
+	setCloseLine(closeLine: boolean): Shape3D {
+		this.closeLine = closeLine;
 
-        this.update();
+		this.update();
 
-        this.dispatchEvent({ type: 'close-line-changed' });
+		this.dispatchEvent({ type: "close-line-changed" });
 
-        return this;
-    }
+		return this;
+	}
 
-    /**
-     *
-     * @returns Readonly {@link Shape3D.closeLine}
-     */
-    getCloseLine(): Readonly<boolean> {
-        return this.closeLine;
-    }
+	/**
+	 *
+	 * @returns Readonly {@link Shape3D.closeLine}
+	 */
+	getCloseLine(): Readonly<boolean> {
+		return this.closeLine;
+	}
 
-    getShapes(): Readonly<Shape[]> {
-        return this.shapes;
-    }
+	getShapes(): Readonly<Shape[]> {
+		return this.shapes;
+	}
 
-    /**
-     * Calculate the center between N points,
-     * where N is a finite set of points in 3D space.
-     * @param _center
-     * @returns
-     */
-    getCenter(_center: THREE.Vector3) {
-        const center = _center || new THREE.Vector3();
-        const vertices = this.getVertices();
-        const { length } = vertices;
-        for (let i = 0; i < length; i++) {
-            center.add(new THREE.Vector3(...vertices[i]));
-        }
-        center.divideScalar(length);
-        return center;
-    }
+	/**
+	 * Calculate the center between N points,
+	 * where N is a finite set of points in 3D space.
+	 * @param _center
+	 * @returns
+	 */
+	getCenter(_center: THREE.Vector3) {
+		const center = _center || new THREE.Vector3();
+		const vertices = this.getVertices();
+		const { length } = vertices;
+		for (let i = 0; i < length; i++) {
+			center.add(new THREE.Vector3(...vertices[i]));
+		}
+		center.divideScalar(length);
+		return center;
+	}
 
-    /**
-     * Calculate the `centroid` (center of mass) between N points,
-     * where N is a finite set of points in 2D space.
-     * @param _center
-     * @returns
-     */
-    getCentroid(_center: THREE.Vector3) {
-        const center = _center || new THREE.Vector3();
-        const vertices = this.getVertices();
-        const flatPoints = vertices.map((p) => [p[0], p[2]]);
-        const [x, z] = polylabel([flatPoints]);
-        center.set(x, 0, z);
-        return center;
-    }
+	/**
+	 * Calculate the `centroid` (center of mass) between N points,
+	 * where N is a finite set of points in 2D space.
+	 * @param _center
+	 * @returns
+	 */
+	getCentroid(_center: THREE.Vector3) {
+		const center = _center || new THREE.Vector3();
+		const vertices = this.getVertices();
+		const flatPoints = vertices.map((p) => [p[0], p[2]]);
+		const [x, z] = polylabel([flatPoints]);
+		center.set(x, 0, z);
+		return center;
+	}
 }
 
 export interface Shape {
-    parent: Shape3D;
-    object: THREE.Object3D;
-    setColor(color: ColorRepresentation): void;
-    create(): void;
-    update(): void;
-    dispose(): void;
+	parent: Shape3D;
+	object: THREE.Object3D;
+	setColor(color: ColorRepresentation): void;
+	create(): void;
+	update(): void;
+	dispose(): void;
 }
 
-type SupportedShapes = ExtractShapeType<typeof Shape3D.SUPPORTED_SHAPES>[number];
+type SupportedShapes = ExtractShapeType<
+	typeof Shape3D.SUPPORTED_SHAPES
+>[number];
