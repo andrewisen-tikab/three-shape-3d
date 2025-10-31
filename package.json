@@ -25,6 +25,7 @@
         "vite-plugin-dts": "^3.5.3"
     },
     "dependencies": {
+        "camera-control": "^0.0.1",
         "polylabel": "^2.0.1"
     },
     "peerDependencies": {
