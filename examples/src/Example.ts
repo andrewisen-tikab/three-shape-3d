@@ -27,7 +27,6 @@ export type SupportedShapes =
 	(typeof SUPPORTED_SHAPES)[keyof typeof SUPPORTED_SHAPES];
 
 const _raycaster = new THREE.Raycaster();
-// @ts-expect-error
 _raycaster.firstHitOnly = true;
 const _pointer = new THREE.Vector2();
 

@@ -9,14 +9,11 @@ import vertexIconURL from "../../assets/icons/vertex.png?url";
 import vertexHappyIconURL from "../../assets/icons/vertex-happy.png?url";
 import vertexMovingIconURL from "../../assets/icons/vertex-moving.png?url";
 
-// @ts-expect-error
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
-// @ts-expect-error
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const handleGeometry = new THREE.BoxGeometry(1, 1, 1);
-// @ts-expect-error
 handleGeometry.computeBoundsTree();
 
 export type VertexType = "vertex" | "midpoint" | "ghost";

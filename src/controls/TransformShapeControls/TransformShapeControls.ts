@@ -12,7 +12,6 @@ import type {
 import VertexObject, { type VertexMetadata } from "./vertex";
 
 const _raycaster = new THREE.Raycaster();
-// @ts-expect-error
 _raycaster.firstHitOnly = true;
 
 const _tempVector = /* @__PURE__ */ new THREE.Vector3();
@@ -490,7 +489,6 @@ class TransformShapeControls extends THREE.Object3D<TransformShapeControlsEvents
 			}
 
 			if (this.lastSelectedVertex) {
-				// @ts-expect-error
 				this.lastSelectedVertex.parent.endHover();
 			}
 			if (this.axis !== null) {
@@ -1529,12 +1527,10 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
 
 		const arrowGeometry = new THREE.CylinderGeometry(0, 0.04, 0.1, 12);
 		arrowGeometry.translate(0, 0.05, 0);
-		// @ts-expect-error
 		arrowGeometry.computeBoundsTree();
 
 		const scaleHandleGeometry = new THREE.BoxGeometry(0.08, 0.08, 0.08);
 		scaleHandleGeometry.translate(0, 0.04, 0);
-		// @ts-expect-error
 		scaleHandleGeometry.computeBoundsTree();
 
 		const lineGeometry = new THREE.BufferGeometry();
@@ -1542,13 +1538,11 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
 			"position",
 			new THREE.Float32BufferAttribute([0, 0, 0, 1, 0, 0], 3),
 		);
-		// @ts-expect-error
 		// lineGeometry.computeBoundsTree();
 
 		const lineGeometry2 = new THREE.CylinderGeometry(0.0075, 0.0075, 0.5, 3);
 		lineGeometry2.translate(0, 0.25, 0);
 
-		// @ts-expect-error
 		// lineGeometry2.computeBoundsTree();
 
 		function CircleGeometry(radius: number, arc: number) {
@@ -1559,7 +1553,6 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
 				64,
 				arc * Math.PI * 2,
 			);
-			// @ts-expect-error
 			// geometry.computeBoundsTree();
 			geometry.rotateY(Math.PI / 2);
 			geometry.rotateX(Math.PI / 2);
@@ -2099,7 +2092,6 @@ class TransformShapeControlsGizmo extends THREE.Object3D {
 			parent.forEach((array: any[]) => {
 				array.forEach((object: THREE.Mesh) => {
 					if (!object?.geometry) return;
-					// @ts-expect-error
 					// object.geometry.computeBoundsTree();
 				});
 			});
